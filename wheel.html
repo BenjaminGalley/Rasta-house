@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RASTA | Prize Wheel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Goldman&display=swap" rel="stylesheet">
+    <style>
+        :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; }
+        body { background: #000; color: white; font-family: 'Goldman', cursive; text-align: center; margin: 0; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
+        .header { padding: 15px; border-bottom: 2px solid var(--rasta-gold); display: flex; justify-content: space-between; align-items: center; background: #111; }
+        .wheel-container { position: relative; flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .pointer { position: absolute; top: 20px; z-index: 10; width: 50px; filter: drop-shadow(0 0 10px #000); }
+        .wheel-img { width: 85vw; max-width: 400px; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); border-radius: 50%; border: 5px solid #222; }
+        .controls { background: #111; padding: 25px; border-top: 2px solid var(--rasta-gold); }
+        .spin-btn { width: 80%; padding: 20px; background: var(--rasta-green); color: white; border: none; border-radius: 50px; font-weight: bold; font-size: 1.5rem; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button onclick="location.href='index.html'" style="background:none; border:1px solid #444; color:white; padding:5px 15px; border-radius:5px;">BACK</button>
+        <div id="bal-display" style="color:var(--rasta-green)">BAL: 0.00</div>
+    </div>
+    <div class="wheel-container">
+        <img src="https://img.icons8.com/color/96/down.png" class="pointer">
+        <img src="assets/asset.five.jpg" id="wheel" class="wheel-img">
+    </div>
+    <div class="controls">
+        <div style="margin-bottom: 15px; font-size: 1.2rem;">
+            BET: <input type="number" id="bet" value="2" min="2" style="width:80px; padding:10px; background:#000; color:var(--rasta-gold); border:1px solid var(--rasta-gold); border-radius:10px; text-align:center;">
+        </div>
+        <button class="spin-btn" id="spinBtn" onclick="spinWheel()">SPIN WHEEL</button>
+    </div>
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDMA1puOQXKQXEUO0I2O3125Gp0fUwBlIzVFkc3-9mSmA74ss5YkPNMHfnw6GKP3-llw/exec";
+        let user = JSON.parse(localStorage.getItem('rasta_user') || '{"balance":0}');
+        let rotation = 0;
+        window.onload = () => { document.getElementById('bal-display').innerText = "BAL: " + user.balance.toFixed(2); };
+
+        async function spinWheel() {
+            const bet = parseFloat(document.getElementById('bet').value);
+            if(bet < 2 || bet > user.balance) return alert("Check Bet/Balance");
+            document.getElementById('spinBtn').disabled = true;
+
+            const res = await fetch(`${SCRIPT_URL}?action=calculateSpin&bet=${bet}&playerID=${user.playerID}`);
+            const data = await res.json();
+
+            rotation += 1800 + (data.win ? 0 : 45); // Adjust based on your image sectors
+            document.getElementById('wheel').style.transform = `rotate(${rotation}deg)`;
+
+            setTimeout(() => {
+                user.balance = data.newBalance;
+                localStorage.setItem('rasta_user', JSON.stringify(user));
+                document.getElementById('bal-display').innerText = "BAL: " + user.balance.toFixed(2);
+                document.getElementById('spinBtn').disabled = false;
+                if(data.win) alert("WINNER!");
+            }, 4100);
+        }
+    </script>
+</body>
+</html>
