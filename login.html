@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RASTA BET | Login</title>
+    <style>
+        body { background: #000; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .login-card { background: #111; padding: 40px; border-radius: 20px; border: 1px solid #FFD100; text-align: center; width: 85%; max-width: 400px; }
+        input { width: 100%; padding: 15px; margin: 10px 0; background: #000; border: 1px solid #333; color: white; border-radius: 10px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: #008542; border: none; color: white; font-weight: bold; border-radius: 10px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h1 style="color:#FFD100">RASTA HOUSE</h1>
+        <p>Enter Phone to Start</p>
+        <input type="tel" id="phone" placeholder="09...">
+        <button onclick="login()">ENTER HOUSE</button>
+    </div>
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDMA1puOQXKQXEUO0I2O3125Gp0fUwBlIzVFkc3-9mSmA74ss5YkPNMHfnw6GKP3-llw/exec";
+        async function login() {
+            const phone = document.getElementById('phone').value;
+            if(!phone) return alert("Enter phone");
+            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}`);
+            const data = await res.json();
+            localStorage.setItem('rasta_user', JSON.stringify(data));
+            location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
