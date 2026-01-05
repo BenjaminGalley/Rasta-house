@@ -3,116 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RASTA ADMIN | Control Center</title>
+    <title>RASTA ADMIN</title>
     <style>
-        :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; }
-        body { background: #000; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; }
-        h1 { color: var(--rasta-gold); text-align: center; border-bottom: 2px solid var(--rasta-green); padding-bottom: 10px; }
-        
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .stat-card { background: #111; padding: 15px; border-radius: 12px; border: 1px solid #333; text-align: center; }
-        .stat-val { display: block; font-size: 1.2rem; font-weight: bold; color: var(--rasta-gold); }
-
-        .section-header { color: var(--rasta-green); font-weight: bold; margin: 25px 0 10px 0; font-size: 1.1rem; border-left: 4px solid var(--rasta-green); padding-left: 10px; }
-        
-        .card { background: #111; border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #222; position: relative; }
-        .card-dep { border-left: 6px solid var(--rasta-green); }
-        .card-wit { border-left: 6px solid var(--rasta-red); }
-
-        .player-info { color: var(--rasta-gold); font-weight: bold; margin-bottom: 5px; font-size: 1rem; }
-        .meta-info { font-size: 0.85rem; color: #aaa; margin-bottom: 10px; line-height: 1.4; }
-        .amount-tag { font-size: 1.4rem; font-weight: 900; margin-bottom: 10px; }
-        
-        .btn-group { display: flex; gap: 10px; }
-        .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
-        .btn-approve { background: var(--rasta-green); color: white; }
-        .btn-pay { background: var(--rasta-gold); color: black; }
-        .btn-reject { background: #333; color: #999; }
-        
-        .loader { text-align: center; color: var(--rasta-gold); padding: 20px; }
+        body { background: #000; color: white; font-family: sans-serif; padding: 15px; }
+        .card { background: #111; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid #FFD100; }
+        .btn { padding: 10px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        .btn-app { background: #008542; color: white; }
     </style>
 </head>
 <body>
-
-    <h1>RASTA ADMIN</h1>
-    
-    <div class="stat-grid">
-        <div class="stat-card"><small>TOTAL PLAYERS</small><span class="stat-val" id="total-p">0</span></div>
-        <div class="stat-card"><small>HOUSE BALANCE</small><span class="stat-val" id="total-b">0.00</span></div>
-    </div>
-
-    <div class="section-header">📥 DEPOSIT REQUESTS (Verify & Approve)</div>
-    <div id="dep-list"><div class="loader">Fetching deposits...</div></div>
-
-    <div class="section-header">📤 WITHDRAWAL REQUESTS (Pay Now)</div>
-    <div id="wit-list"><div class="loader">Fetching withdrawals...</div></div>
-
+    <h1 style="color:#FFD100">ADMIN CONTROL</h1>
+    <div id="stat-p">Total Players: 0</div>
+    <h3 style="color:#008542">Pending Deposits</h3>
+    <div id="dep-list"></div>
     <script>
-        // Replace with your Web App URL
-        const SCRIPT_URL = "YOUR_GOOGLE_SCRIPT_URL_HERE";
-
-        async function refreshAdmin() {
-            try {
-                const response = await fetch(`${SCRIPT_URL}?action=getAdminData`);
-                const data = await response.json();
-                
-                document.getElementById('total-p').innerText = data.totalPlayers;
-                document.getElementById('total-b').innerText = data.totalHouseBalance + " ETB";
-
-                // Render Deposits
-                let dHtml = '';
-                data.deposits.forEach(d => {
-                    dHtml += `
-                    <div class="card card-dep">
-                        <div class="player-info">${d.playerName} (${d.playerID})</div>
-                        <div class="meta-info">
-                            Phone: <strong>${d.playerPhone}</strong><br>
-                            Method: ${d.method} | Txn ID: <span style="color:var(--rasta-gold)">${d.txnID}</span>
-                        </div>
-                        <div class="amount-tag">${d.amount} <small>ETB</small></div>
-                        <div class="btn-group">
-                            <button class="btn btn-approve" onclick="action('approveDeposit', '${d.id}')">Approve ✅</button>
-                            <button class="btn btn-reject">Reject</button>
-                        </div>
-                    </div>`;
-                });
-                document.getElementById('dep-list').innerHTML = dHtml || '<p style="text-align:center">No pending deposits.</p>';
-
-                // Render Withdrawals
-                let wHtml = '';
-                data.withdrawals.forEach(w => {
-                    wHtml += `
-                    <div class="card card-wit">
-                        <div class="player-info">${w.playerName} (${w.playerID})</div>
-                        <div class="meta-info">
-                            Current Phone: ${w.playerPhone}<br>
-                            <span style="color:var(--rasta-red)">SEND TO (${w.method}):</span> <strong>${w.account}</strong>
-                        </div>
-                        <div class="amount-tag" style="color:var(--rasta-red)">${w.amount} <small>ETB</small></div>
-                        <div class="btn-group">
-                            <button class="btn btn-pay" onclick="window.confirm('Did you send ${w.amount} to ${w.account} via ${w.method}?') && action('approveWithdrawal', '${w.id}')">Mark as Paid 💸</button>
-                            <button class="btn btn-reject">Cancel</button>
-                        </div>
-                    </div>`;
-                });
-                document.getElementById('wit-list').innerHTML = wHtml || '<p style="text-align:center">No pending withdrawals.</p>';
-
-            } catch (err) {
-                console.error(err);
-                alert("Error connecting to Google Script.");
-            }
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
+        async function load() {
+            const res = await fetch(`${SCRIPT_URL}?action=getAdminData`);
+            const data = await res.json();
+            document.getElementById('stat-p').innerText = "Total Players: " + data.totalPlayers;
+            let dHtml = '';
+            data.deposits.forEach(d => {
+                dHtml += `<div class="card">
+                    <b>${d.playerName} (${d.playerPhone})</b><br>
+                    Amount: ${d.amount} ETB | ID: ${d.txnID}<br>
+                    <button class="btn btn-app" onclick="approve('${d.id}')">APPROVE ✅</button>
+                </div>`;
+            });
+            document.getElementById('dep-list').innerHTML = dHtml || "No requests";
         }
-
-        async function action(type, id) {
-            const res = await fetch(`${SCRIPT_URL}?action=${type}&id=${id}`);
-            const result = await res.json();
-            if(result.success) {
-                alert("Action successful!");
-                refreshAdmin();
-            }
+        async function approve(id) {
+            await fetch(`${SCRIPT_URL}?action=approveDeposit&id=${id}`);
+            alert("Success!"); load();
         }
-
-        window.onload = refreshAdmin;
+        window.onload = load;
     </script>
 </body>
 </html>
