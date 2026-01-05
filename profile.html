@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RASTA BET | My Wallet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Goldman:wght@400;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --rasta-green: #008542;
+            --rasta-gold: #FFD100;
+            --rasta-red: #E71D36;
+            --dark-bg: #050505;
+            --card-bg: #111;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding-bottom: 80px;
+        }
+
+        /* Fixed Header */
+        .wallet-header {
+            background: linear-gradient(135deg, var(--rasta-green), #000);
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 2px solid var(--rasta-gold);
+        }
+
+        .player-id-tag {
+            background: var(--rasta-gold);
+            color: black;
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+        }
+
+        .balance-hero {
+            font-size: 2.5rem;
+            font-family: 'Goldman';
+            margin: 10px 0;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: #000;
+            border-bottom: 1px solid #333;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            color: var(--rasta-gold);
+            border-bottom: 3px solid var(--rasta-gold);
+        }
+
+        /* Content Sections */
+        .section {
+            padding: 20px;
+            display: none;
+        }
+
+        .section.active { display: block; }
+
+        .form-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid #222;
+            margin-bottom: 20px;
+        }
+
+        .method-btn {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #000;
+            border: 1px solid #333;
+            padding: 15px;
+            width: 100%;
+            border-radius: 10px;
+            color: white;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .method-btn.selected { border-color: var(--rasta-green); background: rgba(0, 133, 66, 0.1); }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            background: #000;
+            border: 1px solid #333;
+            color: white;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-size: 1rem;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 18px;
+            background: var(--rasta-gold);
+            border: none;
+            color: black;
+            font-weight: 800;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-transform: uppercase;
+        }
+
+        /* Footer Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 70px;
+            background: #000;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid var(--rasta-gold);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wallet-header">
+        <div class="player-id-tag" id="display-id">ID: RST-8821</div>
+        <div style="font-size: 0.9rem; opacity: 0.8;">Total Balance</div>
+        <div class="balance-hero"><span id="display-bal">0.00</span> <small style="font-size: 1rem;">ETB</small></div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('deposit', this)">DEPOSIT</div>
+        <div class="tab" onclick="switchTab('withdraw', this)">WITHDRAW</div>
+    </div>
+
+    <div id="deposit" class="section active">
+        <p style="margin-bottom: 15px; font-size: 0.9rem; color: #888;">Select Payment Method:</p>
+        
+        <button class="method-btn selected" onclick="selectMethod('Telebirr', this)">
+            <div style="width: 40px; height: 40px; background: #005eb8; border-radius: 5px;"></div>
+            <div>
+                <strong>Telebirr</strong><br>
+                <small>Send to: 0988733637</small>
+            </div>
+        </button>
+
+        <button class="method-btn" onclick="selectMethod('CBE', this)">
+            <div style="width: 40px; height: 40px; background: #6c2d82; border-radius: 5px;"></div>
+            <div>
+                <strong>CBE (Birr)</strong><br>
+                <small>Send to: 0911045825</small>
+            </div>
+        </button>
+
+        <div class="form-card">
+            <label>Amount to Deposit (ETB)</label>
+            <input type="number" id="dep-amount" placeholder="Min: 50 ETB">
+            
+            <label style="display:block; margin-top:15px;">Transaction ID / Screenshot Ref</label>
+            <input type="text" id="dep-ref" placeholder="Enter Txn ID">
+            
+            <button class="btn-submit" onclick="submitDeposit()">Submit Deposit</button>
+        </div>
+    </div>
+
+    <div id="withdraw" class="section">
+        <div class="form-card" style="border-left: 5px solid var(--rasta-red);">
+            <p style="font-size: 0.8rem; color: var(--rasta-red); font-weight: bold;">⚠️ INSTANT DEDUCTION ON REQUEST</p>
+        </div>
+
+        <div class="form-card">
+            <label>Withdrawal Method</label>
+            <select id="wit-method" style="width:100%; padding:15px; background:#000; color:white; border:1px solid #333; margin-top:10px; border-radius:10px;">
+                <option value="Telebirr">Telebirr</option>
+                <option value="CBE">CBE</option>
+            </select>
+
+            <label style="display:block; margin-top:15px;">Amount to Withdraw</label>
+            <input type="number" id="wit-amount" placeholder="Available: 0.00">
+            
+            <button class="btn-submit" style="background: var(--rasta-red); color: white;" onclick="submitWithdraw()">Request Payout</button>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <div onclick="location.href='index.html'" style="text-align:center;">🏠<br><small>Home</small></div>
+        <div style="text-align:center; color: var(--rasta-gold);">💰<br><small>Wallet</small></div>
+    </nav>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDMA1puOQXKQXEUO0I2O3125Gp0fUwBlIzVFkc3-9mSmA74ss5YkPNMHfnw6GKP3-llw/exec";
+        let currentMethod = "Telebirr";
+        let user = JSON.parse(localStorage.getItem('rasta_user') || '{}');
+
+        window.onload = () => {
+            if(!user.playerID) {
+                alert("Please login first");
+                location.href = 'index.html';
+            }
+            document.getElementById('display-id').innerText = "ID: " + user.playerID;
+            document.getElementById('display-bal').innerText = user.balance;
+        };
+
+        function switchTab(id, el) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            el.classList.add('active');
+        }
+
+        function selectMethod(m, el) {
+            currentMethod = m;
+            document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        async function submitDeposit() {
+            const amount = document.getElementById('dep-amount').value;
+            const ref = document.getElementById('dep-ref').value;
+            if(!amount || !ref) return alert("Fill all fields");
+
+            const res = await fetch(SCRIPT_URL, {
+                method: "POST",
+                body: JSON.stringify({
+                    action: "deposit",
+                    playerID: user.playerID,
+                    amount: amount,
+                    method: currentMethod,
+                    txnID: ref
+                })
+            });
+            alert("Deposit Submitted. Admin will verify shortly.");
+        }
+
+        async function submitWithdraw() {
+            const amount = document.getElementById('wit-amount').value;
+            if(amount > user.balance) return alert("Insufficient balance");
+            
+            const res = await fetch(SCRIPT_URL, {
+                method: "POST",
+                body: JSON.stringify({
+                    action: "withdraw",
+                    playerID: user.playerID,
+                    amount: amount,
+                    method: document.getElementById('wit-method').value
+                })
+            });
+            
+            const data = await res.json();
+            if(data.success) {
+                alert("Withdrawal Requested! Funds deducted from balance.");
+                user.balance = data.newBalance;
+                localStorage.setItem('rasta_user', JSON.stringify(user));
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
