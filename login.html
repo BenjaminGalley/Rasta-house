@@ -2,30 +2,70 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RASTA BET | LOGIN</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RASTA BET | WELCOME</title>
     <style>
-        body { background: #000; color: #FFD100; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; }
-        input { padding: 15px; width: 80%; margin: 10px 0; border-radius: 8px; border: none; }
-        button { background: #008542; color: white; padding: 15px; width: 85%; border: none; border-radius: 8px; font-weight: bold; }
+        :root { --rasta-green: #008542; --rasta-gold: #FFD100; }
+        body { 
+            background: #000; color: white; font-family: 'Segoe UI', sans-serif; 
+            margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh;
+            background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('asset/asset.bg.jpg');
+            background-size: cover; background-position: center;
+        }
+        .login-box { 
+            background: rgba(17,17,17,0.95); padding: 40px 20px; border-radius: 25px; 
+            border: 2px solid var(--rasta-gold); width: 85%; max-width: 400px; text-align: center; 
+        }
+        .logo { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--rasta-green); margin-bottom: 20px; object-fit: cover; }
+        h1 { color: var(--rasta-gold); font-size: 1.5rem; margin-bottom: 30px; letter-spacing: 2px; }
+        input { 
+            width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 12px; 
+            border: 1px solid #333; background: #050505; color: white; box-sizing: border-box; font-size: 1rem;
+        }
+        .btn-enter { 
+            width: 100%; padding: 16px; border-radius: 12px; border: none; 
+            background: var(--rasta-green); color: white; font-weight: bold; font-size: 1.2rem; cursor: pointer;
+        }
+        #status { color: var(--rasta-gold); margin-top: 15px; font-size: 0.9rem; display: none; }
     </style>
 </head>
 <body>
-    <img src="asset/asset.ui.jpg" style="width:100px; border-radius:50%">
-    <h2>RASTA HOUSE</h2>
-    <input type="text" id="phone" placeholder="Phone Number (09...)">
-    <input type="text" id="name" placeholder="Full Name">
-    <button onclick="login()">ENTER CASINO</button>
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
-        async function login() {
-            const p = document.getElementById('phone').value;
-            const n = document.getElementById('name').value;
-            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${p}&name=${n}`);
+
+<div class="login-box">
+    <img src="asset/asset.ui.jpg" class="logo">
+    <h1>RASTA HOUSE</h1>
+    <input type="text" id="phone" placeholder="Phone Number (09...)" required>
+    <input type="text" id="name" placeholder="Full Name (e.g. Abebe)" required>
+    <button class="btn-enter" onclick="handleLogin()">ENTER CASINO</button>
+    <div id="status">Connecting to Database...</div>
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
+
+    async function handleLogin() {
+        const phone = document.getElementById('phone').value;
+        const name = document.getElementById('name').value;
+        const status = document.getElementById('status');
+
+        if(!phone || !name) return alert("Please fill in your details");
+
+        status.style.display = 'block';
+
+        try {
+            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}&name=${name}`);
             const user = await res.json();
-            localStorage.setItem('rasta_user', JSON.stringify(user));
-            location.href = 'index.html';
+            
+            if(user.playerID) {
+                localStorage.setItem('rasta_user', JSON.stringify(user));
+                window.location.href = 'index.html';
+            }
+        } catch (err) {
+            alert("Network Error. Please try again.");
+            status.style.display = 'none';
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>
