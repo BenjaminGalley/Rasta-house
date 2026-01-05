@@ -4,169 +4,115 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RASTA ADMIN | Control Center</title>
-    <link href="https://fonts.googleapis.com/css2?family=Goldman&display=swap" rel="stylesheet">
     <style>
         :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; }
-        body { background: #000; color: white; font-family: sans-serif; margin: 0; padding: 20px; }
+        body { background: #000; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; }
+        h1 { color: var(--rasta-gold); text-align: center; border-bottom: 2px solid var(--rasta-green); padding-bottom: 10px; }
         
-        .admin-header { 
-            display: flex; justify-content: space-between; align-items: center; 
-            border-bottom: 2px solid var(--rasta-gold); padding-bottom: 15px; margin-bottom: 20px;
-        }
-        .admin-header h1 { font-family: 'Goldman'; color: var(--rasta-gold); margin: 0; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .stat-card { background: #111; padding: 15px; border-radius: 12px; border: 1px solid #333; text-align: center; }
+        .stat-val { display: block; font-size: 1.2rem; font-weight: bold; color: var(--rasta-gold); }
 
-        /* Stats Section */
-        .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .stat-card { background: #111; padding: 20px; border-radius: 12px; border-top: 4px solid var(--rasta-green); text-align: center; }
-        .stat-card small { color: #888; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; }
-        .stat-card div { font-size: 1.8rem; font-weight: bold; margin-top: 5px; }
-
-        /* Table Sections */
-        .section-title { color: var(--rasta-gold); margin: 20px 0 10px 0; display: flex; align-items: center; gap: 10px; }
-        .table-wrapper { background: #111; border-radius: 12px; overflow: hidden; margin-bottom: 30px; border: 1px solid #222; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        th { background: #222; color: #888; text-align: left; padding: 15px; text-transform: uppercase; font-size: 0.7rem; }
-        td { padding: 15px; border-bottom: 1px solid #222; }
+        .section-header { color: var(--rasta-green); font-weight: bold; margin: 25px 0 10px 0; font-size: 1.1rem; border-left: 4px solid var(--rasta-green); padding-left: 10px; }
         
-        /* Action Buttons */
-        .btn { padding: 8px 16px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .card { background: #111; border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #222; position: relative; }
+        .card-dep { border-left: 6px solid var(--rasta-green); }
+        .card-wit { border-left: 6px solid var(--rasta-red); }
+
+        .player-info { color: var(--rasta-gold); font-weight: bold; margin-bottom: 5px; font-size: 1rem; }
+        .meta-info { font-size: 0.85rem; color: #aaa; margin-bottom: 10px; line-height: 1.4; }
+        .amount-tag { font-size: 1.4rem; font-weight: 900; margin-bottom: 10px; }
+        
+        .btn-group { display: flex; gap: 10px; }
+        .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
         .btn-approve { background: var(--rasta-green); color: white; }
-        .btn-approve:hover { background: #00a352; }
-        .btn-reject { background: var(--rasta-red); color: white; margin-left: 5px; }
-        .btn-refresh { background: var(--rasta-gold); color: black; font-weight: bold; }
-
-        code { background: #000; padding: 4px 8px; border-radius: 4px; color: var(--rasta-gold); border: 1px solid #333; }
-        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; background: #333; }
+        .btn-pay { background: var(--rasta-gold); color: black; }
+        .btn-reject { background: #333; color: #999; }
+        
+        .loader { text-align: center; color: var(--rasta-gold); padding: 20px; }
     </style>
 </head>
 <body>
 
-    <div class="admin-header">
-        <h1>RASTA ADMIN</h1>
-        <button class="btn btn-refresh" onclick="loadData()">REFRESH DATA</button>
+    <h1>RASTA ADMIN</h1>
+    
+    <div class="stat-grid">
+        <div class="stat-card"><small>TOTAL PLAYERS</small><span class="stat-val" id="total-p">0</span></div>
+        <div class="stat-card"><small>HOUSE BALANCE</small><span class="stat-val" id="total-b">0.00</span></div>
     </div>
 
-    <div class="stats-container">
-        <div class="stat-card">
-            <small>Total House Balance</small>
-            <div id="stat-total-bal">0.00 ETB</div>
-        </div>
-        <div class="stat-card" style="border-top-color: var(--rasta-gold);">
-            <small>Active Players</small>
-            <div id="stat-players">0</div>
-        </div>
-        <div class="stat-card" style="border-top-color: var(--rasta-red);">
-            <small>Pending Payouts</small>
-            <div id="stat-pending-wit">0</div>
-        </div>
-    </div>
+    <div class="section-header">📥 DEPOSIT REQUESTS (Verify & Approve)</div>
+    <div id="dep-list"><div class="loader">Fetching deposits...</div></div>
 
-    <div class="section-title">🟡 PENDING DEPOSITS (Verify Txn ID)</div>
-    <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th>Player ID</th>
-                    <th>Method</th>
-                    <th>Amount</th>
-                    <th>Transaction ID</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="deposit-list">
-                <tr><td colspan="5" style="text-align:center; color:#555;">Loading deposits...</td></tr>
-            </tbody>
-        </table>
-    </div>
-
-    <div class="section-title">🔴 WITHDRAWAL REQUESTS (Pay the Player)</div>
-    <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th>Player ID</th>
-                    <th>Method</th>
-                    <th>Amount</th>
-                    <th>Account Info</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="withdraw-list">
-                <tr><td colspan="5" style="text-align:center; color:#555;">Loading withdrawals...</td></tr>
-            </tbody>
-        </table>
-    </div>
+    <div class="section-header">📤 WITHDRAWAL REQUESTS (Pay Now)</div>
+    <div id="wit-list"><div class="loader">Fetching withdrawals...</div></div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDMA1puOQXKQXEUO0I2O3125Gp0fUwBlIzVFkc3-9mSmA74ss5YkPNMHfnw6GKP3-llw/exec";
+        // Replace with your Web App URL
+        const SCRIPT_URL = "YOUR_GOOGLE_SCRIPT_URL_HERE";
 
-        async function loadData() {
+        async function refreshAdmin() {
             try {
                 const response = await fetch(`${SCRIPT_URL}?action=getAdminData`);
                 const data = await response.json();
-
-                // Update Stats
-                document.getElementById('stat-total-bal').innerText = data.totalHouseBalance + " ETB";
-                document.getElementById('stat-players').innerText = data.totalPlayers;
-                document.getElementById('stat-pending-wit').innerText = data.withdrawals.length;
+                
+                document.getElementById('total-p').innerText = data.totalPlayers;
+                document.getElementById('total-b').innerText = data.totalHouseBalance + " ETB";
 
                 // Render Deposits
-                const depList = document.getElementById('deposit-list');
-                depList.innerHTML = data.deposits.length ? "" : "<tr><td colspan='5' style='text-align:center;'>No pending deposits</td></tr>";
+                let dHtml = '';
                 data.deposits.forEach(d => {
-                    depList.innerHTML += `
-                        <tr>
-                            <td><b>${d.playerID}</b></td>
-                            <td><span class="status-badge">${d.method}</span></td>
-                            <td style="color:var(--rasta-green); font-weight:bold;">${d.amount} ETB</td>
-                            <td><code>${d.txnID}</code></td>
-                            <td>
-                                <button class="btn btn-approve" onclick="processAction('approveDeposit', '${d.id}')">APPROVE</button>
-                                <button class="btn btn-reject" onclick="processAction('rejectDeposit', '${d.id}')">REJECT</button>
-                            </td>
-                        </tr>
-                    `;
+                    dHtml += `
+                    <div class="card card-dep">
+                        <div class="player-info">${d.playerName} (${d.playerID})</div>
+                        <div class="meta-info">
+                            Phone: <strong>${d.playerPhone}</strong><br>
+                            Method: ${d.method} | Txn ID: <span style="color:var(--rasta-gold)">${d.txnID}</span>
+                        </div>
+                        <div class="amount-tag">${d.amount} <small>ETB</small></div>
+                        <div class="btn-group">
+                            <button class="btn btn-approve" onclick="action('approveDeposit', '${d.id}')">Approve ✅</button>
+                            <button class="btn btn-reject">Reject</button>
+                        </div>
+                    </div>`;
                 });
+                document.getElementById('dep-list').innerHTML = dHtml || '<p style="text-align:center">No pending deposits.</p>';
 
                 // Render Withdrawals
-                const witList = document.getElementById('withdraw-list');
-                witList.innerHTML = data.withdrawals.length ? "" : "<tr><td colspan='5' style='text-align:center;'>No pending withdrawals</td></tr>";
+                let wHtml = '';
                 data.withdrawals.forEach(w => {
-                    witList.innerHTML += `
-                        <tr>
-                            <td><b>${w.playerID}</b></td>
-                            <td><span class="status-badge">${w.method}</span></td>
-                            <td style="color:var(--rasta-red); font-weight:bold;">${w.amount} ETB</td>
-                            <td><code>${w.account}</code></td>
-                            <td>
-                                <button class="btn btn-approve" onclick="processAction('approveWithdraw', '${w.id}')">PAID</button>
-                                <button class="btn btn-reject" onclick="processAction('rejectWithdraw', '${w.id}')">REJECT</button>
-                            </td>
-                        </tr>
-                    `;
+                    wHtml += `
+                    <div class="card card-wit">
+                        <div class="player-info">${w.playerName} (${w.playerID})</div>
+                        <div class="meta-info">
+                            Current Phone: ${w.playerPhone}<br>
+                            <span style="color:var(--rasta-red)">SEND TO (${w.method}):</span> <strong>${w.account}</strong>
+                        </div>
+                        <div class="amount-tag" style="color:var(--rasta-red)">${w.amount} <small>ETB</small></div>
+                        <div class="btn-group">
+                            <button class="btn btn-pay" onclick="window.confirm('Did you send ${w.amount} to ${w.account} via ${w.method}?') && action('approveWithdrawal', '${w.id}')">Mark as Paid 💸</button>
+                            <button class="btn btn-reject">Cancel</button>
+                        </div>
+                    </div>`;
                 });
+                document.getElementById('wit-list').innerHTML = wHtml || '<p style="text-align:center">No pending withdrawals.</p>';
 
             } catch (err) {
-                console.error("Failed to load admin data");
+                console.error(err);
+                alert("Error connecting to Google Script.");
             }
         }
 
-        async function processAction(action, id) {
-            if(!confirm("Confirm this action?")) return;
-            
-            const res = await fetch(`${SCRIPT_URL}?action=${action}&id=${id}`);
+        async function action(type, id) {
+            const res = await fetch(`${SCRIPT_URL}?action=${type}&id=${id}`);
             const result = await res.json();
-            
             if(result.success) {
                 alert("Action successful!");
-                loadData();
-            } else {
-                alert("Error processing request.");
+                refreshAdmin();
             }
         }
 
-        // Initial Load
-        window.onload = loadData;
+        window.onload = refreshAdmin;
     </script>
 </body>
 </html>
