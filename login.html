@@ -2,54 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RASTA BET | Access</title>
-    <link href="https://fonts.googleapis.com/css2?family=Goldman&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RASTA BET | LOGIN</title>
     <style>
-        :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; }
-        body { background: #000; color: white; font-family: 'Montserrat', sans-serif; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; }
-        .login-card { background: #111; padding: 30px; border-radius: 20px; border: 1px solid var(--rasta-gold); width: 85%; max-width: 380px; text-align: center; }
-        h1 { font-family: 'Goldman'; color: var(--rasta-gold); margin-bottom: 20px; }
-        .input-group { margin-bottom: 15px; text-align: left; position: relative; }
-        label { display: block; font-size: 0.7rem; color: var(--rasta-green); margin-bottom: 5px; font-weight: bold; }
-        input { width: 100%; padding: 15px; background: #000; border: 1px solid #333; color: white; border-radius: 10px; box-sizing: border-box; }
-        .eye-icon { position: absolute; right: 15px; bottom: 12px; cursor: pointer; color: var(--rasta-gold); font-size: 1.2rem; }
-        .btn-enter { width: 100%; padding: 18px; background: var(--rasta-green); color: white; border: none; border-radius: 10px; font-weight: 800; margin-top: 10px; cursor: pointer; }
+        body { background: #000; color: #FFD100; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; }
+        input { padding: 15px; width: 80%; margin: 10px 0; border-radius: 8px; border: none; }
+        button { background: #008542; color: white; padding: 15px; width: 85%; border: none; border-radius: 8px; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="login-card">
-        <h1>RASTA BET</h1>
-        <div class="input-group">
-            <label>FULL NAME / ሙሉ ስም</label>
-            <input type="text" id="name" placeholder="Enter Name">
-        </div>
-        <div class="input-group">
-            <label>PHONE / ስልክ</label>
-            <input type="tel" id="phone" placeholder="09...">
-        </div>
-        <div class="input-group">
-            <label>PASSWORD / የይለፍ ቃል</label>
-            <input type="password" id="pass" placeholder="Password">
-            <span class="eye-icon" onclick="togglePass()">👁️</span>
-        </div>
-        <button class="btn-enter" onclick="auth()">ENTER HOUSE / ግባ</button>
-    </div>
-
+    <img src="asset/asset.ui.jpg" style="width:100px; border-radius:50%">
+    <h2>RASTA HOUSE</h2>
+    <input type="text" id="phone" placeholder="Phone Number (09...)">
+    <input type="text" id="name" placeholder="Full Name">
+    <button onclick="login()">ENTER CASINO</button>
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDMA1puOQXKQXEUO0I2O3125Gp0fUwBlIzVFkc3-9mSmA74ss5YkPNMHfnw6GKP3-llw/exec";
-        function togglePass() {
-            const p = document.getElementById('pass');
-            p.type = p.type === 'password' ? 'text' : 'password';
-        }
-        async function auth() {
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
+        async function login() {
+            const p = document.getElementById('phone').value;
             const n = document.getElementById('name').value;
-            const ph = document.getElementById('phone').value;
-            const ps = document.getElementById('pass').value;
-            if(!n || !ph || !ps) return alert("Fill all fields");
-            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${ph}&name=${encodeURIComponent(n)}&pass=${ps}`);
-            const data = await res.json();
-            localStorage.setItem('rasta_user', JSON.stringify(data));
+            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${p}&name=${n}`);
+            const user = await res.json();
+            localStorage.setItem('rasta_user', JSON.stringify(user));
             location.href = 'index.html';
         }
     </script>
