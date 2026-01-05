@@ -5,43 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RASTA HOUSE | LOBBY</title>
     <style>
-        :root { --rasta-green: #008542; --rasta-gold: #FFD100; --dark-bg: #0a0a0a; }
+        :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; --dark-bg: #0a0a0a; }
         body { background: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; }
         
         header { 
             background: #111; padding: 15px; display: flex; justify-content: space-between; 
             align-items: center; border-bottom: 2px solid var(--rasta-gold); position: sticky; top: 0; z-index: 1000;
         }
-        .logo-text { font-weight: bold; color: var(--rasta-gold); font-size: 1.2rem; }
+        .logo-text { font-weight: bold; color: var(--rasta-gold); font-size: 1.2rem; letter-spacing: 1px; }
         .balance-pill { 
             background: var(--rasta-green); padding: 8px 15px; border-radius: 20px; 
             font-weight: bold; border: 1px solid var(--rasta-gold); cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 133, 66, 0.4);
         }
 
         .banner { 
-            height: 180px; background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('asset/asset.bg.jpg');
-            background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center;
+            height: 160px; background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.7)), url('asset/asset.bg.jpg');
+            background-size: cover; background-position: center; display: flex; flex-direction: column; align-items: center; justify-content: center;
             border-bottom: 3px solid var(--rasta-green);
         }
 
-        .game-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; }
+        .game-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 12px; }
+        
         .game-card { 
             background: #1a1a1a; border-radius: 15px; overflow: hidden; 
             border: 1px solid #333; position: relative; aspect-ratio: 1/1; cursor: pointer;
+            transition: 0.2s;
         }
-        .game-card img { width: 100%; height: 100%; object-fit: cover; transition: 0.3s; }
-        .game-card:active img { transform: scale(0.95); }
+        .game-card img { width: 100%; height: 100%; object-fit: cover; transition: 0.3s; filter: brightness(0.8); }
+        .game-card:active { transform: scale(0.96); }
+        .game-card:active img { filter: brightness(1.1); }
+
         .game-title { 
-            position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.8); 
-            padding: 8px 0; text-align: center; color: var(--rasta-gold); font-size: 0.8rem; font-weight: bold;
+            position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.85); 
+            padding: 8px 0; text-align: center; color: var(--rasta-gold); font-size: 0.75rem; font-weight: bold;
+            border-top: 1px solid var(--rasta-green);
+        }
+        
+        /* New Game Tag */
+        .badge {
+            position: absolute; top: 10px; right: 10px; background: var(--rasta-red);
+            color: white; font-size: 0.6rem; padding: 3px 8px; border-radius: 5px; font-weight: bold;
+            z-index: 5; box-shadow: 0 0 5px #000;
         }
 
         .bottom-nav { 
-            position: fixed; bottom: 0; width: 100%; height: 70px; background: #111; 
+            position: fixed; bottom: 0; width: 100%; height: 65px; background: #111; 
             display: flex; justify-content: space-around; align-items: center; border-top: 2px solid var(--rasta-gold);
+            z-index: 1000;
         }
-        .nav-link { text-decoration: none; color: #888; text-align: center; font-size: 0.7rem; }
+        .nav-link { text-decoration: none; color: #888; text-align: center; font-size: 0.65rem; font-weight: bold; }
         .nav-link.active { color: var(--rasta-gold); }
+        .nav-icon { font-size: 1.4rem; margin-bottom: 2px; display: block; }
     </style>
 </head>
 <body>
@@ -52,46 +67,65 @@
 </header>
 
 <div class="banner">
-    <h2 style="color:white; text-shadow: 2px 2px 10px #000;">WIN BIG TODAY!</h2>
+    <h2 style="color:white; text-shadow: 2px 2px 10px #000; margin:0;">WIN BIG TODAY!</h2>
+    <p id="welcomeUser" style="color:var(--rasta-gold); margin:5px 0 0 0; font-size:0.8rem; font-weight:bold;"></p>
 </div>
 
 <div class="game-grid">
-    <div class="game-card" onclick="location.href='slots.html'">
-        <img src="asset/asset.tiles.jpg">
-        <div class="game-title">JUNGLE SLOTS</div>
+    <div class="game-card" onclick="location.href='rasta-revelation.html'">
+        <div class="badge">NEW</div>
+        <img src="asset/asset.rasta.jpg">
+        <div class="game-title">RASTA REVELATION</div>
     </div>
+
+    <div class="game-card" onclick="location.href='premium-slots.html'">
+        <div class="badge" style="background:var(--rasta-green)">4K</div>
+        <img src="asset/asset.nine.jpg">
+        <div class="game-title">LION SLOTS</div>
+    </div>
+
+    <div class="game-card" onclick="location.href='crash.html'">
+        <div class="badge" style="background:var(--rasta-gold); color:black;">HOT</div>
+        <img src="asset/asset.bg.jpg">
+        <div class="game-title">RASTA CRASH</div>
+    </div>
+
+    <div class="game-card" onclick="location.href='scratch.html'">
+        <img src="asset/asset.tiles.jpg">
+        <div class="game-title">SCRATCH GOLD</div>
+    </div>
+
     <div class="game-card" onclick="location.href='fast-keno.html'">
         <img src="asset/asset.ui.jpg">
         <div class="game-title">FAST KENO</div>
     </div>
-    <div class="game-card">
-        <img src="asset/asset.one.jpg">
-        <div class="game-title">LION KING</div>
-    </div>
-    <div class="game-card">
-        <img src="asset/asset.two.jpg">
-        <div class="game-title">FRUIT PARTY</div>
-    </div>
-    <div class="game-card">
+    
+    <div class="game-card" onclick="location.href='wheel.html'">
         <img src="asset/asset.five.jpg">
         <div class="game-title">RASTA WHEEL</div>
-    </div>
-    <div class="game-card">
-        <img src="asset/asset.six.jpg">
-        <div class="game-title">DICE MASTER</div>
     </div>
 </div>
 
 <nav class="bottom-nav">
-    <a href="index.html" class="nav-link active">🏠<br>HOME</a>
-    <a href="profile.html" class="nav-link">💰<br>WALLET</a>
+    <a href="index.html" class="nav-link active"><span class="nav-icon">🏠</span>HOME</a>
+    <a href="profile.html" class="nav-link"><span class="nav-icon">💰</span>WALLET</a>
 </nav>
 
 <script>
-    const user = JSON.parse(localStorage.getItem('rasta_user'));
+    // Logic to run when the page loads
     window.onload = () => {
-        if(!user) { location.href='login.html'; return; }
+        const userData = localStorage.getItem('rasta_user');
+        
+        if(!userData) { 
+            location.href='login.html'; 
+            return; 
+        }
+
+        const user = JSON.parse(userData);
+        // Set Balance
         document.getElementById('userBal').innerText = parseFloat(user.balance).toFixed(2);
+        // Set Welcome Name
+        document.getElementById('welcomeUser').innerText = "One Love, " + user.name;
     };
 </script>
 
