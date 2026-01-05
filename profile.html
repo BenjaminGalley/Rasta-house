@@ -2,137 +2,268 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RASTA HOUSE | WALLET</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RASTA HOUSE | WALLET & PROFILE</title>
     <style>
-        :root { --green: #008542; --gold: #FFD100; --red: #E71D36; }
-        body { background: #000; color: white; font-family: sans-serif; padding: 15px; margin: 0; }
-        .back-link { color: var(--gold); text-decoration: none; font-size: 0.9rem; display: block; margin-bottom: 20px; }
-        
-        .balance-card { 
-            background: #111; padding: 30px; border-radius: 20px; text-align: center;
-            border: 2px solid var(--gold); margin-bottom: 25px;
+        :root { 
+            --rasta-green: #008542; 
+            --rasta-gold: #FFD100; 
+            --rasta-red: #E71D36; 
+            --dark-surface: #111111;
         }
-        .bal-amt { font-size: 2.5rem; font-weight: bold; color: var(--gold); display: block; margin-top: 10px; }
-
-        .form-section { background: #111; padding: 20px; border-radius: 20px; margin-bottom: 25px; }
-        .sec-title { font-weight: bold; text-transform: uppercase; margin-bottom: 15px; font-size: 1.1rem; }
         
-        .instr-box { background: #000; padding: 12px; border-radius: 10px; font-size: 0.85rem; color: #aaa; margin-bottom: 15px; border-left: 4px solid #333; }
-        .instr-box b { color: white; }
+        body { 
+            background: #000; 
+            color: white; 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
 
+        /* Header Style */
+        .profile-header {
+            width: 100%;
+            background: var(--dark-surface);
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 2px solid var(--rasta-gold);
+            box-sizing: border-box;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            background: var(--rasta-gold);
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: black;
+            font-weight: bold;
+        }
+
+        .balance-card {
+            background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
+            width: 90%;
+            max-width: 400px;
+            margin: -25px auto 20px;
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid #333;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+
+        .balance-label { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        .balance-amount { font-size: 2.5rem; font-weight: bold; color: var(--rasta-green); margin: 5px 0; }
+
+        /* Form Styling */
+        .container { width: 90%; max-width: 400px; padding-bottom: 100px; }
+        
+        .action-tabs { 
+            display: flex; 
+            background: var(--dark-surface); 
+            border-radius: 12px; 
+            padding: 5px; 
+            margin-bottom: 20px; 
+        }
+        
+        .tab { 
+            flex: 1; 
+            padding: 12px; 
+            text-align: center; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            color: #666; 
+            transition: 0.3s;
+        }
+        
+        .tab.active { background: var(--rasta-gold); color: black; }
+
+        .form-group { 
+            background: var(--dark-surface); 
+            padding: 20px; 
+            border-radius: 20px; 
+            border: 1px solid #222; 
+            margin-bottom: 20px; 
+        }
+
+        .instr {
+            font-size: 0.8rem;
+            color: #ccc;
+            line-height: 1.6;
+            background: #000;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--rasta-green);
+        }
+
+        label { display: block; margin-bottom: 8px; font-size: 0.8rem; color: var(--rasta-gold); }
+        
         input, select { 
-            width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 10px; 
-            border: 1px solid #333; background: #000; color: white; box-sizing: border-box;
+            width: 100%; 
+            padding: 15px; 
+            background: #000; 
+            border: 1px solid #333; 
+            color: white; 
+            border-radius: 12px; 
+            margin-bottom: 15px; 
+            box-sizing: border-box;
+            font-size: 1rem;
         }
-        label { font-size: 0.75rem; color: #888; margin-left: 5px; margin-bottom: 4px; display: block; }
 
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; }
-        .btn-dep { background: var(--green); color: white; }
-        .btn-wit { background: var(--red); color: white; }
+        input:focus { border-color: var(--rasta-green); outline: none; }
+
+        .btn-main { 
+            width: 100%; 
+            padding: 18px; 
+            border: none; 
+            border-radius: 12px; 
+            font-size: 1.1rem; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.2s;
+        }
+
+        .btn-deposit { background: var(--rasta-green); color: white; box-shadow: 0 4px 0 #004d26; }
+        .btn-withdraw { background: var(--rasta-red); color: white; box-shadow: 0 4px 0 #8a1121; }
+        .btn-logout { background: transparent; border: 1px solid var(--rasta-red); color: var(--rasta-red); margin-top: 20px; }
+
+        /* Bottom Nav Fix */
+        .nav-placeholder { height: 80px; }
     </style>
 </head>
 <body>
 
-    <a href="index.html" class="back-link">← Return to Games</a>
+    <div class="profile-header">
+        <div class="user-avatar" id="avatarLetter">R</div>
+        <h3 id="displayUserName" style="margin:0;">Rasta Player</h3>
+        <p id="displayUserPhone" style="margin:5px 0 0; font-size:0.8rem; color:#666;"></p>
+    </div>
 
     <div class="balance-card">
-        <small>AVAILABLE BALANCE</small>
-        <span class="bal-amt" id="displayBal">0.00 ETB</span>
+        <div class="balance-label">Available Balance</div>
+        <div class="balance-amount"><span id="userBal">0.00</span> <small style="font-size:1rem">ETB</small></div>
     </div>
 
-    <div class="form-section">
-        <div class="sec-title" style="color: var(--green);">Deposit Funds / ገንዘብ ማስገቢያ</div>
-        <div class="instr-box">
-            1. Transfer money to / ገንዘብ ይላኩ ወደ:<br>
-            • Telebirr: <b>0988733637</b><br>
-            • CBE Birr: <b>0911045825</b><br>
-            2. Enter details below / ዝርዝሩን ከታች ይሙሉ
+    <div class="container">
+        <div class="action-tabs">
+            <div class="tab active" id="tabDep" onclick="toggleView('deposit')">DEPOSIT</div>
+            <div class="tab" id="tabWit" onclick="toggleView('withdraw')">WITHDRAW</div>
         </div>
 
-        <select id="depMethod">
-            <option value="Telebirr">Telebirr</option>
-            <option value="CBE Birr">CBE Birr</option>
-        </select>
+        <div id="depView">
+            <div class="form-group">
+                <div class="instr">
+                    <strong>1. Send payment to:</strong><br>
+                    • Telebirr: 0988733637<br>
+                    • CBE Birr: 0911045825<br>
+                    <strong>2. Submit details below.</strong>
+                </div>
 
-        <label>AMOUNT (ETB) / መጠን</label>
-        <input type="number" id="depAmount" placeholder="Min 10 ETB">
+                <label>PAYMENT METHOD</label>
+                <select id="depMethod">
+                    <option value="Telebirr">Telebirr</option>
+                    <option value="CBE Birr">CBE Birr</option>
+                </select>
 
-        <label>TRANSACTION ID (FROM SMS) / የትራንዛክሽን መለያ</label>
-        <input type="text" id="depTxn" placeholder="e.g. 9GH567...">
+                <label>AMOUNT (MIN 100 ETB)</label>
+                <input type="number" id="depAmount" placeholder="100 - 10,000" min="100" max="10000">
 
-        <label>SENDER FULL NAME / የላኪው ሙሉ ስም</label>
-        <input type="text" id="depFromName" placeholder="Name on the receipt">
+                <label>SENDER PHONE NUMBER</label>
+                <input type="text" id="senderPhone" placeholder="09...">
 
-        <label>SENDER PHONE NUMBER / የላኪው ስልክ ቁጥር</label>
-        <input type="tel" id="depFromPhone" placeholder="09...">
+                <button class="btn-main btn-deposit" onclick="submitForm('deposit')">SUBMIT DEPOSIT</button>
+            </div>
+        </div>
 
-        <button class="btn btn-dep" onclick="submitDeposit()">SUBMIT DEPOSIT</button>
+        <div id="witView" style="display:none;">
+            <div class="form-group">
+                <div class="instr">
+                    Withdrawals are processed to your registered phone number within 24 hours.
+                </div>
+
+                <label>RECEIVE METHOD</label>
+                <select id="witMethod">
+                    <option value="Telebirr">Telebirr</option>
+                    <option value="CBE Birr">CBE Birr</option>
+                </select>
+
+                <label>AMOUNT (MIN 100 ETB)</label>
+                <input type="number" id="witAmount" placeholder="100 - 10,000" min="100" max="10000">
+
+                <label>RECEIVER PHONE</label>
+                <input type="text" id="receiverPhone" placeholder="09...">
+
+                <button class="btn-main btn-withdraw" onclick="submitForm('withdraw')">REQUEST WITHDRAWAL</button>
+            </div>
+        </div>
+
+        <button class="btn-main" style="background:#222; color:var(--rasta-gold); margin-top:10px;" onclick="location.href='index.html'">BACK TO LOBBY</button>
+        <button class="btn-main btn-logout" onclick="logout()">LOGOUT & EXIT</button>
+        <div class="nav-placeholder"></div>
     </div>
 
-    <div class="form-section">
-        <div class="sec-title" style="color: var(--red);">Withdraw Funds / ገንዘብ ማውጫ</div>
-        
-        <select id="witMethod">
-            <option value="Telebirr">Telebirr</option>
-            <option value="CBE Birr">CBE Birr</option>
-        </select>
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
+    let user = JSON.parse(localStorage.getItem('rasta_user'));
 
-        <label>AMOUNT TO WITHDRAW / ማውጣት የሚፈልጉት መጠን</label>
-        <input type="number" id="witAmount" placeholder="Min 50 ETB">
+    if(!user) { location.href = 'index.html'; }
 
-        <label>RECEIVER FULL NAME / የተቀባዩ ሙሉ ስም</label>
-        <input type="text" id="witToName" placeholder="Full name for transfer">
+    // Init UI
+    document.getElementById('userBal').innerText = parseFloat(user.balance).toFixed(2);
+    document.getElementById('displayUserName').innerText = user.name;
+    document.getElementById('displayUserPhone').innerText = user.phone;
+    document.getElementById('avatarLetter').innerText = user.name.charAt(0).toUpperCase();
 
-        <label>RECEIVER PHONE/ACCOUNT / የተቀባዩ ስልክ ቁጥር</label>
-        <input type="tel" id="witToPhone" placeholder="09...">
+    function toggleView(view) {
+        document.getElementById('depView').style.display = view === 'deposit' ? 'block' : 'none';
+        document.getElementById('witView').style.display = view === 'withdraw' ? 'block' : 'none';
+        document.getElementById('tabDep').className = view === 'deposit' ? 'tab active' : 'tab';
+        document.getElementById('tabWit').className = view === 'withdraw' ? 'tab active' : 'tab';
+    }
 
-        <button class="btn btn-wit" onclick="submitWithdraw()">REQUEST WITHDRAWAL</button>
-    </div>
+    function submitForm(type) {
+        const amt = parseFloat(document.getElementById(type === 'deposit' ? 'depAmount' : 'witAmount').value);
+        const phone = document.getElementById(type === 'deposit' ? 'senderPhone' : 'receiverPhone').value;
+        const method = document.getElementById(type === 'deposit' ? 'depMethod' : 'witMethod').value;
 
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
-        let user = JSON.parse(localStorage.getItem('rasta_user') || '{"balance":0}');
-        document.getElementById('displayBal').innerText = user.balance.toFixed(2) + " ETB";
+        if(isNaN(amt) || amt < 100 || amt > 10000) return alert("Please enter an amount between 100 and 10,000 ETB.");
+        if(phone.length < 10) return alert("Please enter a valid phone number.");
+        if(type === 'withdraw' && amt > user.balance) return alert("Insufficient balance.");
 
-        async function submitDeposit() {
-            const data = {
-                action: "deposit",
-                playerID: user.playerID,
-                method: document.getElementById('depMethod').value,
-                amount: document.getElementById('depAmount').value,
-                txnID: document.getElementById('depTxn').value,
-                fromName: document.getElementById('depFromName').value,
-                fromPhone: document.getElementById('depFromPhone').value
-            };
+        const btn = event.target;
+        btn.innerText = "SENDING...";
+        btn.disabled = true;
 
-            if(!data.amount || !data.txnID || !data.fromName || !data.fromPhone) return alert("Please fill all fields");
+        fetch(`${SCRIPT_URL}?action=${type}&phone=${user.phone}&name=${user.name}&amount=${amt}&method=${method}&sender=${phone}`)
+        .then(() => {
+            alert(type.toUpperCase() + " REQUEST SUBMITTED!");
+            if(type === 'withdraw') {
+                user.balance -= amt;
+                localStorage.setItem('rasta_user', JSON.stringify(user));
+            }
+            location.href = 'index.html';
+        })
+        .catch(() => {
+            alert("Sent! Admin will verify soon.");
+            location.href = 'index.html';
+        });
+    }
 
-            await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) });
-            alert("Deposit Request Sent! Wait for approval.");
-            location.reload();
+    function logout() {
+        if(confirm("Logout from Rasta House?")) {
+            localStorage.removeItem('rasta_user');
+            location.href = 'index.html';
         }
-
-        async function submitWithdraw() {
-            const amt = parseFloat(document.getElementById('witAmount').value);
-            const data = {
-                action: "withdraw",
-                playerID: user.playerID,
-                method: document.getElementById('witMethod').value,
-                amount: amt,
-                toName: document.getElementById('witToName').value,
-                toPhone: document.getElementById('witToPhone').value
-            };
-
-            if(amt > user.balance) return alert("Insufficient Balance");
-            if(!amt || !data.toName || !data.toPhone) return alert("Please fill all fields");
-
-            await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) });
-            user.balance -= amt;
-            localStorage.setItem('rasta_user', JSON.stringify(user));
-            alert("Withdrawal Request Sent!");
-            location.reload();
-        }
-    </script>
+    }
+</script>
 </body>
 </html>
