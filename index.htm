@@ -3,98 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RASTA BET | Home</title>
-    <link href="https://fonts.googleapis.com/css2?family=Goldman:wght@400;700&family=Montserrat:wght@300;600;800&display=swap" rel="stylesheet">
+    <title>RASTA BET | VIP Lobby</title>
+    <link href="https://fonts.googleapis.com/css2?family=Goldman:wght@400;700&family=Montserrat:wght@400;900&display=swap" rel="stylesheet">
     <style>
         :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; --dark-bg: #050505; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
-        body { background: var(--dark-bg); color: white; height: 100vh; overflow: hidden; }
+        
+        body { background: var(--dark-bg); color: white; overflow-x: hidden; padding-bottom: 80px; }
 
-        /* Stable Upper Half */
-        .header {
-            height: 40vh; width: 100%; position: fixed; top: 0; z-index: 100;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.9), var(--dark-bg)), url('assets/asset.bg.jpg') center/cover;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border-bottom: 2px solid var(--rasta-gold);
+        /* Top Header */
+        header {
+            background: #111; padding: 15px; display: flex; justify-content: space-between;
+            align-items: center; border-bottom: 2px solid var(--rasta-gold); position: sticky; top: 0; z-index: 100;
         }
-        .header h1 { font-family: 'Goldman'; font-size: 2.5rem; color: var(--rasta-gold); text-shadow: 0 0 15px var(--rasta-red); }
+        .logo { font-family: 'Goldman'; color: var(--rasta-gold); font-size: 1.5rem; letter-spacing: 2px; }
+        
+        .menu-btn { font-size: 1.5rem; background: none; border: none; color: white; cursor: pointer; }
 
-        /* Scrolling Lower Half */
-        .game-container {
-            margin-top: 40vh; height: 60vh; overflow-y: scroll; padding: 15px;
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 100px;
+        /* Sidebar Menu */
+        .sidebar {
+            position: fixed; top: 0; right: -280px; width: 280px; height: 100%;
+            background: #111; z-index: 200; transition: 0.3s; padding: 30px 20px;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.5); border-left: 2px solid var(--rasta-gold);
+        }
+        .sidebar.active { right: 0; }
+        .sidebar-user { border-bottom: 1px solid #333; padding-bottom: 20px; margin-bottom: 20px; }
+        .sidebar-item { display: block; padding: 15px 0; color: white; text-decoration: none; font-weight: bold; border-bottom: 1px solid #222; }
+        .logout-btn { color: var(--rasta-red); margin-top: 40px; cursor: pointer; font-weight: bold; }
+
+        /* Hero Banner */
+        .hero {
+            width: 100%; height: 200px; background: url('assets/asset.bg.jpg') center;
+            background-size: cover; display: flex; align-items: flex-end; padding: 20px;
+            border-bottom: 3px solid var(--rasta-green);
+        }
+        .hero-text h2 { font-family: 'Goldman'; color: var(--rasta-gold); text-shadow: 2px 2px 10px #000; }
+
+        /* Game Grid */
+        .grid-title { padding: 20px 15px 10px; font-weight: 900; font-size: 1.2rem; color: var(--rasta-green); }
+        .game-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px;
         }
         .game-card {
-            background: #111; border-radius: 10px; border: 1px solid #333; overflow: hidden;
-            transition: 0.3s; position: relative;
+            background: #111; border-radius: 12px; aspect-ratio: 1/1; position: relative;
+            overflow: hidden; border: 1px solid #222; cursor: pointer;
         }
-        .game-card:active { transform: scale(0.95); border-color: var(--rasta-green); }
-        .game-thumb { height: 100px; background: url('assets/asset.tiles.jpg') center/cover; filter: brightness(0.7); }
-        .game-label { padding: 8px; font-size: 0.75rem; text-align: center; font-weight: 800; color: #ccc; }
-        .live-tag { position: absolute; top: 5px; right: 5px; background: var(--rasta-red); font-size: 0.6rem; padding: 2px 5px; border-radius: 3px; }
+        .game-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+        .game-label { 
+            position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.8);
+            font-size: 0.65rem; text-align: center; padding: 5px 0; font-weight: bold;
+        }
 
-        /* Navigation */
-        .nav-bar { position: fixed; bottom: 0; width: 100%; height: 70px; background: #000; border-top: 2px solid var(--rasta-gold); display: flex; justify-content: space-around; align-items: center; z-index: 200; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; color: #888; }
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%; height: 70px; background: #111;
+            display: flex; justify-content: space-around; align-items: center;
+            border-top: 2px solid var(--rasta-gold); z-index: 100;
+        }
+        .nav-item { text-align: center; color: #888; text-decoration: none; font-size: 0.7rem; font-weight: bold; }
         .nav-item.active { color: var(--rasta-gold); }
+        .nav-item i { display: block; font-size: 1.5rem; margin-bottom: 4px; }
 
-        /* Side Menu */
-        .side-menu { position: fixed; left: -100%; top: 0; width: 80%; height: 100%; background: #0a0a0a; z-index: 300; transition: 0.4s; border-right: 2px solid var(--rasta-green); padding: 40px 20px; }
-        .side-menu.open { left: 0; }
-        .menu-link { display: block; padding: 15px; color: white; border-bottom: 1px solid #222; text-decoration: none; font-weight: 600; }
+        /* Wallet Shortcut Button */
+        .wallet-float {
+            background: var(--rasta-green); padding: 10px 20px; border-radius: 20px;
+            font-weight: bold; font-family: 'Goldman'; border: 1px solid var(--rasta-gold);
+        }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>RASTA BET</h1>
-    <p id="bal-display" style="color: var(--rasta-green); font-weight: 800; margin-top: 10px;">BALANCE: 0.00 ETB</p>
-    <div style="margin-top: 15px;">
-        <button onclick="toggleMenu()" style="padding: 8px 20px; background: var(--rasta-red); border: none; color: white; font-weight: bold; border-radius: 5px;">MENU</button>
+<header>
+    <div class="logo">RASTA BET</div>
+    <div class="wallet-float" onclick="location.href='profile.html'">
+        <span id="header-bal">0.00</span> ETB
+    </div>
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+</header>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-user">
+        <h4 id="user-name">VIP PLAYER</h4>
+        <small id="user-id" style="color:var(--rasta-gold)">ID: RS-0000</small>
+    </div>
+    <a href="profile.html" class="sidebar-item">Wallet / የገንዘብ ቦርሳ</a>
+    <a href="#" class="sidebar-item">Game History / የታሪክ መዝገብ</a>
+    <a href="#" class="sidebar-item">Support / ድጋፍ</a>
+    <div class="logout-btn" onclick="logout()">LOGOUT / ውጣ</div>
+</div>
+
+<div class="hero">
+    <div class="hero-text">
+        <h2>WELCOME TO THE HOUSE</h2>
+        <p style="font-size: 0.8rem;">Minimum Bet: 2 Birr | 4K Gaming Experience</p>
     </div>
 </div>
 
-<div class="game-container" id="gameGrid">
+<div class="grid-title">VIP GAMES / ጨዋታዎች</div>
+<div class="game-grid">
+    <div class="game-card" onclick="location.href='fast-keno.html'">
+        <img src="https://img.freepik.com/free-vector/realistic-keno-background_23-2148286940.jpg" alt="Keno">
+        <div class="game-label">FAST KENO</div>
     </div>
+    <div class="game-card" onclick="location.href='slots.html'">
+        <img src="assets/asset.tiles.jpg" alt="Slots">
+        <div class="game-label">JUNGLE SLOTS</div>
+    </div>
+    <div class="game-card" onclick="location.href='wheel.html'">
+        <img src="assets/asset.five.jpg" alt="Wheel">
+        <div class="game-label">RASTA WHEEL</div>
+    </div>
+    <div class="game-card"><div class="game-label">SOON</div></div>
+    <div class="game-card"><div class="game-label">SOON</div></div>
+    <div class="game-card"><div class="game-label">SOON</div></div>
+</div>
 
-<nav class="nav-bar">
-    <div class="nav-item active"><span>🏠</span><span>HOME</span></div>
-    <div class="nav-item" onclick="location.href='fast-keno.html'"><span>🎱</span><span>KENO</span></div>
-    <div class="nav-item"><span>💰</span><span>DEPOSIT</span></div>
-    <div class="nav-item"><span>👤</span><span>PROFILE</span></div>
-</nav>
-
-<div class="side-menu" id="menu">
-    <h2 style="color: var(--rasta-gold); margin-bottom: 20px;">RASTA HOUSE</h2>
-    <a href="#" class="menu-link">My Account</a>
-    <a href="#" class="menu-link">Deposit History</a>
-    <a href="#" class="menu-link">Withdraw Funds</a>
-    <a href="#" class="menu-link">Promotions</a>
-    <a href="#" class="menu-link" style="color: var(--rasta-red);" onclick="toggleMenu()">Close Menu</a>
+<div class="bottom-nav">
+    <a href="index.html" class="nav-item active">🏠<br>HOME</a>
+    <a href="fast-keno.html" class="nav-item">🎰<br>KENO</a>
+    <a href="profile.html" class="nav-item">💰<br>WALLET</a>
+    <a href="profile.html" class="nav-item">📥<br>DEPOSIT</a>
 </div>
 
 <script>
-    const games = [
-        "Fast Keno", "Jungle Reels", "Lion Pride Slots", "Zebra Dash", "Golden Safari",
-        "Rasta Wheel", "Fruit Blaster", "Diamond Mine", "Buffalo Run", "Mega Moolah",
-        "Treasures of Nile", "King Kong Cash", "Magic Monkey", "Temple Run Slots", "Fire 777",
-        "Lucky Emeralds", "Ancient Gold", "Pirate Booty", "Ocean Pearl", "Wild Wolf",
-        "Solar Flare", "Thunder God", "Rasta Dice", "Instant Win"
-    ];
+    let user = JSON.parse(localStorage.getItem('rasta_user'));
 
-    const grid = document.getElementById('gameGrid');
-    games.forEach((game, index) => {
-        const url = game === "Fast Keno" ? "fast-keno.html" : "#";
-        grid.innerHTML += `
-            <div class="game-card" onclick="location.href='${url}'">
-                ${index < 3 ? '<div class="live-tag">HOT</div>' : ''}
-                <div class="game-thumb"></div>
-                <div class="game-label">${game.toUpperCase()}</div>
-            </div>
-        `;
-    });
+    // Security: If no user, send to login
+    window.onload = () => {
+        if (!user) {
+            location.href = 'login.html';
+            return;
+        }
+        document.getElementById('header-bal').innerText = parseFloat(user.balance).toFixed(2);
+        document.getElementById('user-name').innerText = user.name;
+        document.getElementById('user-id').innerText = "ID: " + user.playerID;
+    };
 
-    function toggleMenu() { document.getElementById('menu').classList.toggle('open'); }
+    function toggleMenu() {
+        document.getElementById('sidebar').classList.toggle('active');
+    }
+
+    function logout() {
+        localStorage.removeItem('rasta_user');
+        location.href = 'login.html';
+    }
 </script>
+
 </body>
 </html>
