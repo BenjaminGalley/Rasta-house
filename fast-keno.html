@@ -53,17 +53,15 @@
 </head>
 <body>
 
-<audio id="bg-music" loop>
-    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg">
-</audio>
+<audio id="bg-music" loop><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg"></audio>
 <audio id="snd-tick"><source src="https://actions.google.com/sounds/v1/button/button_click.ogg" type="audio/ogg"></audio>
 <audio id="snd-pop"><source src="https://actions.google.com/sounds/v1/cartoon/pop.ogg" type="audio/ogg"></audio>
 <audio id="snd-win"><source src="https://actions.google.com/sounds/v1/foley/beating_prizes.ogg" type="audio/ogg"></audio>
 
 <div class="keno-header">
-    <button onclick="location.href='index.html'">BACK</button>
+    <button onclick="location.href='index.html'" style="background:none; color:white; border:1px solid #444; padding:5px 10px; border-radius:5px;">BACK</button>
     <div class="timer-box"><div id="timer">00:60</div></div>
-    <button id="mute-btn" onclick="toggleMute()">🎵 ON</button>
+    <button id="mute-btn" onclick="toggleMute()">🎵 OFF</button>
 </div>
 
 <div class="main-layout">
@@ -73,7 +71,7 @@
             <div id="no-tickets" style="color:#444; padding:20px;">No bets placed.</div>
         </div>
         <div id="pot-display" style="padding: 5px 15px; font-size: 0.8rem; color: var(--rasta-green);">
-            Potential: <span id="pot-win">0.00</span> ETB
+            Potential: <span id="pot-win">0.00</span> ETB | Balance: <span id="top-bal">0.00</span>
         </div>
     </div>
 </div>
@@ -87,15 +85,16 @@
 </div>
 
 <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
     let user = JSON.parse(localStorage.getItem('rasta_user') || '{"balance":0}');
     let selected = [];
     let activeTickets = [];
     let timeRemaining = 60;
     let isMuted = true;
 
-    const payoutTable = { 2: 50, 3: 100, 4: 160, 5: 300, 6: 600, 7: 1200, 8: 2500, 9: 5000, 10: 10000 };
+    const payoutTable = { 2: 5, 3: 15, 4: 40, 5: 100, 6: 250, 7: 500, 8: 1000, 9: 2500, 10: 5000 };
 
-    function playSound(id) { if(!isMuted) document.getElementById(id).play(); }
+    function playSound(id) { if(!isMuted) { const s = document.getElementById(id); s.currentTime = 0; s.play(); } }
 
     function toggleMute() {
         isMuted = !isMuted;
@@ -104,7 +103,6 @@
         else { bg.pause(); document.getElementById('mute-btn').innerText = "🎵 OFF"; }
     }
 
-    // Grid Setup
     const grid = document.getElementById('kenoGrid');
     for(let i=1; i<=80; i++) {
         const div = document.createElement('div');
@@ -122,6 +120,7 @@
         const bet = parseFloat(document.getElementById('betAmount').value);
         const pot = (bet / 2) * (payoutTable[selected.length] || 0);
         document.getElementById('pot-win').innerText = pot.toFixed(2);
+        document.getElementById('top-bal').innerText = user.balance.toFixed(2);
     }
 
     setInterval(() => {
@@ -133,20 +132,22 @@
 
     function placeBet() {
         const bet = parseFloat(document.getElementById('betAmount').value);
-        if(selected.length < 2) return alert("Select numbers!");
-        if(bet > user.balance) return alert("Low balance");
+        if(selected.length < 2) return alert("Select at least 2 numbers!");
+        if(bet > user.balance) return alert("Insufficient balance");
 
-        user.balance -= bet; updateUI();
+        user.balance -= bet; 
+        updateUI();
         const t = { id: Date.now().toString().slice(-3), nums: [...selected], stake: bet, win: (bet/2)*(payoutTable[selected.length]||0) };
         activeTickets.push(t);
         
         const card = document.createElement('div');
         card.className = 'ticket-card'; card.id = 't-'+t.id;
-        card.innerHTML = `<small>#${t.id}</small><br><b>${t.nums.join(',')}</b><br><small>Potential: ${t.win}</small>`;
+        card.innerHTML = `<small>#${t.id}</small><br><b>${t.nums.join(',')}</b><br><small>Win: ${t.win} ETB</small>`;
         document.getElementById('ticketScroll').appendChild(card);
         document.getElementById('no-tickets').style.display = 'none';
 
         selected = []; document.querySelectorAll('.num').forEach(d => d.classList.remove('selected'));
+        updatePotential();
     }
 
     function runDraw() {
@@ -164,23 +165,34 @@
     }
 
     function checkResults(draw) {
-        let wonAny = false;
+        let sessionWin = 0;
         activeTickets.forEach(t => {
             const hits = t.nums.filter(n => draw.includes(n)).length;
             if(hits === t.nums.length) { 
                 document.getElementById('t-'+t.id).classList.add('winner');
-                user.balance += t.win; wonAny = true;
+                sessionWin += t.win;
             }
         });
-        if(wonAny) playSound('snd-win');
-        updateUI();
+        if(sessionWin > 0) {
+            playSound('snd-win');
+            user.balance += sessionWin;
+            updateUI();
+        }
         setTimeout(() => { 
             document.getElementById('ticketScroll').innerHTML = '<div id="no-tickets" style="color:#444; padding:20px;">No bets placed.</div>';
             activeTickets = [];
         }, 8000);
     }
 
-    function updateUI() { localStorage.setItem('rasta_user', JSON.stringify(user)); }
+    // Sync balance to Google Sheet
+    function updateUI() { 
+        localStorage.setItem('rasta_user', JSON.stringify(user));
+        document.getElementById('top-bal').innerText = user.balance.toFixed(2);
+        // Silent sync to database
+        fetch(`${SCRIPT_URL}?action=syncBalance&playerID=${user.playerID}&balance=${user.balance}`).catch(e => console.log("Sync delay"));
+    }
+
+    window.onload = updatePotential;
 </script>
 </body>
 </html>
