@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RASTA REVELATION</title>
+    <style>
+        :root { --gold: #FFD100; --green: #008542; --red: #E71D36; }
+        body { background: #000; color: white; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; overflow-x: hidden; }
+        
+        .header { padding: 15px; background: #111; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; }
+        .bal-display { background: #222; padding: 8px 15px; border-radius: 20px; border: 1px solid var(--gold); font-weight: bold; }
+
+        /* The Slot Machine Body */
+        .machine-frame { 
+            margin: 20px auto; width: 340px; background: linear-gradient(145deg, #1a1a1a, #000); 
+            padding: 20px; border: 6px solid var(--gold); border-radius: 30px;
+            box-shadow: 0 0 50px rgba(0, 133, 66, 0.3);
+        }
+
+        .reels-container { display: flex; justify-content: center; gap: 10px; background: #000; padding: 15px; border-radius: 15px; overflow: hidden; }
+        
+        .reel-box { width: 90px; height: 90px; background: #111; border-radius: 12px; overflow: hidden; position: relative; border: 1px solid #333; }
+        
+        .symbol {
+            width: 90px; height: 90px;
+            background-image: url('asset/asset.rasta.jpg');
+            background-size: 360px 360px; /* 4x4 Grid */
+            position: absolute; top: 0; left: 0;
+            transition: transform 0.1s;
+        }
+
+        /* Fast Slide Animation */
+        .slide-anim { animation: rastaSlide 0.12s infinite linear; }
+        @keyframes rastaSlide { 
+            0% { transform: translateY(-100%); filter: blur(3px); } 
+            100% { transform: translateY(100%); filter: blur(6px); } 
+        }
+
+        .controls { margin-top: 15px; }
+        .bet-box { margin-bottom: 15px; }
+        input { background: #111; border: 2px solid #444; color: var(--gold); padding: 12px; width: 80px; text-align: center; font-size: 1.2rem; border-radius: 10px; }
+        
+        .btn-spin { 
+            width: 85%; padding: 20px; background: linear-gradient(to bottom, var(--green), #004d26); 
+            color: white; border: none; border-radius: 50px; font-weight: bold; font-size: 1.4rem; 
+            cursor: pointer; box-shadow: 0 6px 0 #002e17; text-shadow: 1px 1px 2px #000;
+        }
+        .btn-spin:active { transform: translateY(4px); box-shadow: 0 2px 0 #002e17; }
+        
+        #message { height: 30px; color: var(--gold); font-weight: bold; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
+        
+        /* Music Control */
+        .music-toggle { margin-top: 20px; font-size: 0.8rem; color: #666; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div style="text-align:left">
+        <div style="font-weight:bold; color:var(--gold)">RASTA REVELATION</div>
+        <div style="font-size:0.6rem; color:var(--green)">HAIL THE KING</div>
+    </div>
+    <div class="bal-display" id="balDisplay">0.00 ETB</div>
+</div>
+
+<div class="machine-frame">
+    <div id="message">PRESS SPIN TO REVEAL</div>
+    <div class="reels-container">
+        <div class="reel-box"><div class="symbol" id="r1"></div></div>
+        <div class="reel-box"><div class="symbol" id="r2"></div></div>
+        <div class="reel-box"><div class="symbol" id="r3"></div></div>
+    </div>
+</div>
+
+<div class="controls">
+    <div class="bet-box">
+        <small style="display:block; color:#888; margin-bottom:5px;">BET (MIN 2 BIRR)</small>
+        <input type="number" id="betAmt" value="5" min="2">
+    </div>
+    <button class="btn-spin" onclick="handleSpin()" id="spinBtn">SPIN</button>
+    <div class="music-toggle" onclick="toggleMusic()">🎵 CLICK FOR REGGAE VIBES</div>
+</div>
+
+<audio id="reggaeBg" loop>
+    <source src="https://www.free-stock-music.com/music/alexander-nakarada-be-jammin.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
+    let user = JSON.parse(localStorage.getItem('rasta_user')) || { balance: 100, name: "King", phone: "000" };
+    
+    // Mapping symbols based on the 4x4 asset.rasta.jpg
+    const rastaIcons = [
+        { name: 'Haile Selassie', x: 0, y: 0, mult: 50 },  // Jackpot
+        { name: 'Bob Marley', x: 90, y: 0, mult: 25 },     // High
+        { name: 'Damian Marley', x: 180, y: 0, mult: 15 }, // Med
+        { name: 'Lion of Judah', x: 270, y: 0, mult: 10 }, // Med
+        { name: 'Marijuana Tree', x: 0, y: 90, mult: 5 },  // Low
+        { name: 'Marijuana Leaf', x: 90, y: 90, mult: 3 }, // Low
+        { name: 'Rolled Ganja', x: 180, y: 90, mult: 2 }   // Low
+    ];
+
+    function updateUI() {
+        document.getElementById('balDisplay').innerText = user.balance.toFixed(2) + " ETB";
+    }
+
+    function setSymbol(id, idx) {
+        const el = document.getElementById(id);
+        el.style.backgroundPosition = `-${rastaIcons[idx].x}px -${rastaIcons[idx].y}px`;
+    }
+
+    // Initial State
+    setSymbol('r1', 0); setSymbol('r2', 1); setSymbol('r3', 3);
+    updateUI();
+
+    function toggleMusic() {
+        const audio = document.getElementById('reggaeBg');
+        if (audio.paused) {
+            audio.play().catch(e => console.log("User interaction needed first"));
+            document.querySelector('.music-toggle').innerText = "🔊 VIBING...";
+        } else {
+            audio.pause();
+            document.querySelector('.music-toggle').innerText = "🔇 MUSIC OFF";
+        }
+    }
+
+    async function handleSpin() {
+        const bet = parseFloat(document.getElementById('betAmt').value);
+        if (bet < 2) return alert("Min bet 2 Birr");
+        if (bet > user.balance) return alert("Insufficient Balance");
+
+        // Start Music automatically if it's the first spin
+        document.getElementById('reggaeBg').play().catch(e => {});
+
+        user.balance -= bet;
+        updateUI();
+        document.getElementById('spinBtn').disabled = true;
+        document.getElementById('message').innerText = "REVEALING...";
+
+        // Start Animations
+        document.querySelectorAll('.symbol').forEach(s => s.classList.add('slide-anim'));
+
+        setTimeout(() => {
+            stopReels(bet);
+        }, 1500);
+    }
+
+    function stopReels(bet) {
+        document.querySelectorAll('.symbol').forEach(s => s.classList.remove('slide-anim'));
+        
+        const res = [
+            Math.floor(Math.random() * rastaIcons.length),
+            Math.floor(Math.random() * rastaIcons.length),
+            Math.floor(Math.random() * rastaIcons.length)
+        ];
+
+        setSymbol('r1', res[0]);
+        setSymbol('r2', res[1]);
+        setSymbol('r3', res[2]);
+
+        let win = 0;
+        // Logic: 3 of a kind wins big
+        if (res[0] === res[1] && res[1] === res[2]) {
+            win = bet * rastaIcons[res[0]].mult;
+            document.getElementById('message').innerText = "JAH BLESS! WIN: " + win + " ETB";
+        } 
+        // Logic: 2 of a kind wins smaller
+        else if (res[0] === res[1] || res[1] === res[2] || res[0] === res[2]) {
+            win = bet * 1.5;
+            document.getElementById('message').innerText = "NICE VIBE: " + win + " ETB";
+        } else {
+            document.getElementById('message').innerText = "TRY AGAIN";
+        }
+
+        user.balance += win;
+        updateUI();
+        document.getElementById('spinBtn').disabled = false;
+        
+        // Sync with Database
+        localStorage.setItem('rasta_user', JSON.stringify(user));
+        fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&name=${user.name}&updateBal=${user.balance}`);
+    }
+</script>
+
+</body>
+</html>
