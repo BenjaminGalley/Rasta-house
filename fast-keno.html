@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RASTA | Fast Keno</title>
+    <style>
+        :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; }
+        body { background: #050505; color: white; font-family: sans-serif; text-align: center; margin: 0; }
+        .keno-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; padding: 10px; max-width: 400px; margin: auto; }
+        .number { background: #222; padding: 10px 0; border-radius: 5px; cursor: pointer; border: 1px solid #333; font-weight: bold; }
+        .number.selected { background: var(--rasta-gold); color: black; border-color: white; }
+        .number.hit { background: var(--rasta-green); color: white; animation: flash 0.5s infinite; }
+        .controls { padding: 20px; background: #111; border-top: 2px solid var(--rasta-gold); position: fixed; bottom: 0; width: 100%; box-sizing: border-box; }
+        input { padding: 10px; width: 80px; background: #000; color: var(--rasta-gold); border: 1px solid var(--rasta-gold); border-radius: 5px; font-size: 1.2rem; }
+        .btn { padding: 12px 25px; font-weight: bold; border-radius: 5px; border: none; margin: 5px; cursor: pointer; }
+        .btn-play { background: var(--rasta-green); color: white; width: 100%; font-size: 1.2rem; }
+        @keyframes flash { 50% { opacity: 0.5; } }
+    </style>
+</head>
+<body>
+
+<div style="padding: 20px;">
+    <h2 style="color: var(--rasta-gold);">FAST KENO</h2>
+    <p id="status">Select up to 10 numbers</p>
+</div>
+
+<div class="keno-grid" id="grid"></div>
+
+<div class="controls">
+    <div style="margin-bottom: 10px;">
+        BET: <input type="number" id="betAmount" value="10"> ETB
+    </div>
+    <button class="btn btn-play" onclick="playKeno()">START DRAW</button>
+    <button class="btn" style="background: #444; color: white;" onclick="location.href='index.html'">BACK</button>
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDMA1puOQXKQXEUO0I2O3125Gp0fUwBlIzVFkc3-9mSmA74ss5YkPNMHfnw6GKP3-llw/exec";
+    let selected = [];
+    const grid = document.getElementById('grid');
+
+    for(let i=1; i<=80; i++) {
+        let div = document.createElement('div');
+        div.className = 'number';
+        div.innerText = i;
+        div.onclick = () => {
+            if(selected.includes(i)) {
+                selected = selected.filter(n => n !== i);
+                div.classList.remove('selected');
+            } else if(selected.length < 10) {
+                selected.push(i);
+                div.classList.add('selected');
+            }
+        };
+        grid.appendChild(div);
+    }
+
+    async function playKeno() {
+        if(selected.length === 0) return alert("Select numbers first!");
+        const bet = document.getElementById('betAmount').value;
+        document.getElementById('status').innerText = "Drawing numbers...";
+
+        // Logic for draw
+        let draws = [];
+        while(draws.length < 20) {
+            let n = Math.floor(Math.random() * 80) + 1;
+            if(!draws.includes(n)) draws.push(n);
+        }
+
+        // Highlight draws
+        let hits = 0;
+        const allNumbers = document.querySelectorAll('.number');
+        allNumbers.forEach(n => n.classList.remove('hit'));
+
+        draws.forEach((n, i) => {
+            setTimeout(() => {
+                const el = allNumbers[n-1];
+                el.classList.add('hit');
+                if(selected.includes(n)) hits++;
+                
+                if(i === 19) calculateResult(hits, bet);
+            }, i * 100);
+        });
+    }
+
+    function calculateResult(hits, bet) {
+        let win = 0;
+        if(hits >= 2) win = bet * (hits * 1.5); // Basic multiplier
+        document.getElementById('status').innerText = `HITS: ${hits} | WON: ${win.toFixed(2)} ETB`;
+        
+        // Send to Google Script to update balance
+        if(win > 0) {
+            fetch(`${SCRIPT_URL}?action=updateBalance&amount=${win - bet}`);
+        } else {
+            fetch(`${SCRIPT_URL}?action=updateBalance&amount=${-bet}`);
+        }
+    }
+</script>
+</body>
+</html>
