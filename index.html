@@ -8,6 +8,31 @@
         :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; --dark-bg: #0a0a0a; }
         body { background: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; }
         
+        /* --- VISITOR SECTION (FRONT GATE) --- */
+        #visitor-gate {
+            height: 100vh;
+            display: none; /* Controlled by Script */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.8)), url('asset/asset.bg.jpg');
+            background-size: cover;
+            background-position: center;
+            text-align: center;
+        }
+        .gate-logo { font-size: 3.5rem; font-weight: bold; color: var(--rasta-gold); margin: 0; text-shadow: 0 0 20px rgba(255, 209, 0, 0.4); }
+        .gate-sub { color: var(--rasta-green); font-weight: bold; letter-spacing: 3px; margin-bottom: 30px; }
+        .gate-buttons { width: 80%; max-width: 320px; }
+        .btn-gate { 
+            display: block; width: 100%; padding: 18px; margin: 12px 0; border-radius: 35px; 
+            text-decoration: none; font-weight: bold; font-size: 1.1rem; text-align: center; transition: 0.3s;
+        }
+        .btn-login { background: var(--rasta-green); color: white; box-shadow: 0 4px 0 #004d26; }
+        .btn-reg { border: 2px solid var(--rasta-gold); color: var(--rasta-gold); }
+
+        /* --- LOBBY SECTION (YOUR ORIGINAL STYLING) --- */
+        #lobby-view { display: none; } /* Controlled by Script */
+        
         header { 
             background: #111; padding: 15px; display: flex; justify-content: space-between; 
             align-items: center; border-bottom: 2px solid var(--rasta-gold); position: sticky; top: 0; z-index: 1000;
@@ -42,7 +67,6 @@
             border-top: 1px solid var(--rasta-green);
         }
         
-        /* New Game Tag */
         .badge {
             position: absolute; top: 10px; right: 10px; background: var(--rasta-red);
             color: white; font-size: 0.6rem; padding: 3px 8px; border-radius: 5px; font-weight: bold;
@@ -61,71 +85,84 @@
 </head>
 <body>
 
-<header>
-    <div class="logo-text">RASTA BET</div>
-    <div class="balance-pill" onclick="location.href='profile.html'"><span id="userBal">0.00</span> ETB</div>
-</header>
-
-<div class="banner">
-    <h2 style="color:white; text-shadow: 2px 2px 10px #000; margin:0;">WIN BIG TODAY!</h2>
-    <p id="welcomeUser" style="color:var(--rasta-gold); margin:5px 0 0 0; font-size:0.8rem; font-weight:bold;"></p>
-</div>
-
-<div class="game-grid">
-    <div class="game-card" onclick="location.href='rasta-revelation.html'">
-        <div class="badge">NEW</div>
-        <img src="asset/asset.rasta.jpg">
-        <div class="game-title">RASTA REVELATION</div>
-    </div>
-
-    <div class="game-card" onclick="location.href='premium-slots.html'">
-        <div class="badge" style="background:var(--rasta-green)">4K</div>
-        <img src="asset/asset.nine.jpg">
-        <div class="game-title">LION SLOTS</div>
-    </div>
-
-    <div class="game-card" onclick="location.href='crash.html'">
-        <div class="badge" style="background:var(--rasta-gold); color:black;">HOT</div>
-        <img src="asset/asset.bg.jpg">
-        <div class="game-title">RASTA CRASH</div>
-    </div>
-
-    <div class="game-card" onclick="location.href='scratch.html'">
-        <img src="asset/asset.tiles.jpg">
-        <div class="game-title">SCRATCH GOLD</div>
-    </div>
-
-    <div class="game-card" onclick="location.href='fast-keno.html'">
-        <img src="asset/asset.ui.jpg">
-        <div class="game-title">FAST KENO</div>
-    </div>
-    
-    <div class="game-card" onclick="location.href='wheel.html'">
-        <img src="asset/asset.five.jpg">
-        <div class="game-title">RASTA WHEEL</div>
+<div id="visitor-gate">
+    <h1 class="gate-logo">RASTA HOUSE</h1>
+    <p class="gate-sub">WIN BIG TODAY</p>
+    <div class="gate-buttons">
+        <a href="login.html" class="btn-gate btn-login">LOGIN</a>
+        <a href="register.html" class="btn-gate btn-reg">REGISTER</a>
     </div>
 </div>
 
-<nav class="bottom-nav">
-    <a href="index.html" class="nav-link active"><span class="nav-icon">🏠</span>HOME</a>
-    <a href="profile.html" class="nav-link"><span class="nav-icon">💰</span>WALLET</a>
-</nav>
+<div id="lobby-view">
+    <header>
+        <div class="logo-text">RASTA BET</div>
+        <div class="balance-pill" onclick="location.href='profile.html'"><span id="userBal">0.00</span> ETB</div>
+    </header>
+
+    <div class="banner">
+        <h2 style="color:white; text-shadow: 2px 2px 10px #000; margin:0;">WIN BIG TODAY!</h2>
+        <p id="welcomeUser" style="color:var(--rasta-gold); margin:5px 0 0 0; font-size:0.8rem; font-weight:bold;"></p>
+    </div>
+
+    <div class="game-grid">
+        <div class="game-card" onclick="location.href='rasta-revelation.html'">
+            <div class="badge">NEW</div>
+            <img src="asset/asset.rasta.jpg">
+            <div class="game-title">RASTA REVELATION</div>
+        </div>
+
+        <div class="game-card" onclick="location.href='premium-slots.html'">
+            <div class="badge" style="background:var(--rasta-green)">4K</div>
+            <img src="asset/asset.nine.jpg">
+            <div class="game-title">LION SLOTS</div>
+        </div>
+
+        <div class="game-card" onclick="location.href='crash.html'">
+            <div class="badge" style="background:var(--rasta-gold); color:black;">HOT</div>
+            <img src="asset/asset.bg.jpg">
+            <div class="game-title">RASTA CRASH</div>
+        </div>
+
+        <div class="game-card" onclick="location.href='scratch.html'">
+            <img src="asset/asset.tiles.jpg">
+            <div class="game-title">SCRATCH GOLD</div>
+        </div>
+
+        <div class="game-card" onclick="location.href='fast-keno.html'">
+            <img src="asset/asset.ui.jpg">
+            <div class="game-title">FAST KENO</div>
+        </div>
+        
+        <div class="game-card" onclick="location.href='wheel.html'">
+            <img src="asset/asset.five.jpg">
+            <div class="game-title">RASTA WHEEL</div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-link active"><span class="nav-icon">🏠</span>HOME</a>
+        <a href="profile.html" class="nav-link"><span class="nav-icon">💰</span>WALLET</a>
+    </nav>
+</div>
 
 <script>
-    // Logic to run when the page loads
     window.onload = () => {
         const userData = localStorage.getItem('rasta_user');
         
         if(!userData) { 
-            location.href='login.html'; 
-            return; 
+            // Show Gate for visitors
+            document.getElementById('visitor-gate').style.display = 'flex';
+            document.getElementById('lobby-view').style.display = 'none';
+        } else {
+            // Show Lobby for players
+            document.getElementById('visitor-gate').style.display = 'none';
+            document.getElementById('lobby-view').style.display = 'block';
+            
+            const user = JSON.parse(userData);
+            document.getElementById('userBal').innerText = parseFloat(user.balance).toFixed(2);
+            document.getElementById('welcomeUser').innerText = "One Love, " + user.name;
         }
-
-        const user = JSON.parse(userData);
-        // Set Balance
-        document.getElementById('userBal').innerText = parseFloat(user.balance).toFixed(2);
-        // Set Welcome Name
-        document.getElementById('welcomeUser').innerText = "One Love, " + user.name;
     };
 </script>
 
