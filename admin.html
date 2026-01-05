@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RASTA ADMIN | Dashboard</title>
+    <style>
+        :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; }
+        body { background: #050505; color: white; font-family: sans-serif; margin: 0; padding: 20px; }
+        h1 { color: var(--rasta-gold); border-bottom: 2px solid var(--rasta-green); padding-bottom: 10px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: #111; padding: 20px; border-radius: 10px; border-left: 5px solid var(--rasta-gold); }
+        .stat-card big { font-size: 1.5rem; display: block; margin-top: 5px; }
+        
+        table { width: 100%; border-collapse: collapse; background: #111; border-radius: 10px; overflow: hidden; }
+        th { background: #222; padding: 15px; text-align: left; color: var(--rasta-gold); }
+        td { padding: 15px; border-bottom: 1px solid #222; }
+        
+        .btn-approve { background: var(--rasta-green); border: none; color: white; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        .btn-reject { background: var(--rasta-red); border: none; color: white; padding: 8px 15px; border-radius: 5px; margin-left: 5px; }
+    </style>
+</head>
+<body>
+
+    <h1>RASTA HOUSE ADMIN</h1>
+
+    <div class="stat-grid">
+        <div class="stat-card">Total House Profit<big id="total-profit">0.00 ETB</big></div>
+        <div class="stat-card">Active Players<big id="player-count">0</big></div>
+    </div>
+
+    <h3>Pending Deposits</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Player ID</th>
+                <th>Amount</th>
+                <th>Method</th>
+                <th>Txn ID</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="deposit-table">
+            </tbody>
+    </table>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDMA1puOQXKQXEUO0I2O3125Gp0fUwBlIzVFkc3-9mSmA74ss5YkPNMHfnw6GKP3-llw/exec";
+
+        async function loadAdminData() {
+            const res = await fetch(`${SCRIPT_URL}?action=getAdminData`);
+            const data = await res.json();
+            
+            document.getElementById('total-profit').innerText = data.profit + " ETB";
+            document.getElementById('player-count').innerText = data.players;
+
+            const table = document.getElementById('deposit-table');
+            table.innerHTML = "";
+            data.pending.forEach(dep => {
+                table.innerHTML += `
+                    <tr>
+                        <td>${dep.playerID}</td>
+                        <td>${dep.amount} ETB</td>
+                        <td>${dep.method}</td>
+                        <td><code>${dep.txnID}</code></td>
+                        <td>
+                            <button class="btn-approve" onclick="action('${dep.id}', 'approve')">Approve</button>
+                            <button class="btn-reject" onclick="action('${dep.id}', 'reject')">Reject</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function action(depId, type) {
+            if(!confirm("Are you sure?")) return;
+            await fetch(`${SCRIPT_URL}?action=manageDeposit&id=${depId}&status=${type}`);
+            alert("Success!");
+            loadAdminData();
+        }
+
+        // Auto-refresh every 30 seconds
+        loadAdminData();
+        setInterval(loadAdminData, 30000);
+    </script>
+</body>
+</html>
