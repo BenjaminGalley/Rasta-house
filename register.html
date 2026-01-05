@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RASTA HOUSE | JOIN THE TRIBE</title>
+    <style>
+        :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; }
+        body { 
+            background: #000; color: white; font-family: 'Segoe UI', sans-serif; 
+            margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;
+            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)), url('asset/asset.bg.jpg'); background-size: cover;
+        }
+        
+        .reg-card { 
+            width: 85%; max-width: 350px; background: rgba(17, 17, 17, 0.95); 
+            padding: 30px; border-radius: 20px; border: 1px solid var(--rasta-gold); 
+            box-shadow: 0 0 20px rgba(255, 209, 0, 0.2); 
+        }
+        h2 { color: var(--rasta-gold); margin: 0; text-align: center; letter-spacing: 2px; }
+        .sub-text { text-align:center; font-size: 0.8rem; color: var(--rasta-green); font-weight: bold; margin-bottom: 20px; }
+        
+        label { display: block; margin: 15px 0 5px; font-size: 0.8rem; color: #aaa; text-transform: uppercase; }
+        input { 
+            width: 100%; padding: 14px; background: #000; border: 1px solid #333; 
+            color: white; border-radius: 10px; box-sizing: border-box; font-size: 1rem; 
+        }
+        input:focus { border-color: var(--rasta-green); outline: none; }
+        
+        .btn-join { 
+            width: 100%; padding: 16px; background: var(--rasta-green); color: white; 
+            border: none; border-radius: 10px; font-weight: bold; font-size: 1.1rem; 
+            cursor: pointer; margin-top: 25px; box-shadow: 0 4px 0 #005a2d; 
+        }
+        .btn-join:active { transform: translateY(2px); box-shadow: none; }
+        
+        .footer-link { margin-top: 20px; font-size: 0.85rem; color: #888; text-align: center; }
+        .footer-link a { color: var(--rasta-gold); text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="reg-card">
+        <h2>REGISTER</h2>
+        <p class="sub-text">START YOUR JOURNEY</p>
+
+        <label>Full Name</label>
+        <input type="text" id="regName" placeholder="Enter your name">
+
+        <label>Phone Number</label>
+        <input type="text" id="regPhone" placeholder="09...">
+
+        <label>Create Password</label>
+        <input type="password" id="regPass" placeholder="••••••••">
+
+        <button class="btn-join" onclick="handleRegister()">CREATE ACCOUNT</button>
+
+        <div class="footer-link">
+            Already have an account? <a href="login.html">Login</a>
+        </div>
+    </div>
+
+<script>
+    // Your Google Apps Script Web App URL
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
+
+    async function handleRegister() {
+        const name = document.getElementById('regName').value.trim();
+        const phone = document.getElementById('regPhone').value.trim();
+        const pass = document.getElementById('regPass').value.trim();
+
+        if(!name || !phone || !pass) {
+            return alert("Please fill all fields.");
+        }
+
+        if(phone.length < 10) {
+            return alert("Enter a valid phone number.");
+        }
+
+        const btn = document.querySelector('.btn-join');
+        const originalText = btn.innerText;
+        btn.innerText = "CREATING...";
+        btn.disabled = true;
+
+        try {
+            // Registering with 0.00 ETB starting balance
+            // We use the same 'login' action but provide name and pass to trigger creation
+            const response = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}&name=${name}&pass=${pass}&updateBal=0`);
+            
+            // Auto-login the user locally so they go straight to the game
+            const userData = {
+                name: name,
+                phone: phone,
+                balance: 0.00
+            };
+            
+            localStorage.setItem('rasta_user', JSON.stringify(userData));
+            
+            alert("Welcome to Rasta House, " + name + "!");
+            window.location.href = "index.html";
+            
+        } catch (error) {
+            console.error(error);
+            alert("Error connecting. Please check your internet.");
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    }
+</script>
+
+</body>
+</html>
