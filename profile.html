@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RASTA BET | My Wallet</title>
+    <title>RASTA BET | Wallet</title>
     <link href="https://fonts.googleapis.com/css2?family=Goldman:wght@400;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -11,7 +11,7 @@
             --rasta-gold: #FFD100;
             --rasta-red: #E71D36;
             --dark-bg: #050505;
-            --card-bg: #111;
+            --card-bg: #121212;
         }
 
         body {
@@ -19,130 +19,67 @@
             color: white;
             font-family: 'Montserrat', sans-serif;
             margin: 0;
-            padding-bottom: 80px;
+            padding-bottom: 50px;
         }
 
-        /* Fixed Header */
         .wallet-header {
-            background: linear-gradient(135deg, var(--rasta-green), #000);
-            padding: 30px 20px;
+            background: linear-gradient(180deg, var(--rasta-green), #000);
+            padding: 40px 20px;
             text-align: center;
-            border-bottom: 2px solid var(--rasta-gold);
-        }
-
-        .player-id-tag {
-            background: var(--rasta-gold);
-            color: black;
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: 800;
-            font-size: 0.8rem;
-            margin-bottom: 10px;
-        }
-
-        .balance-hero {
-            font-size: 2.5rem;
-            font-family: 'Goldman';
-            margin: 10px 0;
-        }
-
-        /* Tabs */
-        .tabs {
-            display: flex;
-            background: #000;
-            border-bottom: 1px solid #333;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 15px;
-            text-align: center;
-            font-weight: bold;
-            color: #666;
-            cursor: pointer;
-        }
-
-        .tab.active {
-            color: var(--rasta-gold);
             border-bottom: 3px solid var(--rasta-gold);
         }
 
-        /* Content Sections */
-        .section {
-            padding: 20px;
-            display: none;
+        .balance-amount { font-family: 'Goldman'; font-size: 3rem; margin: 5px 0; color: white; }
+
+        .tabs { display: flex; background: #000; border-bottom: 1px solid #222; }
+        .tab { 
+            flex: 1; padding: 15px; text-align: center; font-weight: bold; 
+            cursor: pointer; color: #555; transition: 0.3s;
         }
+        .tab.active { color: var(--rasta-gold); border-bottom: 3px solid var(--rasta-gold); background: #111; }
 
-        .section.active { display: block; }
+        .content-section { padding: 20px; display: none; }
+        .content-section.active { display: block; }
 
-        .form-card {
+        .method-card {
             background: var(--card-bg);
-            padding: 20px;
-            border-radius: 15px;
-            border: 1px solid #222;
-            margin-bottom: 20px;
-        }
-
-        .method-btn {
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 15px;
-            background: #000;
-            border: 1px solid #333;
-            padding: 15px;
-            width: 100%;
-            border-radius: 10px;
-            color: white;
-            margin-bottom: 10px;
-            text-align: left;
+        }
+        .method-card.selected { border-color: var(--rasta-gold); background: #1a1a00; }
+
+        .bank-details {
+            background: #000; border: 1px dashed var(--rasta-gold); padding: 15px;
+            border-radius: 8px; margin-bottom: 15px; text-align: center;
         }
 
-        .method-btn.selected { border-color: var(--rasta-green); background: rgba(0, 133, 66, 0.1); }
-
-        input {
-            width: 100%;
-            padding: 15px;
-            background: #000;
-            border: 1px solid #333;
-            color: white;
-            border-radius: 10px;
-            margin-top: 10px;
-            font-size: 1rem;
+        input, select {
+            width: 100%; padding: 15px; background: #000; border: 1px solid #333;
+            color: white; border-radius: 8px; font-size: 1rem; margin-bottom: 15px;
+            box-sizing: border-box;
         }
 
-        .btn-submit {
-            width: 100%;
-            padding: 18px;
-            background: var(--rasta-gold);
-            border: none;
-            color: black;
-            font-weight: 800;
-            border-radius: 10px;
-            margin-top: 20px;
-            text-transform: uppercase;
+        .btn-action {
+            width: 100%; padding: 18px; border: none; border-radius: 8px;
+            font-weight: 800; font-size: 1.1rem; text-transform: uppercase;
+            cursor: pointer;
         }
-
-        /* Footer Nav */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            height: 70px;
-            background: #000;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 1px solid var(--rasta-gold);
-        }
+        .btn-deposit { background: var(--rasta-green); color: white; }
+        .btn-withdraw { background: var(--rasta-gold); color: black; }
     </style>
 </head>
 <body>
 
     <div class="wallet-header">
-        <div class="player-id-tag" id="display-id">ID: RST-8821</div>
-        <div style="font-size: 0.9rem; opacity: 0.8;">Total Balance</div>
-        <div class="balance-hero"><span id="display-bal">0.00</span> <small style="font-size: 1rem;">ETB</small></div>
+        <div style="font-size: 0.8rem; letter-spacing: 2px;">ACCOUNT BALANCE</div>
+        <div class="balance-amount"><span id="user-bal">0.00</span> <small style="font-size:1.2rem">ETB</small></div>
+        <div id="player-id" style="color: var(--rasta-gold); font-size: 0.8rem;">ID: ...</div>
     </div>
 
     <div class="tabs">
@@ -150,126 +87,95 @@
         <div class="tab" onclick="switchTab('withdraw', this)">WITHDRAW</div>
     </div>
 
-    <div id="deposit" class="section active">
-        <p style="margin-bottom: 15px; font-size: 0.9rem; color: #888;">Select Payment Method:</p>
-        
-        <button class="method-btn selected" onclick="selectMethod('Telebirr', this)">
-            <div style="width: 40px; height: 40px; background: #005eb8; border-radius: 5px;"></div>
-            <div>
-                <strong>Telebirr</strong><br>
-                <small>Send to: 0988733637</small>
-            </div>
-        </button>
+    <div id="deposit" class="content-section active">
+        <div class="method-card selected" onclick="selectMethod('Telebirr', '0988733637', this)">
+            <div style="background:#005eb8; width:45px; height:45px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold;">T</div>
+            <div><strong>Telebirr</strong><br><small>Instant Notification</small></div>
+        </div>
 
-        <button class="method-btn" onclick="selectMethod('CBE', this)">
-            <div style="width: 40px; height: 40px; background: #6c2d82; border-radius: 5px;"></div>
-            <div>
-                <strong>CBE (Birr)</strong><br>
-                <small>Send to: 0911045825</small>
-            </div>
-        </button>
+        <div class="method-card" onclick="selectMethod('CBE', '0911045825', this)">
+            <div style="background:#6c2d82; width:45px; height:45px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold;">C</div>
+            <div><strong>CBE (Commercial Bank)</strong><br><small>Manual Confirmation</small></div>
+        </div>
 
-        <div class="form-card">
-            <label>Amount to Deposit (ETB)</label>
-            <input type="number" id="dep-amount" placeholder="Min: 50 ETB">
-            
-            <label style="display:block; margin-top:15px;">Transaction ID / Screenshot Ref</label>
-            <input type="text" id="dep-ref" placeholder="Enter Txn ID">
-            
-            <button class="btn-submit" onclick="submitDeposit()">Submit Deposit</button>
+        <div class="bank-details">
+            <span style="color:#888; font-size: 0.8rem;">SEND MONEY TO:</span><br>
+            <strong id="target-account" style="font-size: 1.2rem; color: var(--rasta-gold);">Telebirr: 0988733637</strong>
+        </div>
+
+        <div class="form-group">
+            <input type="number" id="dep-amount" placeholder="Amount (Min 50 ETB)">
+            <input type="text" id="dep-ref" placeholder="Transaction ID (from SMS)">
+            <button class="btn-action btn-deposit" onclick="submitDeposit()">Submit Deposit</button>
         </div>
     </div>
 
-    <div id="withdraw" class="section">
-        <div class="form-card" style="border-left: 5px solid var(--rasta-red);">
-            <p style="font-size: 0.8rem; color: var(--rasta-red); font-weight: bold;">⚠️ INSTANT DEDUCTION ON REQUEST</p>
-        </div>
-
-        <div class="form-card">
-            <label>Withdrawal Method</label>
-            <select id="wit-method" style="width:100%; padding:15px; background:#000; color:white; border:1px solid #333; margin-top:10px; border-radius:10px;">
+    <div id="withdraw" class="content-section">
+        <div class="form-group">
+            <select id="wit-method">
                 <option value="Telebirr">Telebirr</option>
-                <option value="CBE">CBE</option>
+                <option value="CBE">CBE (Commercial Bank)</option>
             </select>
-
-            <label style="display:block; margin-top:15px;">Amount to Withdraw</label>
-            <input type="number" id="wit-amount" placeholder="Available: 0.00">
-            
-            <button class="btn-submit" style="background: var(--rasta-red); color: white;" onclick="submitWithdraw()">Request Payout</button>
+            <input type="text" id="wit-account" placeholder="Your Phone/Account Number">
+            <input type="number" id="wit-amount" placeholder="Amount (Min 100 ETB)">
+            <button class="btn-action btn-withdraw" onclick="submitWithdraw()">Request Payout</button>
         </div>
     </div>
 
-    <nav class="bottom-nav">
-        <div onclick="location.href='index.html'" style="text-align:center;">🏠<br><small>Home</small></div>
-        <div style="text-align:center; color: var(--rasta-gold);">💰<br><small>Wallet</small></div>
-    </nav>
+    <div style="text-align:center; margin-top:20px;">
+        <button onclick="location.href='index.html'" style="background:none; border:none; color:white; text-decoration:underline;">Back to Games</button>
+    </div>
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDMA1puOQXKQXEUO0I2O3125Gp0fUwBlIzVFkc3-9mSmA74ss5YkPNMHfnw6GKP3-llw/exec";
-        let currentMethod = "Telebirr";
         let user = JSON.parse(localStorage.getItem('rasta_user') || '{}');
+        let currentMethod = "Telebirr";
 
         window.onload = () => {
-            if(!user.playerID) {
-                alert("Please login first");
-                location.href = 'index.html';
-            }
-            document.getElementById('display-id').innerText = "ID: " + user.playerID;
-            document.getElementById('display-bal').innerText = user.balance;
+            document.getElementById('user-bal').innerText = parseFloat(user.balance || 0).toFixed(2);
+            document.getElementById('player-id').innerText = "PLAYER ID: " + (user.playerID || "GUEST");
         };
 
         function switchTab(id, el) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             el.classList.add('active');
         }
 
-        function selectMethod(m, el) {
-            currentMethod = m;
-            document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('selected'));
+        function selectMethod(method, num, el) {
+            currentMethod = method;
+            document.querySelectorAll('.method-card').forEach(c => c.classList.remove('selected'));
             el.classList.add('selected');
+            document.getElementById('target-account').innerText = method + ": " + num;
         }
 
         async function submitDeposit() {
             const amount = document.getElementById('dep-amount').value;
             const ref = document.getElementById('dep-ref').value;
-            if(!amount || !ref) return alert("Fill all fields");
-
-            const res = await fetch(SCRIPT_URL, {
+            if(amount < 50 || !ref) return alert("Min 50 ETB and Transaction ID required.");
+            
+            // Sending to Google Script
+            await fetch(SCRIPT_URL, {
                 method: "POST",
-                body: JSON.stringify({
-                    action: "deposit",
-                    playerID: user.playerID,
-                    amount: amount,
-                    method: currentMethod,
-                    txnID: ref
-                })
+                body: JSON.stringify({ action: "deposit", playerID: user.playerID, amount, method: currentMethod, txnID: ref })
             });
-            alert("Deposit Submitted. Admin will verify shortly.");
+            alert("Request sent! Balance will update after Admin verification.");
+            location.reload();
         }
 
         async function submitWithdraw() {
             const amount = document.getElementById('wit-amount').value;
-            if(amount > user.balance) return alert("Insufficient balance");
-            
-            const res = await fetch(SCRIPT_URL, {
+            const account = document.getElementById('wit-account').value;
+            if(amount < 100 || !account) return alert("Min 100 ETB and account required.");
+            if(amount > user.balance) return alert("Insufficient Balance");
+
+            await fetch(SCRIPT_URL, {
                 method: "POST",
-                body: JSON.stringify({
-                    action: "withdraw",
-                    playerID: user.playerID,
-                    amount: amount,
-                    method: document.getElementById('wit-method').value
-                })
+                body: JSON.stringify({ action: "withdraw", playerID: user.playerID, amount, method: document.getElementById('wit-method').value, account })
             });
-            
-            const data = await res.json();
-            if(data.success) {
-                alert("Withdrawal Requested! Funds deducted from balance.");
-                user.balance = data.newBalance;
-                localStorage.setItem('rasta_user', JSON.stringify(user));
-                location.reload();
-            }
+            alert("Withdrawal request sent to Admin.");
+            location.reload();
         }
     </script>
 </body>
