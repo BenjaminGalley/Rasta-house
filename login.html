@@ -7,22 +7,22 @@
     <style>
         :root { --rasta-green: #008542; --rasta-gold: #FFD100; --dark: #050505; }
         body { 
-            background: var(--dark); color: white; font-family: sans-serif; 
+            background: var(--dark); color: white; font-family: 'Montserrat', sans-serif; 
             margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh;
             background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('asset/asset.bg.jpg');
             background-size: cover; background-position: center;
         }
         .reg-card { 
-            background: rgba(17,17,17,0.95); padding: 40px 25px; border-radius: 20px; 
+            background: rgba(17,17,17,0.95); padding: 30px 25px; border-radius: 20px; 
             border: 2px solid var(--rasta-gold); width: 90%; max-width: 380px; text-align: center; 
         }
-        .logo { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--rasta-green); margin-bottom: 20px; }
-        h2 { color: var(--rasta-gold); margin-bottom: 30px; letter-spacing: 1px; }
+        .logo { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--rasta-green); margin-bottom: 15px; }
+        h2 { color: var(--rasta-gold); margin-bottom: 25px; letter-spacing: 1px; font-size: 1.5rem; }
         
-        .input-group { text-align: left; margin-bottom: 20px; }
-        label { display: block; font-size: 0.8rem; color: #888; margin-bottom: 5px; margin-left: 5px; }
+        .input-group { text-align: left; margin-bottom: 15px; }
+        label { display: block; font-size: 0.75rem; color: #888; margin-bottom: 5px; margin-left: 5px; }
         input { 
-            width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #333; 
+            width: 100%; padding: 14px; border-radius: 10px; border: 1px solid #333; 
             background: #000; color: white; box-sizing: border-box; font-size: 1rem;
         }
         input:focus { border-color: var(--rasta-gold); outline: none; }
@@ -43,17 +43,22 @@
     <h2>RASTA HOUSE</h2>
     
     <div class="input-group">
-        <label>FULL NAME / ሙሉ ስም</label>
-        <input type="text" id="regName" placeholder="Enter your name">
+        <label>FULL NAME</label>
+        <input type="text" id="regName" placeholder="Enter name">
     </div>
 
     <div class="input-group">
-        <label>PHONE NUMBER / ስልክ ቁጥር</label>
-        <input type="tel" id="regPhone" placeholder="09... or 07...">
+        <label>PHONE NUMBER</label>
+        <input type="tel" id="regPhone" placeholder="09...">
+    </div>
+
+    <div class="input-group">
+        <label>PASSWORD (4-6 Digits)</label>
+        <input type="password" id="regPass" placeholder="Set a password">
     </div>
 
     <button class="btn-reg" id="regBtn" onclick="handleRegister()">CREATE ACCOUNT</button>
-    <div id="msg">Registering... Please wait.</div>
+    <div id="msg">Connecting to Rasta House...</div>
 </div>
 
 <script>
@@ -62,30 +67,30 @@
     async function handleRegister() {
         const name = document.getElementById('regName').value.trim();
         const phone = document.getElementById('regPhone').value.trim();
+        const pass = document.getElementById('regPass').value.trim();
         const btn = document.getElementById('regBtn');
         const msg = document.getElementById('msg');
 
-        if(!name || !phone) {
-            alert("Please enter both Name and Phone Number");
+        if(!name || !phone || !pass) {
+            alert("Please fill in all fields (Name, Phone, and Password)");
             return;
         }
 
-        // Disable button and show message
         btn.disabled = true;
         btn.style.opacity = "0.5";
         msg.style.display = "block";
 
         try {
-            // Send to Google Sheet
-            const response = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}&name=${name}`);
+            // Updated to include 'pass' to match your Google Script requirements
+            const response = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}&name=${name}&pass=${pass}`);
             const userData = await response.json();
 
             if(userData.playerID) {
-                // Save user info locally for the games to use
+                // Save complete user object locally
                 localStorage.setItem('rasta_user', JSON.stringify(userData));
-                msg.innerText = "Success! Redirecting...";
+                msg.innerText = "Welcome! Redirecting...";
                 
-                // Go to the lobby
+                // Fixed redirect: Ensure this matches your renamed index.html file
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 1000);
@@ -93,7 +98,7 @@
                 throw new Error("Registration failed");
             }
         } catch (error) {
-            alert("Connection error! Make sure your Google Script is Deployed to 'Anyone'.");
+            alert("Network Error: Ensure your Google Script is deployed for 'Anyone'.");
             btn.disabled = false;
             btn.style.opacity = "1";
             msg.style.display = "none";
