@@ -3,85 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RASTA ADMIN | Dashboard</title>
+    <title>RASTA ADMIN | Control Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Goldman&display=swap" rel="stylesheet">
     <style>
         :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; }
-        body { background: #050505; color: white; font-family: sans-serif; margin: 0; padding: 20px; }
-        h1 { color: var(--rasta-gold); border-bottom: 2px solid var(--rasta-green); padding-bottom: 10px; }
-        .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px; }
-        .stat-card { background: #111; padding: 20px; border-radius: 10px; border-left: 5px solid var(--rasta-gold); }
-        .stat-card big { font-size: 1.5rem; display: block; margin-top: 5px; }
+        body { background: #000; color: white; font-family: sans-serif; margin: 0; padding: 20px; }
         
-        table { width: 100%; border-collapse: collapse; background: #111; border-radius: 10px; overflow: hidden; }
-        th { background: #222; padding: 15px; text-align: left; color: var(--rasta-gold); }
+        .admin-header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            border-bottom: 2px solid var(--rasta-gold); padding-bottom: 15px; margin-bottom: 20px;
+        }
+        .admin-header h1 { font-family: 'Goldman'; color: var(--rasta-gold); margin: 0; }
+
+        /* Stats Section */
+        .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: #111; padding: 20px; border-radius: 12px; border-top: 4px solid var(--rasta-green); text-align: center; }
+        .stat-card small { color: #888; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; }
+        .stat-card div { font-size: 1.8rem; font-weight: bold; margin-top: 5px; }
+
+        /* Table Sections */
+        .section-title { color: var(--rasta-gold); margin: 20px 0 10px 0; display: flex; align-items: center; gap: 10px; }
+        .table-wrapper { background: #111; border-radius: 12px; overflow: hidden; margin-bottom: 30px; border: 1px solid #222; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { background: #222; color: #888; text-align: left; padding: 15px; text-transform: uppercase; font-size: 0.7rem; }
         td { padding: 15px; border-bottom: 1px solid #222; }
         
-        .btn-approve { background: var(--rasta-green); border: none; color: white; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
-        .btn-reject { background: var(--rasta-red); border: none; color: white; padding: 8px 15px; border-radius: 5px; margin-left: 5px; }
+        /* Action Buttons */
+        .btn { padding: 8px 16px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-approve { background: var(--rasta-green); color: white; }
+        .btn-approve:hover { background: #00a352; }
+        .btn-reject { background: var(--rasta-red); color: white; margin-left: 5px; }
+        .btn-refresh { background: var(--rasta-gold); color: black; font-weight: bold; }
+
+        code { background: #000; padding: 4px 8px; border-radius: 4px; color: var(--rasta-gold); border: 1px solid #333; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; background: #333; }
     </style>
 </head>
 <body>
 
-    <h1>RASTA HOUSE ADMIN</h1>
-
-    <div class="stat-grid">
-        <div class="stat-card">Total House Profit<big id="total-profit">0.00 ETB</big></div>
-        <div class="stat-card">Active Players<big id="player-count">0</big></div>
+    <div class="admin-header">
+        <h1>RASTA ADMIN</h1>
+        <button class="btn btn-refresh" onclick="loadData()">REFRESH DATA</button>
     </div>
 
-    <h3>Pending Deposits</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Player ID</th>
-                <th>Amount</th>
-                <th>Method</th>
-                <th>Txn ID</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="deposit-table">
+    <div class="stats-container">
+        <div class="stat-card">
+            <small>Total House Balance</small>
+            <div id="stat-total-bal">0.00 ETB</div>
+        </div>
+        <div class="stat-card" style="border-top-color: var(--rasta-gold);">
+            <small>Active Players</small>
+            <div id="stat-players">0</div>
+        </div>
+        <div class="stat-card" style="border-top-color: var(--rasta-red);">
+            <small>Pending Payouts</small>
+            <div id="stat-pending-wit">0</div>
+        </div>
+    </div>
+
+    <div class="section-title">🟡 PENDING DEPOSITS (Verify Txn ID)</div>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Player ID</th>
+                    <th>Method</th>
+                    <th>Amount</th>
+                    <th>Transaction ID</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="deposit-list">
+                <tr><td colspan="5" style="text-align:center; color:#555;">Loading deposits...</td></tr>
             </tbody>
-    </table>
+        </table>
+    </div>
+
+    <div class="section-title">🔴 WITHDRAWAL REQUESTS (Pay the Player)</div>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Player ID</th>
+                    <th>Method</th>
+                    <th>Amount</th>
+                    <th>Account Info</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="withdraw-list">
+                <tr><td colspan="5" style="text-align:center; color:#555;">Loading withdrawals...</td></tr>
+            </tbody>
+        </table>
+    </div>
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDMA1puOQXKQXEUO0I2O3125Gp0fUwBlIzVFkc3-9mSmA74ss5YkPNMHfnw6GKP3-llw/exec";
 
-        async function loadAdminData() {
-            const res = await fetch(`${SCRIPT_URL}?action=getAdminData`);
-            const data = await res.json();
+        async function loadData() {
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=getAdminData`);
+                const data = await response.json();
+
+                // Update Stats
+                document.getElementById('stat-total-bal').innerText = data.totalHouseBalance + " ETB";
+                document.getElementById('stat-players').innerText = data.totalPlayers;
+                document.getElementById('stat-pending-wit').innerText = data.withdrawals.length;
+
+                // Render Deposits
+                const depList = document.getElementById('deposit-list');
+                depList.innerHTML = data.deposits.length ? "" : "<tr><td colspan='5' style='text-align:center;'>No pending deposits</td></tr>";
+                data.deposits.forEach(d => {
+                    depList.innerHTML += `
+                        <tr>
+                            <td><b>${d.playerID}</b></td>
+                            <td><span class="status-badge">${d.method}</span></td>
+                            <td style="color:var(--rasta-green); font-weight:bold;">${d.amount} ETB</td>
+                            <td><code>${d.txnID}</code></td>
+                            <td>
+                                <button class="btn btn-approve" onclick="processAction('approveDeposit', '${d.id}')">APPROVE</button>
+                                <button class="btn btn-reject" onclick="processAction('rejectDeposit', '${d.id}')">REJECT</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                // Render Withdrawals
+                const witList = document.getElementById('withdraw-list');
+                witList.innerHTML = data.withdrawals.length ? "" : "<tr><td colspan='5' style='text-align:center;'>No pending withdrawals</td></tr>";
+                data.withdrawals.forEach(w => {
+                    witList.innerHTML += `
+                        <tr>
+                            <td><b>${w.playerID}</b></td>
+                            <td><span class="status-badge">${w.method}</span></td>
+                            <td style="color:var(--rasta-red); font-weight:bold;">${w.amount} ETB</td>
+                            <td><code>${w.account}</code></td>
+                            <td>
+                                <button class="btn btn-approve" onclick="processAction('approveWithdraw', '${w.id}')">PAID</button>
+                                <button class="btn btn-reject" onclick="processAction('rejectWithdraw', '${w.id}')">REJECT</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+            } catch (err) {
+                console.error("Failed to load admin data");
+            }
+        }
+
+        async function processAction(action, id) {
+            if(!confirm("Confirm this action?")) return;
             
-            document.getElementById('total-profit').innerText = data.profit + " ETB";
-            document.getElementById('player-count').innerText = data.players;
-
-            const table = document.getElementById('deposit-table');
-            table.innerHTML = "";
-            data.pending.forEach(dep => {
-                table.innerHTML += `
-                    <tr>
-                        <td>${dep.playerID}</td>
-                        <td>${dep.amount} ETB</td>
-                        <td>${dep.method}</td>
-                        <td><code>${dep.txnID}</code></td>
-                        <td>
-                            <button class="btn-approve" onclick="action('${dep.id}', 'approve')">Approve</button>
-                            <button class="btn-reject" onclick="action('${dep.id}', 'reject')">Reject</button>
-                        </td>
-                    </tr>
-                `;
-            });
+            const res = await fetch(`${SCRIPT_URL}?action=${action}&id=${id}`);
+            const result = await res.json();
+            
+            if(result.success) {
+                alert("Action successful!");
+                loadData();
+            } else {
+                alert("Error processing request.");
+            }
         }
 
-        async function action(depId, type) {
-            if(!confirm("Are you sure?")) return;
-            await fetch(`${SCRIPT_URL}?action=manageDeposit&id=${depId}&status=${type}`);
-            alert("Success!");
-            loadAdminData();
-        }
-
-        // Auto-refresh every 30 seconds
-        loadAdminData();
-        setInterval(loadAdminData, 30000);
+        // Initial Load
+        window.onload = loadData;
     </script>
 </body>
 </html>
