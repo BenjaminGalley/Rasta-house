@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RASTA CRASH</title>
+    <style>
+        :root { --gold: #FFD100; --green: #008542; --red: #E71D36; }
+        body { background: #000; color: white; font-family: sans-serif; text-align: center; margin: 0; }
+        .header { padding: 15px; background: #111; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; }
+        
+        .game-area { 
+            height: 300px; margin: 20px; background: #0a0a0a; border-radius: 20px; 
+            position: relative; overflow: hidden; border: 1px solid #333;
+        }
+        
+        #multiplier { 
+            font-size: 4rem; font-weight: bold; margin-top: 100px; color: var(--gold);
+            text-shadow: 0 0 20px rgba(255,208,0,0.5);
+        }
+
+        .rocket {
+            width: 60px; height: 60px;
+            background-image: url('asset/asset.nine.jpg');
+            background-size: 240px 240px;
+            background-position: -120px -60px; /* Focuses on the Portal/Rocket icon */
+            position: absolute; bottom: 20px; left: 20px;
+            transition: all 0.1s linear;
+        }
+
+        .controls { padding: 20px; }
+        input { background: #111; border: 1px solid #444; color: white; padding: 15px; width: 100px; border-radius: 10px; font-size: 1.2rem; }
+        
+        .btn { 
+            width: 80%; padding: 20px; margin-top: 15px; border: none; border-radius: 10px; 
+            font-size: 1.5rem; font-weight: bold; cursor: pointer; color: white;
+        }
+        .btn-bet { background: var(--green); }
+        .btn-cash { background: var(--gold); color: black; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <span>RASTA CRASH</span>
+    <span id="balDisplay">0.00 ETB</span>
+</div>
+
+<div class="game-area">
+    <div id="multiplier">1.00x</div>
+    <div class="rocket" id="rocket"></div>
+</div>
+
+<div class="controls">
+    <input type="number" id="betAmt" value="2" min="2">
+    <button class="btn btn-bet" id="betBtn" onclick="startGame()">PLACE BET</button>
+    <button class="btn btn-cash" id="cashBtn" onclick="cashOut()">CASH OUT</button>
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
+    let user = JSON.parse(localStorage.getItem('rasta_user'));
+    let currentMult = 1.00;
+    let crashPoint = 0;
+    let gameInterval;
+    let activeBet = 0;
+
+    document.getElementById('balDisplay').innerText = user.balance.toFixed(2) + " ETB";
+
+    function startGame() {
+        const bet = parseFloat(document.getElementById('betAmt').value);
+        if (bet < 2) return alert("Min bet 2 ETB");
+        if (bet > user.balance) return alert("Insufficient Balance");
+
+        // Deduct bet
+        user.balance -= bet;
+        activeBet = bet;
+        updateUI();
+
+        // UI Changes
+        document.getElementById('betBtn').style.display = 'none';
+        document.getElementById('cashBtn').style.display = 'inline-block';
+        
+        // Generate Crash Point (House Edge Built-in)
+        // 96% RTP Logic
+        crashPoint = Math.random() * 10 + 1;
+        if (Math.random() < 0.04) crashPoint = 1.00; // Instant crash 4% of the time
+
+        currentMult = 1.00;
+        gameInterval = setInterval(() => {
+            currentMult += 0.01;
+            document.getElementById('multiplier').innerText = currentMult.toFixed(2) + "x";
+            
+            // Move Rocket
+            let pos = (currentMult - 1) * 20;
+            document.getElementById('rocket').style.left = (20 + pos) + "px";
+            document.getElementById('rocket').style.bottom = (20 + pos) + "px";
+
+            if (currentMult >= crashPoint) {
+                endGame(true);
+            }
+        }, 100);
+    }
+
+    function cashOut() {
+        let win = activeBet * currentMult;
+        user.balance += win;
+        alert("CASHED OUT! You won " + win.toFixed(2) + " ETB");
+        endGame(false);
+    }
+
+    function endGame(crashed) {
+        clearInterval(gameInterval);
+        if (crashed) {
+            document.getElementById('multiplier').style.color = 'var(--red)';
+            document.getElementById('multiplier').innerText = "CRASHED!";
+        }
+        
+        activeBet = 0;
+        updateUI();
+        syncDB();
+
+        setTimeout(() => {
+            document.getElementById('betBtn').style.display = 'inline-block';
+            document.getElementById('cashBtn').style.display = 'none';
+            document.getElementById('multiplier').style.color = 'var(--gold)';
+            document.getElementById('multiplier').innerText = "1.00x";
+            document.getElementById('rocket').style.left = "20px";
+            document.getElementById('rocket').style.bottom = "20px";
+        }, 2000);
+    }
+
+    function updateUI() {
+        document.getElementById('balDisplay').innerText = user.balance.toFixed(2) + " ETB";
+        localStorage.setItem('rasta_user', JSON.stringify(user));
+    }
+
+    function syncDB() {
+        fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&name=${user.name}&updateBal=${user.balance}`);
+    }
+</script>
+</body>
+</html>
