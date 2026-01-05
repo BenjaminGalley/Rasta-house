@@ -3,66 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RASTA BET | WELCOME</title>
+    <title>RASTA BET | REGISTRATION</title>
     <style>
-        :root { --rasta-green: #008542; --rasta-gold: #FFD100; }
+        :root { --rasta-green: #008542; --rasta-gold: #FFD100; --dark: #050505; }
         body { 
-            background: #000; color: white; font-family: 'Segoe UI', sans-serif; 
+            background: var(--dark); color: white; font-family: sans-serif; 
             margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh;
             background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('asset/asset.bg.jpg');
             background-size: cover; background-position: center;
         }
-        .login-box { 
-            background: rgba(17,17,17,0.95); padding: 40px 20px; border-radius: 25px; 
-            border: 2px solid var(--rasta-gold); width: 85%; max-width: 400px; text-align: center; 
+        .reg-card { 
+            background: rgba(17,17,17,0.95); padding: 40px 25px; border-radius: 20px; 
+            border: 2px solid var(--rasta-gold); width: 90%; max-width: 380px; text-align: center; 
         }
-        .logo { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--rasta-green); margin-bottom: 20px; object-fit: cover; }
-        h1 { color: var(--rasta-gold); font-size: 1.5rem; margin-bottom: 30px; letter-spacing: 2px; }
+        .logo { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--rasta-green); margin-bottom: 20px; }
+        h2 { color: var(--rasta-gold); margin-bottom: 30px; letter-spacing: 1px; }
+        
+        .input-group { text-align: left; margin-bottom: 20px; }
+        label { display: block; font-size: 0.8rem; color: #888; margin-bottom: 5px; margin-left: 5px; }
         input { 
-            width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 12px; 
-            border: 1px solid #333; background: #050505; color: white; box-sizing: border-box; font-size: 1rem;
+            width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #333; 
+            background: #000; color: white; box-sizing: border-box; font-size: 1rem;
         }
-        .btn-enter { 
+        input:focus { border-color: var(--rasta-gold); outline: none; }
+
+        .btn-reg { 
             width: 100%; padding: 16px; border-radius: 12px; border: none; 
-            background: var(--rasta-green); color: white; font-weight: bold; font-size: 1.2rem; cursor: pointer;
+            background: var(--rasta-green); color: white; font-weight: bold; font-size: 1.1rem; cursor: pointer;
+            margin-top: 10px; transition: 0.3s;
         }
-        #status { color: var(--rasta-gold); margin-top: 15px; font-size: 0.9rem; display: none; }
+        .btn-reg:active { transform: scale(0.98); }
+        #msg { margin-top: 15px; font-size: 0.9rem; color: var(--rasta-gold); display: none; }
     </style>
 </head>
 <body>
 
-<div class="login-box">
+<div class="reg-card">
     <img src="asset/asset.ui.jpg" class="logo">
-    <h1>RASTA HOUSE</h1>
-    <input type="text" id="phone" placeholder="Phone Number (09...)" required>
-    <input type="text" id="name" placeholder="Full Name (e.g. Abebe)" required>
-    <button class="btn-enter" onclick="handleLogin()">ENTER CASINO</button>
-    <div id="status">Connecting to Database...</div>
+    <h2>RASTA HOUSE</h2>
+    
+    <div class="input-group">
+        <label>FULL NAME / ሙሉ ስም</label>
+        <input type="text" id="regName" placeholder="Enter your name">
+    </div>
+
+    <div class="input-group">
+        <label>PHONE NUMBER / ስልክ ቁጥር</label>
+        <input type="tel" id="regPhone" placeholder="09... or 07...">
+    </div>
+
+    <button class="btn-reg" id="regBtn" onclick="handleRegister()">CREATE ACCOUNT</button>
+    <div id="msg">Registering... Please wait.</div>
 </div>
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
 
-    async function handleLogin() {
-        const phone = document.getElementById('phone').value;
-        const name = document.getElementById('name').value;
-        const status = document.getElementById('status');
+    async function handleRegister() {
+        const name = document.getElementById('regName').value.trim();
+        const phone = document.getElementById('regPhone').value.trim();
+        const btn = document.getElementById('regBtn');
+        const msg = document.getElementById('msg');
 
-        if(!phone || !name) return alert("Please fill in your details");
+        if(!name || !phone) {
+            alert("Please enter both Name and Phone Number");
+            return;
+        }
 
-        status.style.display = 'block';
+        // Disable button and show message
+        btn.disabled = true;
+        btn.style.opacity = "0.5";
+        msg.style.display = "block";
 
         try {
-            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}&name=${name}`);
-            const user = await res.json();
-            
-            if(user.playerID) {
-                localStorage.setItem('rasta_user', JSON.stringify(user));
-                window.location.href = 'index.html';
+            // Send to Google Sheet
+            const response = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}&name=${name}`);
+            const userData = await response.json();
+
+            if(userData.playerID) {
+                // Save user info locally for the games to use
+                localStorage.setItem('rasta_user', JSON.stringify(userData));
+                msg.innerText = "Success! Redirecting...";
+                
+                // Go to the lobby
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            } else {
+                throw new Error("Registration failed");
             }
-        } catch (err) {
-            alert("Network Error. Please try again.");
-            status.style.display = 'none';
+        } catch (error) {
+            alert("Connection error! Make sure your Google Script is Deployed to 'Anyone'.");
+            btn.disabled = false;
+            btn.style.opacity = "1";
+            msg.style.display = "none";
         }
     }
 </script>
