@@ -3,43 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WALLET | RASTA BET</title>
+    <title>MY WALLET | RASTA BET</title>
     <style>
-        :root { --gold: #FFD100; --green: #008542; }
-        body { background: #000; color: white; font-family: sans-serif; margin: 0; padding: 20px; text-align: center; }
-        .bal-display { background: #111; padding: 30px; border-radius: 15px; border: 2px solid var(--gold); margin-bottom: 20px; }
-        .bal-amt { font-size: 2.5rem; color: var(--gold); font-weight: bold; }
-        .box { background: #111; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: left; border-left: 4px solid var(--green); }
-        input, select { width: 90%; padding: 12px; margin: 10px 0; border-radius: 5px; border: none; }
-        .btn { background: var(--green); color: white; padding: 15px; width: 100%; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .nav-back { color: var(--gold); text-decoration: none; display: block; margin-bottom: 20px; }
+        :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; }
+        body { background: #000; color: white; font-family: sans-serif; margin: 0; padding: 15px; }
+        .card { background: #111; padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333; }
+        .bal-val { font-size: 2.5rem; color: var(--rasta-gold); font-weight: bold; display: block; margin: 10px 0; }
+        
+        .tab-btn { background: #222; color: #888; border: none; padding: 10px 20px; border-radius: 5px; margin-right: 10px; }
+        .tab-btn.active { background: var(--rasta-green); color: white; }
+
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #050505; color: white; box-sizing: border-box; }
+        .btn-action { width: 100%; padding: 15px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 1rem; }
+        
+        .inst { font-size: 0.85rem; color: #ccc; background: #1a1a1a; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
-    <a href="index.html" class="nav-back">⬅ BACK TO LOBBY</a>
-    
-    <div class="bal-display">
-        <small>YOUR BALANCE</small>
-        <div class="bal-amt"><span id="u-bal">0.00</span> <small style="font-size: 1rem;">ETB</small></div>
+
+    <div style="margin-bottom:20px;"><a href="index.html" style="color:var(--rasta-gold); text-decoration:none;">⬅ Return to Games</a></div>
+
+    <div class="card" style="text-align:center; border-color: var(--rasta-gold);">
+        <small>AVAILABLE BALANCE</small>
+        <span class="bal-val"><span id="displayBal">0.00</span> ETB</span>
     </div>
 
-    <div class="box">
-        <h3 style="color:var(--gold); margin-top:0;">DEPOSIT / ገንዘብ አስገባ</h3>
-        <p style="font-size: 0.8rem;">1. Send money to: <b>0911223344 (Name)</b><br>2. Enter details below:</p>
-        <select id="dep-method">
+    <div class="card">
+        <h3 style="color:var(--rasta-green); margin-top:0;">DEPOSIT FUNDS</h3>
+        <div class="inst">
+            1. Transfer money to: <b>0912345678 (Rasta Admin)</b><br>
+            2. Use Telebirr or CBE Birr.<br>
+            3. Enter the Transaction ID/Secret Code below.
+        </div>
+        <select id="dMethod">
             <option value="Telebirr">Telebirr</option>
-            <option value="CBE">CBE</option>
+            <option value="CBE Birr">CBE Birr</option>
         </select>
-        <input type="number" id="dep-amount" placeholder="Amount (ETB)">
-        <input type="text" id="dep-txn" placeholder="Transaction ID / SMS Code">
-        <button class="btn" onclick="submitDeposit()">SUBMIT DEPOSIT</button>
+        <input type="number" id="dAmount" placeholder="Amount (ETB)">
+        <input type="text" id="dTxn" placeholder="Transaction ID (from SMS)">
+        <button class="btn-action" style="background:var(--rasta-green); color:white;" onclick="deposit()">SUBMIT DEPOSIT</button>
     </div>
 
-    <div class="box" style="border-left-color: #E71D36;">
-        <h3 style="color:#E71D36; margin-top:0;">WITHDRAW / ገንዘብ አውጣ</h3>
-        <input type="number" id="wit-amount" placeholder="Amount to Withdraw">
-        <input type="text" id="wit-acc" placeholder="Your Phone/Account Number">
-        <button class="btn" style="background:#E71D36" onclick="submitWithdraw()">REQUEST WITHDRAW</button>
+    <div class="card">
+        <h3 style="color:var(--rasta-red); margin-top:0;">WITHDRAW FUNDS</h3>
+        <input type="number" id="wAmount" placeholder="Amount to Withdraw">
+        <input type="text" id="wAccount" placeholder="Your Phone/Account Number">
+        <button class="btn-action" style="background:var(--rasta-red); color:white;" onclick="withdraw()">REQUEST WITHDRAWAL</button>
     </div>
 
     <script>
@@ -48,34 +57,42 @@
 
         window.onload = () => {
             if(!user) location.href='login.html';
-            document.getElementById('u-bal').innerText = parseFloat(user.balance).toFixed(2);
+            document.getElementById('displayBal').innerText = parseFloat(user.balance).toFixed(2);
         };
 
-        async function submitDeposit() {
+        async function deposit() {
+            const amt = document.getElementById('dAmount').value;
+            const txn = document.getElementById('dTxn').value;
+            if(!amt || !txn) return alert("Fill all fields");
+
             const data = {
                 action: "deposit",
                 playerID: user.playerID,
-                method: document.getElementById('dep-method').value,
-                amount: document.getElementById('dep-amount').value,
-                txnID: document.getElementById('dep-txn').value
+                method: document.getElementById('dMethod').value,
+                amount: amt,
+                txnID: txn
             };
+
             await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) });
-            alert("Deposit submitted! Wait for Admin approval.");
+            alert("Deposit Request Sent! Please wait for Admin to verify.");
             location.reload();
         }
 
-        async function submitWithdraw() {
-            const amt = document.getElementById('wit-amount').value;
-            if(amt > user.balance) return alert("Insufficient Balance");
+        async function withdraw() {
+            const amt = document.getElementById('wAmount').value;
+            const acc = document.getElementById('wAccount').value;
+            if(amt > user.balance) return alert("Insufficient balance!");
+
             const data = {
                 action: "withdraw",
                 playerID: user.playerID,
-                method: "Telebirr",
+                method: "Manual Transfer",
                 amount: amt,
-                account: document.getElementById('wit-acc').value
+                account: acc
             };
-            const res = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) });
-            alert("Withdrawal requested. Balance deducted.");
+
+            await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) });
+            alert("Withdrawal successful. Balance deducted.");
             user.balance -= amt;
             localStorage.setItem('rasta_user', JSON.stringify(user));
             location.reload();
