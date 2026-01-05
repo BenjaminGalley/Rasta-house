@@ -8,71 +8,42 @@
     <style>
         :root { --rasta-green: #008542; --rasta-gold: #FFD100; --dark: #050505; }
         body { background: var(--dark); color: white; font-family: 'Montserrat', sans-serif; margin: 0; padding-bottom: 80px; }
-        
-        /* Header */
         header { background: #111; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--rasta-gold); position: sticky; top: 0; z-index: 100; }
-        .bal-box { background: var(--rasta-green); padding: 8px 15px; border-radius: 20px; font-family: 'Goldman'; border: 1px solid var(--rasta-gold); }
-
-        /* Sidebar */
-        .sidebar { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: #111; z-index: 200; transition: 0.3s; padding: 40px 20px; border-left: 2px solid var(--rasta-gold); box-shadow: -10px 0 20px #000; }
-        .sidebar.active { right: 0; }
-        .sidebar-item { display: block; padding: 15px 0; color: white; text-decoration: none; font-weight: bold; border-bottom: 1px solid #222; }
-        .logout { color: #E71D36; margin-top: 50px; cursor: pointer; font-weight: 800; border: 1px solid #E71D36; padding: 10px; text-align: center; border-radius: 8px; }
-
-        /* Game Grid */
+        .bal-box { background: var(--rasta-green); padding: 8px 15px; border-radius: 20px; font-family: 'Goldman'; border: 1px solid var(--rasta-gold); cursor: pointer; }
         .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px; }
-        .game-card { background: #111; border-radius: 12px; aspect-ratio: 1/1; position: relative; overflow: hidden; border: 1px solid #222; }
-        .game-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
+        .game-card { background: #111; border-radius: 12px; aspect-ratio: 1/1; position: relative; overflow: hidden; border: 1px solid #222; cursor: pointer; }
+        .game-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
         .game-label { position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.8); font-size: 0.6rem; text-align: center; padding: 5px 0; font-weight: bold; color: var(--rasta-gold); }
-
-        /* Bottom Nav */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: #111; display: flex; justify-content: space-around; align-items: center; border-top: 2px solid var(--rasta-gold); z-index: 100; }
         .nav-item { text-align: center; color: #666; text-decoration: none; font-size: 0.65rem; font-weight: bold; }
         .nav-item.active { color: var(--rasta-gold); }
     </style>
 </head>
 <body>
-
 <header>
-    <div style="font-family:'Goldman'; color:var(--rasta-gold);">RASTA</div>
+    <div style="font-family:'Goldman'; color:var(--rasta-gold); font-size: 1.2rem;">RASTA HOUSE</div>
     <div class="bal-box" onclick="location.href='profile.html'"><span id="bal">0.00</span> ETB</div>
-    <div onclick="toggleMenu()" style="font-size:1.5rem; cursor:pointer;">☰</div>
 </header>
-
-<div class="sidebar" id="sidebar">
-    <h3 id="side-name" style="color:var(--rasta-green)">VIP</h3>
-    <small id="side-id" style="color:var(--rasta-gold)">ID: RS-0000</small>
-    <a href="profile.html" class="sidebar-item">Wallet / የገንዘብ ቦርሳ</a>
-    <a href="profile.html" class="sidebar-item">Deposit / ገንዘብ አስገባ</a>
-    <div class="logout" onclick="logout()">LOGOUT / ውጣ</div>
-</div>
-
-<div style="height:150px; background:url('assets/asset.bg.jpg') center; background-size:cover; border-bottom:2px solid var(--rasta-green);"></div>
-
+<div style="height:160px; background:linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4)), url('asset/asset.bg.jpg') center; background-size:cover; border-bottom:2px solid var(--rasta-green);"></div>
 <div class="game-grid">
-    <div class="game-card" onclick="location.href='fast-keno.html'"><img src="https://img.freepik.com/free-vector/realistic-keno-background_23-2148286940.jpg"><div class="game-label">KENO</div></div>
-    <div class="game-card" onclick="location.href='slots.html'"><img src="assets/asset.tiles.jpg"><div class="game-label">SLOTS</div></div>
-    <div class="game-card" onclick="location.href='wheel.html'"><img src="assets/asset.five.jpg"><div class="game-label">WHEEL</div></div>
-    <script>for(let i=0; i<21; i++) document.write('<div class="game-card"><div class="game-label">SOON</div></div>');</script>
+    <div class="game-card" onclick="location.href='fast-keno.html'"><img src="asset/asset.ui.jpg"><div class="game-label">FAST KENO</div></div>
+    <div class="game-card" onclick="location.href='slots.html'"><img src="asset/asset.tiles.jpg"><div class="game-label">JUNGLE SLOTS</div></div>
+    <div class="game-card" onclick="location.href='wheel.html'"><img src="asset/asset.five.jpg"><div class="game-label">RASTA WHEEL</div></div>
+    <div class="game-card"><img src="asset/asset.one.jpg"><div class="game-label">LION KING</div></div>
+    <div class="game-card"><img src="asset/asset.two.jpg"><div class="game-label">FRUIT PARTY</div></div>
+    <div class="game-card"><img src="asset/asset.six.jpg"><div class="game-label">DICE HOUSE</div></div>
 </div>
-
 <div class="bottom-nav">
     <a href="index.html" class="nav-item active">🏠<br>HOME</a>
-    <a href="fast-keno.html" class="nav-item">🎰<br>KENO</a>
     <a href="profile.html" class="nav-item">💰<br>WALLET</a>
-    <a href="profile.html" class="nav-item">📥<br>DEPOSIT</a>
 </div>
-
 <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
     const user = JSON.parse(localStorage.getItem('rasta_user'));
     window.onload = () => {
         if(!user) { location.href='login.html'; return; }
-        document.getElementById('bal').innerText = parseFloat(user.balance).toFixed(2);
-        document.getElementById('side-name').innerText = user.name;
-        document.getElementById('side-id').innerText = "ID: " + user.playerID;
+        document.getElementById('bal').innerText = parseFloat(user.balance || 0).toFixed(2);
     };
-    function toggleMenu() { document.getElementById('sidebar').classList.toggle('active'); }
-    function logout() { localStorage.removeItem('rasta_user'); location.href='login.html'; }
 </script>
 </body>
 </html>
