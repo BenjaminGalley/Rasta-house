@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RASTA LION PREMIUM</title>
+    <style>
+        :root { --gold: #FFD100; --green: #008542; --red: #E71D36; --dark: #0a0a0a; }
+        body { background: #000; color: white; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; text-align: center; margin: 0; overflow-x: hidden; }
+        
+        .header { padding: 15px; background: #111; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; }
+        .bal-box { background: #222; padding: 5px 15px; border-radius: 20px; border: 1px solid var(--gold); font-weight: bold; }
+
+        .slot-container { 
+            margin: 20px auto; width: 320px; background: var(--dark); 
+            padding: 20px; border: 4px solid var(--gold); border-radius: 25px;
+            box-shadow: 0 0 40px rgba(255, 209, 0, 0.2);
+            position: relative;
+        }
+
+        .reels-row { display: flex; justify-content: center; gap: 12px; background: #000; padding: 15px; border-radius: 15px; border: 2px solid #333; overflow: hidden; }
+        
+        /* The "Window" for the symbol */
+        .reel-window { width: 80px; height: 80px; background: #1a1a1a; border-radius: 10px; overflow: hidden; position: relative; box-shadow: inset 0 0 10px #000; }
+        
+        /* The Sprite Sheet Logic */
+        .symbol {
+            width: 80px; height: 80px;
+            background-image: url('asset/asset.nine.jpg');
+            background-size: 320px 320px; /* 4x4 grid of icons */
+            position: absolute; top: 0; left: 0;
+            transition: transform 0.1s cubic-bezier(.45,.05,.55,.95);
+        }
+
+        /* Animation for Spinning */
+        .spin-anim { animation: blurSpin 0.15s infinite linear; }
+        @keyframes blurSpin { 
+            0% { transform: translateY(-100%); filter: blur(2px); } 
+            100% { transform: translateY(100%); filter: blur(5px); } 
+        }
+
+        .controls { margin-top: 10px; padding: 15px; background: #111; border-radius: 20px; display: inline-block; width: 320px; }
+        .bet-input-group { margin-bottom: 15px; }
+        label { font-size: 0.8rem; color: #888; display: block; margin-bottom: 5px; }
+        input { background: #000; border: 1px solid #444; color: var(--gold); padding: 10px; width: 80px; text-align: center; font-size: 1.2rem; border-radius: 10px; font-weight: bold; }
+        
+        .btn-spin { 
+            width: 100%; padding: 18px; background: linear-gradient(to bottom, var(--green), #005a2d); 
+            color: white; border: none; border-radius: 40px; font-weight: bold; font-size: 1.3rem; 
+            cursor: pointer; box-shadow: 0 6px 0 #003a1d; transition: 0.1s;
+        }
+        .btn-spin:active { transform: translateY(4px); box-shadow: 0 2px 0 #003a1d; }
+        .btn-spin:disabled { background: #333; box-shadow: none; color: #666; cursor: not-allowed; }
+        
+        /* Feature Modes */
+        .free-spin-mode { border: 5px solid var(--red) !important; animation: featureGlow 0.8s infinite alternate; }
+        @keyframes featureGlow { from { box-shadow: 0 0 10px var(--red); } to { box-shadow: 0 0 30px var(--red); } }
+        
+        #msg { height: 20px; margin-bottom: 10px; color: var(--gold); font-weight: bold; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div style="text-align:left">
+        <div style="font-size:0.7rem; color:var(--gold)">PREMIUM SLOT</div>
+        <div style="font-weight:bold; letter-spacing:1px;">RASTA LION</div>
+    </div>
+    <div class="bal-box" id="balDisplay">0.00 ETB</div>
+</div>
+
+<div class="slot-container" id="machine">
+    <div id="msg">READY TO SPIN</div>
+    <div class="reels-row">
+        <div class="reel-window"><div class="symbol" id="r1"></div></div>
+        <div class="reel-window"><div class="symbol" id="r2"></div></div>
+        <div class="reel-window"><div class="symbol" id="r3"></div></div>
+    </div>
+</div>
+
+<div class="controls">
+    <div class="bet-input-group">
+        <label>BET AMOUNT (MIN 2 ETB)</label>
+        <input type="number" id="betAmt" value="5" min="2">
+    </div>
+    <button class="btn-spin" onclick="handleSpin()" id="spinBtn">SPIN REELS</button>
+    <div id="fsCount" style="margin-top:10px; color:var(--red); font-weight:bold; display:none;">FREE SPINS: <span id="fsLeft">0</span></div>
+</div>
+
+<script>
+    // Live URL from your project
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
+    
+    let user = JSON.parse(localStorage.getItem('rasta_user')) || { balance: 0, name: "Guest", phone: "000" };
+    let freeSpins = 0;
+
+    // Sprite Mapping (X, Y positions on asset.nine.jpg)
+    const icons = [
+        { name: 'Lion', x: 0, y: 80 }, 
+        { name: 'Crown', x: 240, y: 0 },
+        { name: 'Chest', x: 80, y: 80 },
+        { name: 'Portal', x: 160, y: 80 }, // SCATTER for Free Spins
+        { name: 'Wild', x: 160, y: 160 }
+    ];
+
+    function updateUI() {
+        document.getElementById('balDisplay').innerText = user.balance.toFixed(2) + " ETB";
+        if (freeSpins > 0) {
+            document.getElementById('fsCount').style.display = 'block';
+            document.getElementById('fsLeft').innerText = freeSpins;
+            document.getElementById('machine').classList.add('free-spin-mode');
+        } else {
+            document.getElementById('fsCount').style.display = 'none';
+            document.getElementById('machine').classList.remove('free-spin-mode');
+        }
+    }
+
+    function setSymbol(id, iconIdx) {
+        const el = document.getElementById(id);
+        el.style.backgroundPosition = `-${icons[iconIdx].x}px -${icons[iconIdx].y}px`;
+    }
+
+    // Initialize random symbols
+    setSymbol('r1', 0); setSymbol('r2', 1); setSymbol('r3', 2);
+    updateUI();
+
+    async function handleSpin() {
+        const bet = parseFloat(document.getElementById('betAmt').value);
+        
+        if (freeSpins === 0) {
+            if (bet < 2) { alert("Minimum bet is 2 ETB / ዝቅተኛ መወራረድ 2 ብር ነው"); return; }
+            if (bet > user.balance) { alert("Insufficient Balance / በቂ ሂሳብ የሎትም"); return; }
+            user.balance -= bet;
+            document.getElementById('msg').innerText = "SPINNING...";
+        } else {
+            freeSpins--;
+            document.getElementById('msg').innerText = "FREE SPINNING!";
+        }
+        
+        updateUI();
+        document.getElementById('spinBtn').disabled = true;
+
+        // Start Spin Animation
+        document.querySelectorAll('.symbol').forEach(s => s.classList.add('spin-anim'));
+
+        // Timing the result
+        setTimeout(() => {
+            stopReels(bet);
+        }, 1200);
+    }
+
+    function stopReels(bet) {
+        document.querySelectorAll('.symbol').forEach(s => s.classList.remove('spin-anim'));
+        
+        // Random results based on icon list length
+        const res = [
+            Math.floor(Math.random() * icons.length),
+            Math.floor(Math.random() * icons.length),
+            Math.floor(Math.random() * icons.length)
+        ];
+
+        setSymbol('r1', res[0]);
+        setSymbol('r2', res[1]);
+        setSymbol('r3', res[2]);
+
+        let win = 0;
+        let scatterCount = res.filter(i => icons[i].name === 'Portal').length;
+
+        // Check for Free Spin Scatters (2 or more Portals)
+        if (scatterCount >= 2) {
+            freeSpins += 5;
+            document.getElementById('msg').innerText = "FEATURE! +5 FREE SPINS";
+        }
+
+        // Win Logic (3 of a kind or 2 of a kind)
+        if (res[0] === res[1] && res[1] === res[2]) {
+            win = bet * 15; // 3 of a kind pays 15x
+            document.getElementById('msg').innerText = "MEGA WIN: " + win + " ETB!";
+        } else if (res[0] === res[1] || res[1] === res[2] || res[0] === res[2]) {
+            win = bet * 1.5; // 2 of a kind pays 1.5x
+            document.getElementById('msg').innerText = "NICE WIN: " + win + " ETB";
+        } else if (win === 0 && scatterCount < 2) {
+            document.getElementById('msg').innerText = "TRY AGAIN";
+        }
+
+        user.balance += win;
+        updateUI();
+        
+        // Reactivate button
+        document.getElementById('spinBtn').disabled = false;
+        
+        // Save to Google Sheet
+        localStorage.setItem('rasta_user', JSON.stringify(user));
+        syncWithDatabase();
+    }
+
+    function syncWithDatabase() {
+        fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&name=${user.name}&updateBal=${user.balance}`)
+        .catch(err => console.log("Sync delay..."));
+    }
+</script>
+
+</body>
+</html>
