@@ -2,142 +2,68 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JUNGLE SLOTS | RASTA BET</title>
-    <link href="https://fonts.googleapis.com/css2?family=Goldman&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JUNGLE SLOTS</title>
     <style>
-        :root { --gold: #FFD100; --green: #008542; --red: #E71D36; }
-        body { background: #000; color: white; font-family: 'Montserrat', sans-serif; margin: 0; text-align: center; overflow: hidden; }
-        
-        /* Using your asset.bg.jpg for the background */
-        .game-container { 
-            height: 100vh; background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('asset/asset.bg.jpg'); 
+        body { background: #000; color: white; font-family: sans-serif; text-align: center; margin: 0; }
+        /* Background uses your asset.bg.jpg */
+        .game-area { 
+            height: 100vh; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('asset/asset.bg.jpg'); 
             background-size: cover; display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-
-        .slot-machine { 
-            background: rgba(20,20,20,0.9); border: 4px solid var(--gold); border-radius: 20px;
-            padding: 15px; display: flex; gap: 10px; box-shadow: 0 0 30px var(--gold);
-        }
-
-        .reel { 
-            width: 80px; height: 240px; background: #fff; border-radius: 10px; 
-            overflow: hidden; position: relative; border: 2px solid #333;
-        }
-
-        /* The symbols move inside this container */
-        .symbol-strip { position: absolute; top: -480px; width: 100%; transition: top 3s cubic-bezier(0.45, 0.05, 0.55, 0.95); }
-
-        .symbol { 
-            width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;
-            border-bottom: 1px solid #eee; background-size: cover; background-position: center;
-        }
-
-        .controls { margin-top: 30px; }
-        .bet-info { font-family: 'Goldman'; color: var(--gold); font-size: 1.2rem; margin-bottom: 10px; }
-        
-        .spin-btn { 
-            background: var(--green); color: white; border: 2px solid var(--gold);
-            padding: 15px 50px; font-size: 1.5rem; font-family: 'Goldman'; border-radius: 50px;
-            cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-        }
-        .spin-btn:disabled { background: #333; opacity: 0.5; }
-
-        .nav-back { position: absolute; top: 20px; left: 20px; color: var(--gold); text-decoration: none; font-weight: bold; }
+        .reels { display: flex; gap: 10px; background: rgba(0,0,0,0.8); padding: 20px; border: 3px solid #FFD100; border-radius: 15px; }
+        .reel { width: 80px; height: 120px; background: white; border-radius: 5px; overflow: hidden; position: relative; }
+        /* Reel images use your asset.tiles.jpg */
+        .symbol { width: 80px; height: 120px; background: url('asset/asset.tiles.jpg'); background-size: cover; }
+        .spin-btn { background: #008542; color: white; padding: 20px 60px; font-size: 1.5rem; border: none; border-radius: 50px; margin-top: 20px; font-weight: bold; cursor: pointer; border: 2px solid #FFD100; }
     </style>
 </head>
 <body>
-
-<div class="game-container">
-    <a href="index.html" class="nav-back">⬅ BACK</a>
-    <h1 style="font-family: 'Goldman'; color: var(--gold); margin-bottom: 5px;">JUNGLE SLOTS</h1>
-    <p style="margin-top:0; font-size: 0.8rem; color: var(--green);">MIN BET: 2 ETB</p>
-
-    <div class="slot-machine">
-        <div class="reel"><div id="reel1" class="symbol-strip"></div></div>
-        <div class="reel"><div id="reel2" class="symbol-strip"></div></div>
-        <div class="reel"><div id="reel3" class="symbol-strip"></div></div>
+    <div class="game-area">
+        <h1 style="color:#FFD100; margin-bottom: 10px;">JUNGLE SLOTS</h1>
+        <div class="reels">
+            <div class="reel"><div id="r1" class="symbol"></div></div>
+            <div class="reel"><div id="r2" class="symbol"></div></div>
+            <div class="reel"><div id="r3" class="symbol"></div></div>
+        </div>
+        <div style="margin-top:20px; font-size: 1.2rem;">BALANCE: <span id="s-bal">0.00</span> ETB</div>
+        <button class="spin-btn" onclick="spin()">SPIN (5 ETB)</button>
+        <a href="index.html" style="color:#FFD100; display:block; margin-top: 20px; text-decoration: none;">BACK</a>
     </div>
 
-    <div class="controls">
-        <div class="bet-info">BALANCE: <span id="user-bal">0.00</span> ETB</div>
-        <button id="spin-btn" class="spin-btn" onclick="spin()">SPIN / አሽከርክር</button>
-    </div>
-</div>
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
+        let user = JSON.parse(localStorage.getItem('rasta_user'));
 
-<script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDMA1puOQXKQXEUO0I2O3125Gp0fUwBlIzVFkc3-9mSmA74ss5YkPNMHfnw6GKP3-llw/exec";
-    let user = JSON.parse(localStorage.getItem('rasta_user') || '{}');
-    const symbols = ['7️⃣', '🍒', '🍋', '🔔', '💎', '🍉']; // Icons used if image fails
-    
-    // Using your asset.tiles.jpg for visual symbols
-    const tileImage = 'asset/asset.tiles.jpg';
-
-    function initReels() {
-        [1,2,3].forEach(id => {
-            const strip = document.getElementById(`reel${id}`);
-            let html = '';
-            // Generate a long strip for spinning effect
-            for(let i=0; i<20; i++) {
-                const randomIcon = symbols[Math.floor(Math.random() * symbols.length)];
-                html += `<div class="symbol" style="background-image: url('${tileImage}'); color:transparent;">${randomIcon}</div>`;
-            }
-            strip.innerHTML = html;
-        });
-    }
-
-    async function spin() {
-        if(user.balance < 2) return alert("Insufficient Balance!");
-        
-        const btn = document.getElementById('spin-btn');
-        btn.disabled = true;
-
-        // Logic: 2 ETB cost
-        user.balance -= 2;
-        updateUI();
-
-        // Spin Animation
-        [1,2,3].forEach(id => {
-            const strip = document.getElementById(`reel${id}`);
-            const randomStop = Math.floor(Math.random() * 10) * 80;
-            strip.style.transition = 'none';
-            strip.style.top = '0px';
-            setTimeout(() => {
-                strip.style.transition = 'top 3s cubic-bezier(0.45, 0.05, 0.55, 0.95)';
-                strip.style.top = `-${480 + randomStop}px`;
-            }, 50);
-        });
-
-        // Determine result after 3 seconds
-        setTimeout(async () => {
-            btn.disabled = false;
-            const win = Math.random() > 0.8; // 20% win chance for demo
-            if(win) {
-                const prize = 10;
-                user.balance += prize;
-                alert("WINNER! You won " + prize + " ETB");
-            }
+        function spin() {
+            if(user.balance < 5) return alert("No money!");
+            user.balance -= 5;
+            document.getElementById('s-bal').innerText = user.balance.toFixed(2);
             
-            // Sync with Google Sheet
-            await fetch(SCRIPT_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "updateBalance", playerID: user.playerID, balance: user.balance })
-            });
-            updateUI();
-        }, 3100);
-    }
+            // Spinning Animation Logic
+            const r1 = document.getElementById('r1');
+            r1.style.opacity = "0.5";
+            setTimeout(() => {
+                r1.style.opacity = "1";
+                const win = Math.random() > 0.9;
+                if(win) {
+                    user.balance += 50;
+                    alert("BIG WIN! +50 ETB");
+                }
+                updateServer();
+            }, 1000);
+        }
 
-    function updateUI() {
-        document.getElementById('user-bal').innerText = parseFloat(user.balance).toFixed(2);
-        localStorage.setItem('rasta_user', JSON.stringify(user));
-    }
+        async function updateServer() {
+            localStorage.setItem('rasta_user', JSON.stringify(user));
+            document.getElementById('s-bal').innerText = user.balance.toFixed(2);
+            // This would normally sync to the sheet in a real game
+        }
 
-    window.onload = () => {
-        if(!user.playerID) location.href = 'login.html';
-        updateUI();
-        initReels();
-    };
-</script>
-
+        window.onload = () => { 
+            if(!user) location.href='login.html';
+            document.getElementById('s-bal').innerText = parseFloat(user.balance).toFixed(2);
+        };
+    </script>
 </body>
 </html>
