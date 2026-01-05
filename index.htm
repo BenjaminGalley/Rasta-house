@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RASTA BET | Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Goldman:wght@400;700&family=Montserrat:wght@300;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; --dark-bg: #050505; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+        body { background: var(--dark-bg); color: white; height: 100vh; overflow: hidden; }
+
+        /* Stable Upper Half */
+        .header {
+            height: 40vh; width: 100%; position: fixed; top: 0; z-index: 100;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9), var(--dark-bg)), url('assets/asset.bg.jpg') center/cover;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border-bottom: 2px solid var(--rasta-gold);
+        }
+        .header h1 { font-family: 'Goldman'; font-size: 2.5rem; color: var(--rasta-gold); text-shadow: 0 0 15px var(--rasta-red); }
+
+        /* Scrolling Lower Half */
+        .game-container {
+            margin-top: 40vh; height: 60vh; overflow-y: scroll; padding: 15px;
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 100px;
+        }
+        .game-card {
+            background: #111; border-radius: 10px; border: 1px solid #333; overflow: hidden;
+            transition: 0.3s; position: relative;
+        }
+        .game-card:active { transform: scale(0.95); border-color: var(--rasta-green); }
+        .game-thumb { height: 100px; background: url('assets/asset.tiles.jpg') center/cover; filter: brightness(0.7); }
+        .game-label { padding: 8px; font-size: 0.75rem; text-align: center; font-weight: 800; color: #ccc; }
+        .live-tag { position: absolute; top: 5px; right: 5px; background: var(--rasta-red); font-size: 0.6rem; padding: 2px 5px; border-radius: 3px; }
+
+        /* Navigation */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; height: 70px; background: #000; border-top: 2px solid var(--rasta-gold); display: flex; justify-content: space-around; align-items: center; z-index: 200; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; color: #888; }
+        .nav-item.active { color: var(--rasta-gold); }
+
+        /* Side Menu */
+        .side-menu { position: fixed; left: -100%; top: 0; width: 80%; height: 100%; background: #0a0a0a; z-index: 300; transition: 0.4s; border-right: 2px solid var(--rasta-green); padding: 40px 20px; }
+        .side-menu.open { left: 0; }
+        .menu-link { display: block; padding: 15px; color: white; border-bottom: 1px solid #222; text-decoration: none; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>RASTA BET</h1>
+    <p id="bal-display" style="color: var(--rasta-green); font-weight: 800; margin-top: 10px;">BALANCE: 0.00 ETB</p>
+    <div style="margin-top: 15px;">
+        <button onclick="toggleMenu()" style="padding: 8px 20px; background: var(--rasta-red); border: none; color: white; font-weight: bold; border-radius: 5px;">MENU</button>
+    </div>
+</div>
+
+<div class="game-container" id="gameGrid">
+    </div>
+
+<nav class="nav-bar">
+    <div class="nav-item active"><span>🏠</span><span>HOME</span></div>
+    <div class="nav-item" onclick="location.href='fast-keno.html'"><span>🎱</span><span>KENO</span></div>
+    <div class="nav-item"><span>💰</span><span>DEPOSIT</span></div>
+    <div class="nav-item"><span>👤</span><span>PROFILE</span></div>
+</nav>
+
+<div class="side-menu" id="menu">
+    <h2 style="color: var(--rasta-gold); margin-bottom: 20px;">RASTA HOUSE</h2>
+    <a href="#" class="menu-link">My Account</a>
+    <a href="#" class="menu-link">Deposit History</a>
+    <a href="#" class="menu-link">Withdraw Funds</a>
+    <a href="#" class="menu-link">Promotions</a>
+    <a href="#" class="menu-link" style="color: var(--rasta-red);" onclick="toggleMenu()">Close Menu</a>
+</div>
+
+<script>
+    const games = [
+        "Fast Keno", "Jungle Reels", "Lion Pride Slots", "Zebra Dash", "Golden Safari",
+        "Rasta Wheel", "Fruit Blaster", "Diamond Mine", "Buffalo Run", "Mega Moolah",
+        "Treasures of Nile", "King Kong Cash", "Magic Monkey", "Temple Run Slots", "Fire 777",
+        "Lucky Emeralds", "Ancient Gold", "Pirate Booty", "Ocean Pearl", "Wild Wolf",
+        "Solar Flare", "Thunder God", "Rasta Dice", "Instant Win"
+    ];
+
+    const grid = document.getElementById('gameGrid');
+    games.forEach((game, index) => {
+        const url = game === "Fast Keno" ? "fast-keno.html" : "#";
+        grid.innerHTML += `
+            <div class="game-card" onclick="location.href='${url}'">
+                ${index < 3 ? '<div class="live-tag">HOT</div>' : ''}
+                <div class="game-thumb"></div>
+                <div class="game-label">${game.toUpperCase()}</div>
+            </div>
+        `;
+    });
+
+    function toggleMenu() { document.getElementById('menu').classList.toggle('open'); }
+</script>
+</body>
+</html>
