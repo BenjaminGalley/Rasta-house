@@ -61,7 +61,7 @@
 
         .balance-label { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
         .balance-amount { font-size: 2.5rem; font-weight: bold; color: var(--rasta-green); margin: 5px 0; }
-        .refresh-link { font-size: 0.75rem; color: var(--rasta-gold); text-decoration: underline; cursor: pointer; padding: 5px; }
+        .refresh-status { font-size: 0.7rem; color: #666; margin-top: 5px; }
 
         /* Form Styling */
         .container { width: 90%; max-width: 400px; padding-bottom: 100px; }
@@ -151,7 +151,7 @@
     <div class="balance-card">
         <div class="balance-label">Verified Balance / የተረጋገጠ ሂሳብ</div>
         <div class="balance-amount"><span id="userBal">0.00</span> <small style="font-size:1rem">ETB</small></div>
-        <div class="refresh-link" onclick="location.href='sync-wallet.html'">🔄 Sync with Admin / አድስ</div>
+        <div class="refresh-status" id="syncStatus">Connected to Sheet / ተገናኝቷል</div>
     </div>
 
     <div class="container">
@@ -184,7 +184,7 @@
                 <label>SENDER PHONE NUMBER / የላኪው ስልክ ቁጥር</label>
                 <input type="text" id="senderPhone" placeholder="09...">
 
-                <button class="btn-main btn-deposit" onclick="handleTransaction('deposit')">SUBMIT DEPOSIT / ገቢ አድርግ</button>
+                <button class="btn-main btn-deposit" id="btnDep" onclick="handleTransaction('deposit')">SUBMIT DEPOSIT / ገቢ አድርግ</button>
             </div>
         </div>
 
@@ -209,7 +209,7 @@
                 <label>RECEIVER PHONE / የተቀባይ ስልክ</label>
                 <input type="text" id="receiverPhone" placeholder="09...">
 
-                <button class="btn-main btn-withdraw" onclick="handleTransaction('withdraw')">INSTANT WITHDRAW / ወጪ አድርግ</button>
+                <button class="btn-main btn-withdraw" id="btnWit" onclick="handleTransaction('withdraw')">INSTANT WITHDRAW / ወጪ አድርግ</button>
             </div>
         </div>
 
@@ -224,16 +224,28 @@
 
     if(!user) { location.href = 'index.html'; }
 
-    // Display initial data
+    // Display local data first
     document.getElementById('userBal').innerText = parseFloat(user.balance || 0).toFixed(2);
     document.getElementById('displayUserName').innerText = user.name;
     document.getElementById('displayUserPhone').innerText = user.phone;
     document.getElementById('avatarLetter').innerText = user.name.charAt(0).toUpperCase();
 
-    // UPDATED: Now points to the sync page to check for approved deposits in the sheet
-    async function fetchOfficialBalance() {
-        location.href = 'sync-wallet.html';
+    // AUTO-SYNC: Grab the real balance from the sheet immediately
+    async function syncNow() {
+        try {
+            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&t=${Date.now()}`);
+            const data = await res.json();
+            if(data && data.balance !== undefined) {
+                user.balance = data.balance;
+                localStorage.setItem('rasta_user', JSON.stringify(user));
+                document.getElementById('userBal').innerText = parseFloat(user.balance).toFixed(2);
+                document.getElementById('syncStatus').innerText = "Last synced: Just now";
+            }
+        } catch(e) { 
+            document.getElementById('syncStatus').innerText = "Offline Mode";
+        }
     }
+    syncNow();
 
     function toggleView(view) {
         document.getElementById('depView').style.display = view === 'deposit' ? 'block' : 'none';
@@ -245,35 +257,39 @@
     async function handleTransaction(type) {
         const amtInput = document.getElementById(type === 'deposit' ? 'depAmount' : 'witAmount');
         const amt = parseFloat(amtInput.value);
-        const name = document.getElementById(type === 'deposit' ? 'senderName' : 'receiverName').value;
-        const phone = document.getElementById(type === 'deposit' ? 'senderPhone' : 'receiverPhone').value;
+        const nameInput = document.getElementById(type === 'deposit' ? 'senderName' : 'receiverName');
+        const phoneInput = document.getElementById(type === 'deposit' ? 'senderPhone' : 'receiverPhone');
         const method = document.getElementById(type === 'deposit' ? 'depMethod' : 'witMethod').value;
 
-        if(isNaN(amt) || amt < 100 || amt > 10000) return alert("Amount must be between 100 - 10,000 ETB.");
-        if(!name || phone.length < 10) return alert("Please fill in name and phone.");
+        if(isNaN(amt) || amt < 100) return alert("Minimum amount is 100 ETB.");
+        if(!nameInput.value || phoneInput.value.length < 10) return alert("Please fill in name and phone.");
         
-        // Instant check for withdrawal
         if(type === 'withdraw' && amt > user.balance) {
             return alert("Insufficient balance!");
         }
 
-        const btn = event.target;
-        btn.innerText = "PROCESSING...";
+        const btn = document.getElementById(type === 'deposit' ? 'btnDep' : 'btnWit');
+        const originalText = btn.innerText;
+        btn.innerText = "SENDING TO ADMIN...";
         btn.disabled = true;
 
-        // INSTANT WITHDRAWAL LOGIC: Decrease locally right now
-        if(type === 'withdraw') {
-            user.balance = parseFloat(user.balance) - amt;
-            localStorage.setItem('rasta_user', JSON.stringify(user));
-            document.getElementById('userBal').innerText = user.balance.toFixed(2);
-        }
+        // URL Build
+        const finalUrl = `${SCRIPT_URL}?action=${type}&phone=${user.phone}&amount=${amt}&method=${method}&senderName=${encodeURIComponent(nameInput.value)}&senderPhone=${phoneInput.value}`;
 
         try {
-            await fetch(`${SCRIPT_URL}?action=${type}&phone=${user.phone}&amount=${amt}&method=${method}&senderName=${encodeURIComponent(name)}&senderPhone=${phone}`);
-            alert(type.toUpperCase() + " REQUEST SUBMITTED!");
+            // Using 'no-cors' mode is the only way to send data to Google Script without it failing/hanging
+            await fetch(finalUrl, { mode: 'no-cors' });
+            
+            // If withdrawal, update local balance immediately for better UI
+            if(type === 'withdraw') {
+                user.balance = parseFloat(user.balance) - amt;
+                localStorage.setItem('rasta_user', JSON.stringify(user));
+            }
+
+            alert("SUCCESS! Request sent to Admin.");
             location.href = 'index.html';
         } catch (err) {
-            alert("Sent! Admin will verify your request.");
+            alert("Sent! Admin will verify soon.");
             location.href = 'index.html';
         }
     }
