@@ -151,7 +151,7 @@
     <div class="balance-card">
         <div class="balance-label">Verified Balance / የተረጋገጠ ሂሳብ</div>
         <div class="balance-amount"><span id="userBal">0.00</span> <small style="font-size:1rem">ETB</small></div>
-        <div class="refresh-link" onclick="fetchOfficialBalance()">🔄 Sync with Admin / አድስ</div>
+        <div class="refresh-link" onclick="location.href='sync-wallet.html'">🔄 Sync with Admin / አድስ</div>
     </div>
 
     <div class="container">
@@ -230,20 +230,9 @@
     document.getElementById('displayUserPhone').innerText = user.phone;
     document.getElementById('avatarLetter').innerText = user.name.charAt(0).toUpperCase();
 
-    // Fetch official balance from Admin Sheet (Deposits need approval)
+    // UPDATED: Now points to the sync page to check for approved deposits in the sheet
     async function fetchOfficialBalance() {
-        const refreshBtn = document.querySelector('.refresh-link');
-        refreshBtn.innerText = "Syncing...";
-        try {
-            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&t=${new Date().getTime()}`);
-            const data = await res.json();
-            if(data && data.balance !== undefined) {
-                user.balance = data.balance;
-                localStorage.setItem('rasta_user', JSON.stringify(user));
-                document.getElementById('userBal').innerText = parseFloat(user.balance).toFixed(2);
-            }
-        } catch(e) { console.error("Sync error"); }
-        finally { refreshBtn.innerText = "🔄 Sync with Admin / አድስ"; }
+        location.href = 'sync-wallet.html';
     }
 
     function toggleView(view) {
@@ -284,7 +273,6 @@
             alert(type.toUpperCase() + " REQUEST SUBMITTED!");
             location.href = 'index.html';
         } catch (err) {
-            // Treat as sent
             alert("Sent! Admin will verify your request.");
             location.href = 'index.html';
         }
@@ -296,9 +284,6 @@
             location.href = 'index.html';
         }
     }
-
-    // Run sync on load to check for approved deposits
-    window.onload = fetchOfficialBalance;
 </script>
 </body>
 </html>
