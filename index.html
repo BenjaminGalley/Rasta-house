@@ -85,11 +85,7 @@
             padding: 8px 0; text-align: center; color: var(--rasta-gold); font-size: 0.75rem; font-weight: bold;
             border-top: 1px solid var(--rasta-green);
         }
-        .badge {
-            position: absolute; top: 10px; right: 10px; background: var(--rasta-red);
-            color: white; font-size: 0.6rem; padding: 3px 8px; border-radius: 5px; font-weight: bold;
-            z-index: 5; box-shadow: 0 0 5px #000;
-        }
+
         .bottom-nav { 
             position: fixed; bottom: 0; width: 100%; height: 65px; background: #111; 
             display: flex; justify-content: space-around; align-items: center; border-top: 2px solid var(--rasta-gold);
@@ -130,7 +126,7 @@
     <header>
         <button class="menu-toggle" onclick="toggleMenu()">☰</button>
         <div class="logo-text">RASTA BET</div>
-        <div class="balance-pill" onclick="location.href='profile.html'"><span id="userBal">0.00</span> ETB</div>
+        <div class="balance-pill" onclick="location.href='profile.html'"><span id="userBal">...</span> ETB</div>
     </header>
 
     <div class="banner">
@@ -140,12 +136,10 @@
 
     <div class="game-grid">
         <div class="game-card" onclick="location.href='safari-simba.html'">
-            <div class="badge">NEW</div>
             <img src="asset/safari.jpeg">
             <div class="game-title">SAFARI SIMBA</div>
         </div>
         <div class="game-card" onclick="location.href='multi-hot-5.html'">
-            <div class="badge" style="background:var(--rasta-green)">HOT</div>
             <img src="asset/multi logo2.jpeg">
             <div class="game-title">MULTI HOT 5</div>
         </div>
@@ -158,26 +152,12 @@
             <div class="game-title">RASTA REVELATION</div>
         </div>
         <div class="game-card" onclick="location.href='premium-slots.html'">
-            <div class="badge" style="background:var(--rasta-green)">4K</div>
             <img src="asset/asset.nine.jpg">
             <div class="game-title">LION SLOTS</div>
         </div>
         <div class="game-card" onclick="location.href='crash.html'">
-            <div class="badge" style="background:var(--rasta-gold); color:black;">HOT</div>
             <img src="asset/asset.bg.jpg">
             <div class="game-title">RASTA CRASH</div>
-        </div>
-        <div class="game-card" onclick="location.href='scratch.html'">
-            <img src="asset/asset.tiles.jpg">
-            <div class="game-title">SCRATCH GOLD</div>
-        </div>
-        <div class="game-card" onclick="location.href='fast-keno.html'">
-            <img src="asset/asset.ui.jpg">
-            <div class="game-title">FAST KENO</div>
-        </div>
-        <div class="game-card" onclick="location.href='wheel.html'">
-            <img src="asset/asset.five.jpg">
-            <div class="game-title">RASTA WHEEL</div>
         </div>
     </div>
 
@@ -204,18 +184,19 @@
         }
     }
 
-    // THIS FIXES THE BALANCE: It ignores the old phone memory and asks the Sheet for the real number
-    async function syncOfficialBalance(user) {
+    // THE SYNC ENGINE: This pulls the numbers directly from Row 5, 29, etc.
+    async function forceSyncBalance(user) {
         try {
-            // Added "&t=" + Date.now() to stop Google from showing old cached data
+            // Adding a timestamp (Date.now()) forces Google to show NEW data, not old memory
             const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&t=${Date.now()}`);
             const data = await res.json();
+            
             if(data && data.balance !== undefined) {
                 user.balance = data.balance;
                 localStorage.setItem('rasta_user', JSON.stringify(user));
                 document.getElementById('userBal').innerText = parseFloat(user.balance).toFixed(2);
             }
-        } catch(e) { console.log("Lobby sync failed."); }
+        } catch(e) { console.error("Sync error"); }
     }
 
     window.onload = () => {
@@ -223,27 +204,19 @@
         
         if(!userData) { 
             document.getElementById('visitor-gate').style.display = 'flex';
-            document.getElementById('lobby-view').style.display = 'none';
         } else {
-            document.getElementById('visitor-gate').style.display = 'none';
             document.getElementById('lobby-view').style.display = 'block';
+            const user = JSON.parse(userData);
             
-            try {
-                const user = JSON.parse(userData);
-                // Set whatever is in the phone first
-                document.getElementById('userBal').innerText = parseFloat(user.balance || 0).toFixed(2);
-                document.getElementById('welcomeUser').innerText = "One Love, " + user.name;
-                document.getElementById('sideUserPhone').innerText = user.phone;
-                
-                // Immediately check the sheet for the real 2400 ETB
-                syncOfficialBalance(user);
-            } catch (e) {
-                localStorage.removeItem('rasta_user');
-                location.reload();
-            }
+            // Show whatever is in phone first
+            document.getElementById('userBal').innerText = parseFloat(user.balance || 0).toFixed(2);
+            document.getElementById('welcomeUser').innerText = "One Love, " + user.name;
+            document.getElementById('sideUserPhone').innerText = user.phone;
+            
+            // CRITICAL: Reach out to the Google Sheet immediately to update the balance
+            forceSyncBalance(user);
         }
     };
 </script>
-
 </body>
 </html>
