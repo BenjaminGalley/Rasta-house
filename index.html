@@ -37,7 +37,6 @@
             background: #111; padding: 15px; display: flex; justify-content: space-between; 
             align-items: center; border-bottom: 2px solid var(--rasta-gold); position: sticky; top: 0; z-index: 1000;
         }
-        /* New Menu Button */
         .menu-toggle { background: none; border: none; color: var(--rasta-gold); font-size: 1.5rem; cursor: pointer; padding: 0 5px; }
         .logo-text { font-weight: bold; color: var(--rasta-gold); font-size: 1.2rem; letter-spacing: 1px; }
         .balance-pill { 
@@ -176,6 +175,8 @@
 </div>
 
 <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
+
     function toggleMenu() {
         const sidebar = document.getElementById('mainSidebar');
         const overlay = document.getElementById('menuOverlay');
@@ -188,6 +189,20 @@
             localStorage.removeItem('rasta_user');
             window.location.reload();
         }
+    }
+
+    // NEW: Sync balance from server
+    async function syncBalance(phone) {
+        try {
+            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}`);
+            const data = await res.json();
+            if(data && data.balance !== undefined) {
+                const userData = JSON.parse(localStorage.getItem('rasta_user'));
+                userData.balance = data.balance;
+                localStorage.setItem('rasta_user', JSON.stringify(userData));
+                document.getElementById('userBal').innerText = parseFloat(data.balance).toFixed(2);
+            }
+        } catch (e) { console.log("Balance sync failed"); }
     }
 
     window.onload = () => {
@@ -205,6 +220,9 @@
                 document.getElementById('userBal').innerText = parseFloat(user.balance || 0).toFixed(2);
                 document.getElementById('welcomeUser').innerText = "One Love, " + user.name;
                 document.getElementById('sideUserPhone').innerText = user.phone;
+                
+                // Fetch latest approved balance from Sheet
+                syncBalance(user.phone);
             } catch (e) {
                 localStorage.removeItem('rasta_user');
                 location.reload();
