@@ -11,29 +11,43 @@
 <body>
     <div class="loader"></div>
     <h3>Checking Ledger... / ሂሳብ በመፈተሽ ላይ...</h3>
+
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
+        // UPDATED SCRIPT URL TO MATCH SYSTEM
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0kOovoQjv6IVSX2vbj7gba7-CtPXer7LFiC9738B8LYHmMc0O3Pzg5IL9U6MkvtKc/exec";
         
         async function sync() {
             let user = JSON.parse(localStorage.getItem('rasta_user'));
-            if(!user) { window.location.href = 'index.html'; return; }
+            
+            // If no user is logged in, send them back to start
+            if(!user) { 
+                window.location.href = 'index.html'; 
+                return; 
+            }
 
             try {
-                // 1. Ask the script for the latest balance
-                const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}`);
+                // 1. Ask the script for the latest balance using cache buster (t=Date.now)
+                const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&t=${Date.now()}`);
                 const data = await res.json();
                 
                 if(data && data.balance !== undefined) {
                     // 2. Update local storage with the balance from the sheet
                     user.balance = data.balance;
+                    user.name = data.name || user.name; // Keep name updated too
                     localStorage.setItem('rasta_user', JSON.stringify(user));
-                    alert("Wallet Updated! / ሂሳብዎ ተባርኳል!");
+                    
+                    console.log("Sync complete. New balance:", data.balance);
                 }
             } catch (e) {
-                alert("Connection Busy. Try again.");
+                console.error("Sync Error:", e);
+                // We don't alert here to avoid annoying the user if the network is just slightly slow
             }
+            
+            // 3. Move to profile regardless so the user isn't stuck on a loader
             window.location.href = 'profile.html';
         }
+
+        // Run sync when page loads
         window.onload = sync;
     </script>
 </body>
