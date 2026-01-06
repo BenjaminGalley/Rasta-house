@@ -30,7 +30,7 @@
         .btn-login { background: var(--rasta-green); color: white; box-shadow: 0 4px 0 #004d26; }
         .btn-reg { border: 2px solid var(--rasta-gold); color: var(--rasta-gold); }
 
-        /* --- LOBBY SECTION (YOUR ORIGINAL STYLING) --- */
+        /* --- LOBBY SECTION --- */
         #lobby-view { display: none; } /* Controlled by Script */
         
         header { 
@@ -159,9 +159,15 @@
             document.getElementById('visitor-gate').style.display = 'none';
             document.getElementById('lobby-view').style.display = 'block';
             
-            const user = JSON.parse(userData);
-            document.getElementById('userBal').innerText = parseFloat(user.balance).toFixed(2);
-            document.getElementById('welcomeUser').innerText = "One Love, " + user.name;
+            try {
+                const user = JSON.parse(userData);
+                document.getElementById('userBal').innerText = parseFloat(user.balance || 0).toFixed(2);
+                document.getElementById('welcomeUser').innerText = "One Love, " + user.name;
+            } catch (e) {
+                console.error("Session error, clearing local storage.");
+                localStorage.removeItem('rasta_user');
+                location.reload();
+            }
         }
     };
 </script>
