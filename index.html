@@ -8,7 +8,7 @@
         :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; --dark-bg: #0a0a0a; }
         body { background: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; overflow-x: hidden; }
         
-        /* --- VISITOR SECTION (FRONT GATE) --- */
+        /* --- VISITOR SECTION --- */
         #visitor-gate {
             height: 100vh;
             display: none; 
@@ -45,7 +45,7 @@
             box-shadow: 0 0 10px rgba(0, 133, 66, 0.4);
         }
 
-        /* --- SIDE MENU STYLES --- */
+        /* --- SIDE MENU --- */
         .sidebar {
             position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
             background: #111; z-index: 2000; transition: 0.3s ease;
@@ -168,6 +168,7 @@
 </div>
 
 <script>
+    // YOUR VERIFIED SCRIPT URL
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
 
     function toggleMenu() {
@@ -184,19 +185,21 @@
         }
     }
 
-    // THE SYNC ENGINE: This pulls the numbers directly from Row 5, 29, etc.
+    // THE SYNC ENGINE: Force pull 2770 ETB from Google Sheet
     async function forceSyncBalance(user) {
         try {
-            // Adding a timestamp (Date.now()) forces Google to show NEW data, not old memory
             const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&t=${Date.now()}`);
             const data = await res.json();
             
             if(data && data.balance !== undefined) {
                 user.balance = data.balance;
                 localStorage.setItem('rasta_user', JSON.stringify(user));
-                document.getElementById('userBal').innerText = parseFloat(user.balance).toFixed(2);
+                document.getElementById('userBal').innerText = parseFloat(data.balance).toFixed(2);
+                console.log("Sheet Sync Success: " + data.balance);
             }
-        } catch(e) { console.error("Sync error"); }
+        } catch(e) { 
+            console.error("Sync failed. Check connection.");
+        }
     }
 
     window.onload = () => {
@@ -208,12 +211,11 @@
             document.getElementById('lobby-view').style.display = 'block';
             const user = JSON.parse(userData);
             
-            // Show whatever is in phone first
             document.getElementById('userBal').innerText = parseFloat(user.balance || 0).toFixed(2);
             document.getElementById('welcomeUser').innerText = "One Love, " + user.name;
             document.getElementById('sideUserPhone').innerText = user.phone;
             
-            // CRITICAL: Reach out to the Google Sheet immediately to update the balance
+            // RUN THE SYNC
             forceSyncBalance(user);
         }
     };
