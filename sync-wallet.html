@@ -1,70 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>RASTA HOUSE | SYNCING...</title>
+    <title>RASTA HOUSE | SYNCING</title>
     <style>
         body { background: #000; color: #FFD100; font-family: sans-serif; text-align: center; padding-top: 100px; }
-        .loader { 
-            border: 5px solid #111; border-top: 5px solid #008542; 
-            border-radius: 50%; width: 50px; height: 50px; 
-            animation: spin 1s linear infinite; margin: 20px auto; 
-        }
+        .loader { border: 5px solid #111; border-top: 5px solid #008542; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
     <div class="loader"></div>
-    <h3>Checking Deposits...</h3>
-    <p>Please wait while we verify your approved payments.</p>
-
+    <h3>Checking Ledger... / ሂሳብ በመፈተሽ ላይ...</h3>
     <script>
-        // Use your existing Script URL
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
         
-        async function syncNow() {
+        async function sync() {
             let user = JSON.parse(localStorage.getItem('rasta_user'));
             if(!user) { window.location.href = 'index.html'; return; }
 
             try {
-                // 1. Fetch the Deposit Sheet data via your existing script
-                // We assume your script allows a "read" or "login" action that returns data
-                const response = await fetch(`${SCRIPT_URL}?action=getDeposits&phone=${user.phone}`);
-                const deposits = await response.json();
-
-                // 2. Get list of already claimed deposit IDs from local storage to prevent double-claiming
-                let claimedIds = JSON.parse(localStorage.getItem('claimed_deposits') || "[]");
-                let newMoney = 0;
-
-                // 3. Loop through deposits found in the sheet
-                deposits.forEach(dep => {
-                    // Check if: 1. Phone matches, 2. Status is Approved, 3. Not already claimed
-                    if (dep.status === "Approved" && !claimedIds.includes(dep.id)) {
-                        newMoney += parseFloat(dep.amount);
-                        claimedIds.push(dep.id); // Mark as claimed locally
-                    }
-                });
-
-                if (newMoney > 0) {
-                    // 4. Update the user balance locally
-                    user.balance = parseFloat(user.balance) + newMoney;
+                // 1. Ask the script for the latest balance
+                const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}`);
+                const data = await res.json();
+                
+                if(data && data.balance !== undefined) {
+                    // 2. Update local storage with the balance from the sheet
+                    user.balance = data.balance;
                     localStorage.setItem('rasta_user', JSON.stringify(user));
-                    localStorage.setItem('claimed_deposits', JSON.stringify(claimedIds));
-                    alert("Success! " + newMoney + " ETB added to your wallet.");
-                } else {
-                    alert("No new approved deposits found.");
+                    alert("Wallet Updated! / ሂሳብዎ ተባርኳል!");
                 }
-
-            } catch (err) {
-                console.error("Sync failed", err);
-                alert("Syncing complete.");
+            } catch (e) {
+                alert("Connection Busy. Try again.");
             }
-
-            // Go back to profile
             window.location.href = 'profile.html';
         }
-
-        window.onload = syncNow;
+        window.onload = sync;
     </script>
 </body>
 </html>
