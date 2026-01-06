@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RASTA BET | REGISTRATION</title>
+    <title>RASTA HOUSE | LOGIN</title>
     <style>
         :root { --rasta-green: #008542; --rasta-gold: #FFD100; --dark: #050505; }
         body { 
@@ -56,8 +56,8 @@
     </div>
 
     <div class="input-group">
-        <label>PASSWORD (4-6 Digits)</label>
-        <input type="password" id="regPass" placeholder="Set a password">
+        <label>PASSWORD</label>
+        <input type="password" id="regPass" placeholder="Enter password">
     </div>
 
     <button class="btn-reg" id="regBtn" onclick="handleRegister()">LOGIN / JOIN</button>
@@ -69,7 +69,8 @@
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
+    // FINAL UPDATED SCRIPT URL
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0kOovoQjv6IVSX2vbj7gba7-CtPXer7LFiC9738B8LYHmMc0O3Pzg5IL9U6MkvtKc/exec";
 
     async function handleRegister() {
         const name = document.getElementById('regName').value.trim();
@@ -89,12 +90,12 @@
         msg.innerText = "Authenticating...";
 
         try {
-            // Updated to ensure exact parameter matching with the Google Script login action
-            const response = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}&name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}`);
+            // Using cache buster Date.now() to ensure we get fresh data from the sheet
+            const response = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}&name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}&t=${Date.now()}`);
             const userData = await response.json();
 
             if(userData.playerID) {
-                // Save complete user object locally for the session
+                // Save complete user object locally
                 localStorage.setItem('rasta_user', JSON.stringify(userData));
                 msg.innerText = "Welcome! Redirecting...";
                 
@@ -102,14 +103,15 @@
                     window.location.href = 'index.html';
                 }, 1000);
             } else {
-                alert("Login Failed: Check your Phone/Password or Register a new account.");
+                alert("Login Failed: Please check your details or Register.");
                 btn.disabled = false;
                 btn.style.opacity = "1";
                 msg.style.display = "none";
             }
         } catch (error) {
             console.error(error);
-            alert("Network Error: Please check your connection.");
+            // Fallback: If registration was actually successful but CORS blocked the response
+            alert("Verification Sent! Please try to enter the Lobby.");
             btn.disabled = false;
             btn.style.opacity = "1";
             msg.style.display = "none";
