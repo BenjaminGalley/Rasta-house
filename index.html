@@ -8,43 +8,6 @@
         :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; --dark-bg: #0a0a0a; }
         body { background: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; overflow-x: hidden; }
         
-        /* --- VISITOR SECTION --- */
-        #visitor-gate {
-            height: 100vh;
-            display: none; 
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.8)), url('asset/asset.bg.jpg');
-            background-size: cover;
-            background-position: center;
-            text-align: center;
-        }
-        .gate-logo { font-size: 3.5rem; font-weight: bold; color: var(--rasta-gold); margin: 0; text-shadow: 0 0 20px rgba(255, 209, 0, 0.4); }
-        .gate-sub { color: var(--rasta-green); font-weight: bold; letter-spacing: 3px; margin-bottom: 30px; }
-        .gate-buttons { width: 80%; max-width: 320px; }
-        .btn-gate { 
-            display: block; width: 100%; padding: 18px; margin: 12px 0; border-radius: 35px; 
-            text-decoration: none; font-weight: bold; font-size: 1.1rem; text-align: center; transition: 0.3s;
-        }
-        .btn-login { background: var(--rasta-green); color: white; box-shadow: 0 4px 0 #004d26; }
-        .btn-reg { border: 2px solid var(--rasta-gold); color: var(--rasta-gold); }
-
-        /* --- LOBBY SECTION --- */
-        #lobby-view { display: none; } 
-        
-        header { 
-            background: #111; padding: 15px; display: flex; justify-content: space-between; 
-            align-items: center; border-bottom: 2px solid var(--rasta-gold); position: sticky; top: 0; z-index: 1000;
-        }
-        .menu-toggle { background: none; border: none; color: var(--rasta-gold); font-size: 1.5rem; cursor: pointer; padding: 0 5px; }
-        .logo-text { font-weight: bold; color: var(--rasta-gold); font-size: 1.2rem; letter-spacing: 1px; }
-        .balance-pill { 
-            background: var(--rasta-green); padding: 8px 15px; border-radius: 20px; 
-            font-weight: bold; border: 1px solid var(--rasta-gold); cursor: pointer;
-            box-shadow: 0 0 10px rgba(0, 133, 66, 0.4);
-        }
-
         /* --- SIDE MENU --- */
         .sidebar {
             position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
@@ -66,12 +29,25 @@
             background: rgba(0,0,0,0.7); display: none; z-index: 1500; 
         }
 
-        /* --- CONTENT SECTION --- */
+        /* --- LOBBY STYLES --- */
+        header { 
+            background: #111; padding: 15px; display: flex; justify-content: space-between; 
+            align-items: center; border-bottom: 2px solid var(--rasta-gold); position: sticky; top: 0; z-index: 1000;
+        }
+        .menu-toggle { background: none; border: none; color: var(--rasta-gold); font-size: 1.5rem; cursor: pointer; padding: 0 5px; }
+        .logo-text { font-weight: bold; color: var(--rasta-gold); font-size: 1.2rem; letter-spacing: 1px; }
+        .balance-pill { 
+            background: var(--rasta-green); padding: 8px 15px; border-radius: 20px; 
+            font-weight: bold; border: 1px solid var(--rasta-gold); cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 133, 66, 0.4);
+        }
+
         .banner { 
             height: 160px; background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.7)), url('asset/asset.bg.jpg');
             background-size: cover; background-position: center; display: flex; flex-direction: column; align-items: center; justify-content: center;
             border-bottom: 3px solid var(--rasta-green);
         }
+
         .game-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 12px; }
         .game-card { 
             background: #1a1a1a; border-radius: 15px; overflow: hidden; 
@@ -86,6 +62,19 @@
             border-top: 1px solid var(--rasta-green);
         }
 
+        /* --- VISITOR GATE --- */
+        #visitor-gate {
+            height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.8)), url('asset/asset.bg.jpg');
+            background-size: cover; text-align: center;
+        }
+        .btn-gate { 
+            display: block; width: 220px; padding: 18px; margin: 12px 0; border-radius: 35px; 
+            text-decoration: none; font-weight: bold; font-size: 1.1rem; text-align: center;
+        }
+        .btn-login { background: var(--rasta-green); color: white; box-shadow: 0 4px 0 #004d26; }
+        .btn-reg { border: 2px solid var(--rasta-gold); color: var(--rasta-gold); }
+
         .bottom-nav { 
             position: fixed; bottom: 0; width: 100%; height: 65px; background: #111; 
             display: flex; justify-content: space-around; align-items: center; border-top: 2px solid var(--rasta-gold);
@@ -93,7 +82,6 @@
         }
         .nav-link { text-decoration: none; color: #888; text-align: center; font-size: 0.65rem; font-weight: bold; }
         .nav-link.active { color: var(--rasta-gold); }
-        .nav-icon { font-size: 1.4rem; margin-bottom: 2px; display: block; }
     </style>
 </head>
 <body>
@@ -114,19 +102,19 @@
 </div>
 
 <div id="visitor-gate">
-    <h1 class="gate-logo">RASTA HOUSE</h1>
-    <p class="gate-sub">WIN BIG TODAY</p>
+    <h1 style="color:var(--rasta-gold); font-size: 3rem; margin: 0;">RASTA HOUSE</h1>
+    <p style="color:var(--rasta-green); font-weight:bold; letter-spacing:3px; margin-bottom:30px;">WIN BIG TODAY</p>
     <div class="gate-buttons">
         <a href="login.html" class="btn-gate btn-login">LOGIN</a>
         <a href="register.html" class="btn-gate btn-reg">REGISTER</a>
     </div>
 </div>
 
-<div id="lobby-view">
+<div id="lobby-view" style="display:none;">
     <header>
         <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-        <div class="logo-text">RASTA BET</div>
-        <div class="balance-pill" onclick="location.href='profile.html'"><span id="userBal">...</span> ETB</div>
+        <div class="logo-text">RASTA HOUSE</div>
+        <div class="balance-pill" onclick="location.href='profile.html'"><span id="userBal">0.00</span> ETB</div>
     </header>
 
     <div class="banner">
@@ -162,14 +150,14 @@
     </div>
 
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-link active"><span class="nav-icon">🏠</span>HOME</a>
-        <a href="profile.html" class="nav-link"><span class="nav-icon">💰</span>WALLET</a>
+        <a href="index.html" class="nav-link active">HOME</a>
+        <a href="profile.html" class="nav-link">WALLET</a>
     </nav>
 </div>
 
 <script>
-    // YOUR VERIFIED SCRIPT URL
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
+    // --- FINAL ACTIVE SCRIPT URL ---
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0kOovoQjv6IVSX2vbj7gba7-CtPXer7LFiC9738B8LYHmMc0O3Pzg5IL9U6MkvtKc/exec";
 
     function toggleMenu() {
         const sidebar = document.getElementById('mainSidebar');
@@ -185,38 +173,29 @@
         }
     }
 
-    // THE SYNC ENGINE: Force pull 2770 ETB from Google Sheet
-    async function forceSyncBalance(user) {
+    async function syncBalance(user) {
         try {
             const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&t=${Date.now()}`);
             const data = await res.json();
-            
             if(data && data.balance !== undefined) {
                 user.balance = data.balance;
                 localStorage.setItem('rasta_user', JSON.stringify(user));
                 document.getElementById('userBal').innerText = parseFloat(data.balance).toFixed(2);
-                console.log("Sheet Sync Success: " + data.balance);
             }
-        } catch(e) { 
-            console.error("Sync failed. Check connection.");
-        }
+        } catch(e) { console.log("Sync Error"); }
     }
 
     window.onload = () => {
         const userData = localStorage.getItem('rasta_user');
-        
         if(!userData) { 
             document.getElementById('visitor-gate').style.display = 'flex';
         } else {
             document.getElementById('lobby-view').style.display = 'block';
             const user = JSON.parse(userData);
-            
             document.getElementById('userBal').innerText = parseFloat(user.balance || 0).toFixed(2);
-            document.getElementById('welcomeUser').innerText = "One Love, " + user.name;
+            document.getElementById('welcomeUser').innerText = "One Love, " + user.name.toUpperCase();
             document.getElementById('sideUserPhone').innerText = user.phone;
-            
-            // RUN THE SYNC
-            forceSyncBalance(user);
+            syncBalance(user);
         }
     };
 </script>
