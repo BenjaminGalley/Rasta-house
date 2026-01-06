@@ -61,6 +61,7 @@
 
         .balance-label { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
         .balance-amount { font-size: 2.5rem; font-weight: bold; color: var(--rasta-green); margin: 5px 0; }
+        .refresh-link { font-size: 0.7rem; color: var(--rasta-gold); text-decoration: none; cursor: pointer; }
 
         /* Form Styling */
         .container { width: 90%; max-width: 400px; padding-bottom: 100px; }
@@ -150,6 +151,7 @@
     <div class="balance-card">
         <div class="balance-label">Available Balance / ቀሪ ሂሳብ</div>
         <div class="balance-amount"><span id="userBal">0.00</span> <small style="font-size:1rem">ETB</small></div>
+        <div class="refresh-link" onclick="syncBalance()">🔄 Refresh Balance / አድስ</div>
     </div>
 
     <div class="container">
@@ -228,6 +230,22 @@
     document.getElementById('displayUserPhone').innerText = user.phone;
     document.getElementById('avatarLetter').innerText = user.name.charAt(0).toUpperCase();
 
+    // NEW: Sync balance from server
+    async function syncBalance() {
+        const btn = document.querySelector('.refresh-link');
+        btn.innerText = "Syncing...";
+        try {
+            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}`);
+            const data = await res.json();
+            if(data && data.balance !== undefined) {
+                user.balance = data.balance;
+                localStorage.setItem('rasta_user', JSON.stringify(user));
+                document.getElementById('userBal').innerText = parseFloat(user.balance).toFixed(2);
+            }
+        } catch(e) { console.log("Sync Error"); }
+        btn.innerText = "🔄 Refresh Balance / አድስ";
+    }
+
     function toggleView(view) {
         document.getElementById('depView').style.display = view === 'deposit' ? 'block' : 'none';
         document.getElementById('witView').style.display = view === 'withdraw' ? 'block' : 'none';
@@ -251,20 +269,10 @@
         btn.disabled = true;
 
         try {
-            // Updated to ensure exact parameter matching with the Google Script
             await fetch(`${SCRIPT_URL}?action=${type}&phone=${user.phone}&amount=${amt}&method=${method}&senderName=${encodeURIComponent(name)}&senderPhone=${phone}`);
-            
             alert(type.toUpperCase() + " REQUEST SUBMITTED!");
-            
-            // If it's a withdrawal, we deduct balance locally for immediate feedback
-            if(type === 'withdraw') {
-                user.balance = parseFloat(user.balance) - amt;
-                localStorage.setItem('rasta_user', JSON.stringify(user));
-            }
             location.href = 'index.html';
         } catch (err) {
-            // Often Google Apps Script returns a CORS error even if the data was saved. 
-            // We treat the request as "Sent" if the network attempt happened.
             alert("Request Sent! Admin will process it shortly.");
             location.href = 'index.html';
         }
@@ -276,6 +284,9 @@
             location.href = 'index.html';
         }
     }
+
+    // Auto sync on page load
+    window.onload = syncBalance;
 </script>
 </body>
 </html>
