@@ -219,18 +219,16 @@
     </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0kOovoQjv6IVSX2vbj7gba7-CtPXer7LFiC9738B8LYHmMc0O3Pzg5IL9U6MkvtKc/exec";
     let user = JSON.parse(localStorage.getItem('rasta_user'));
 
     if(!user) { location.href = 'index.html'; }
 
-    // Display local data first
     document.getElementById('userBal').innerText = parseFloat(user.balance || 0).toFixed(2);
     document.getElementById('displayUserName').innerText = user.name;
     document.getElementById('displayUserPhone').innerText = user.phone;
     document.getElementById('avatarLetter').innerText = user.name.charAt(0).toUpperCase();
 
-    // AUTO-SYNC: Grab the real balance from the sheet immediately
     async function syncNow() {
         try {
             const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&t=${Date.now()}`);
@@ -269,23 +267,17 @@
         }
 
         const btn = document.getElementById(type === 'deposit' ? 'btnDep' : 'btnWit');
-        const originalText = btn.innerText;
         btn.innerText = "SENDING TO ADMIN...";
         btn.disabled = true;
 
-        // URL Build
         const finalUrl = `${SCRIPT_URL}?action=${type}&phone=${user.phone}&amount=${amt}&method=${method}&senderName=${encodeURIComponent(nameInput.value)}&senderPhone=${phoneInput.value}`;
 
         try {
-            // Using 'no-cors' mode is the only way to send data to Google Script without it failing/hanging
             await fetch(finalUrl, { mode: 'no-cors' });
-            
-            // If withdrawal, update local balance immediately for better UI
             if(type === 'withdraw') {
                 user.balance = parseFloat(user.balance) - amt;
                 localStorage.setItem('rasta_user', JSON.stringify(user));
             }
-
             alert("SUCCESS! Request sent to Admin.");
             location.href = 'index.html';
         } catch (err) {
