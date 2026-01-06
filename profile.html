@@ -105,7 +105,7 @@
             border-left: 4px solid var(--rasta-green);
         }
 
-        label { display: block; margin-bottom: 8px; font-size: 0.8rem; color: var(--rasta-gold); }
+        label { display: block; margin-bottom: 8px; font-size: 0.8rem; color: var(--rasta-gold); text-transform: uppercase; }
         
         input, select { 
             width: 100%; 
@@ -136,7 +136,6 @@
         .btn-withdraw { background: var(--rasta-red); color: white; box-shadow: 0 4px 0 #8a1121; }
         .btn-logout { background: transparent; border: 1px solid var(--rasta-red); color: var(--rasta-red); margin-top: 20px; }
 
-        /* Bottom Nav Fix */
         .nav-placeholder { height: 80px; }
     </style>
 </head>
@@ -149,65 +148,71 @@
     </div>
 
     <div class="balance-card">
-        <div class="balance-label">Available Balance</div>
+        <div class="balance-label">Available Balance / ቀሪ ሂሳብ</div>
         <div class="balance-amount"><span id="userBal">0.00</span> <small style="font-size:1rem">ETB</small></div>
     </div>
 
     <div class="container">
         <div class="action-tabs">
-            <div class="tab active" id="tabDep" onclick="toggleView('deposit')">DEPOSIT</div>
-            <div class="tab" id="tabWit" onclick="toggleView('withdraw')">WITHDRAW</div>
+            <div class="tab active" id="tabDep" onclick="toggleView('deposit')">DEPOSIT / ገቢ</div>
+            <div class="tab" id="tabWit" onclick="toggleView('withdraw')">WITHDRAW / ወጪ</div>
         </div>
 
         <div id="depView">
             <div class="form-group">
                 <div class="instr">
-                    <strong>1. Send payment to:</strong><br>
-                    • Telebirr: 0988733637<br>
-                    • CBE Birr: 0911045825<br>
-                    <strong>2. Submit details below.</strong>
+                    <strong>1. Send payment to / ክፍያ ይላኩ:</strong><br>
+                    • Telebirr: <strong>0988733637</strong><br>
+                    • CBE Birr: <strong>0911045825</strong><br>
+                    <strong>2. Submit details below / ከታች መረጃ ይሙሉ::</strong>
                 </div>
 
-                <label>PAYMENT METHOD</label>
+                <label>PAYMENT METHOD / የክፍያ ዘዴ</label>
                 <select id="depMethod">
                     <option value="Telebirr">Telebirr</option>
                     <option value="CBE Birr">CBE Birr</option>
                 </select>
 
-                <label>AMOUNT (MIN 100 ETB)</label>
+                <label>AMOUNT (MIN 100 ETB) / መጠን</label>
                 <input type="number" id="depAmount" placeholder="100 - 10,000" min="100" max="10000">
 
-                <label>SENDER PHONE NUMBER</label>
+                <label>SENDER FULL NAME / የላኪው ሙሉ ስም</label>
+                <input type="text" id="senderName" placeholder="Name on receipt">
+
+                <label>SENDER PHONE NUMBER / የላኪው ስልክ ቁጥር</label>
                 <input type="text" id="senderPhone" placeholder="09...">
 
-                <button class="btn-main btn-deposit" onclick="submitForm('deposit')">SUBMIT DEPOSIT</button>
+                <button class="btn-main btn-deposit" onclick="submitForm('deposit')">SUBMIT DEPOSIT / ገቢ አድርግ</button>
             </div>
         </div>
 
         <div id="witView" style="display:none;">
             <div class="form-group">
                 <div class="instr">
-                    Withdrawals are processed to your registered phone number within 24 hours.
+                    Withdrawals are processed within 24 hours. / ወጪዎች በ24 ሰዓት ውስጥ ይላካሉ::
                 </div>
 
-                <label>RECEIVE METHOD</label>
+                <label>RECEIVE METHOD / መቀበያ ዘዴ</label>
                 <select id="witMethod">
                     <option value="Telebirr">Telebirr</option>
                     <option value="CBE Birr">CBE Birr</option>
                 </select>
 
-                <label>AMOUNT (MIN 100 ETB)</label>
+                <label>AMOUNT (MIN 100 ETB) / መጠን</label>
                 <input type="number" id="witAmount" placeholder="100 - 10,000" min="100" max="10000">
 
-                <label>RECEIVER PHONE</label>
+                <label>RECEIVER FULL NAME / የተቀባይ ሙሉ ስም</label>
+                <input type="text" id="receiverName" placeholder="Full name for transfer">
+
+                <label>RECEIVER PHONE / የተቀባይ ስልክ</label>
                 <input type="text" id="receiverPhone" placeholder="09...">
 
-                <button class="btn-main btn-withdraw" onclick="submitForm('withdraw')">REQUEST WITHDRAWAL</button>
+                <button class="btn-main btn-withdraw" onclick="submitForm('withdraw')">REQUEST WITHDRAWAL / ወጪ ጠይቅ</button>
             </div>
         </div>
 
-        <button class="btn-main" style="background:#222; color:var(--rasta-gold); margin-top:10px;" onclick="location.href='index.html'">BACK TO LOBBY</button>
-        <button class="btn-main btn-logout" onclick="logout()">LOGOUT & EXIT</button>
+        <button class="btn-main" style="background:#222; color:var(--rasta-gold); margin-top:10px;" onclick="location.href='index.html'">BACK TO LOBBY / ተመለስ</button>
+        <button class="btn-main btn-logout" onclick="logout()">LOGOUT / ውጣ</button>
         <div class="nav-placeholder"></div>
     </div>
 
@@ -217,7 +222,7 @@
 
     if(!user) { location.href = 'index.html'; }
 
-    // Init UI
+    // Initialize UI
     document.getElementById('userBal').innerText = parseFloat(user.balance).toFixed(2);
     document.getElementById('displayUserName').innerText = user.name;
     document.getElementById('displayUserPhone').innerText = user.phone;
@@ -232,18 +237,20 @@
 
     function submitForm(type) {
         const amt = parseFloat(document.getElementById(type === 'deposit' ? 'depAmount' : 'witAmount').value);
+        const name = document.getElementById(type === 'deposit' ? 'senderName' : 'receiverName').value;
         const phone = document.getElementById(type === 'deposit' ? 'senderPhone' : 'receiverPhone').value;
         const method = document.getElementById(type === 'deposit' ? 'depMethod' : 'witMethod').value;
 
         if(isNaN(amt) || amt < 100 || amt > 10000) return alert("Please enter an amount between 100 and 10,000 ETB.");
-        if(phone.length < 10) return alert("Please enter a valid phone number.");
+        if(!name || phone.length < 10) return alert("Please fill in name and phone correctly.");
         if(type === 'withdraw' && amt > user.balance) return alert("Insufficient balance.");
 
         const btn = event.target;
         btn.innerText = "SENDING...";
         btn.disabled = true;
 
-        fetch(`${SCRIPT_URL}?action=${type}&phone=${user.phone}&name=${user.name}&amount=${amt}&method=${method}&sender=${phone}`)
+        // Note: Using 'senderName' and 'senderPhone' parameters for the backend script
+        fetch(`${SCRIPT_URL}?action=${type}&phone=${user.phone}&userName=${user.name}&amount=${amt}&method=${method}&senderName=${name}&senderPhone=${phone}`)
         .then(() => {
             alert(type.toUpperCase() + " REQUEST SUBMITTED!");
             if(type === 'withdraw') {
