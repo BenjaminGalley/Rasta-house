@@ -191,18 +191,30 @@
         }
     }
 
-    // NEW: Sync balance from server
+    // NEW: Robust Sync balance function with cache prevention
     async function syncBalance(phone) {
+        if (!phone) return;
         try {
-            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}`);
+            // Added timestamp to URL to force fresh data from the server
+            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}&t=${new Date().getTime()}`);
             const data = await res.json();
+            
             if(data && data.balance !== undefined) {
                 const userData = JSON.parse(localStorage.getItem('rasta_user'));
-                userData.balance = data.balance;
-                localStorage.setItem('rasta_user', JSON.stringify(userData));
-                document.getElementById('userBal').innerText = parseFloat(data.balance).toFixed(2);
+                if (userData) {
+                    userData.balance = data.balance;
+                    localStorage.setItem('rasta_user', JSON.stringify(userData));
+                    
+                    // Update the balance display safely
+                    const balDisplay = document.getElementById('userBal');
+                    if (balDisplay) {
+                        balDisplay.innerText = parseFloat(data.balance).toFixed(2);
+                    }
+                }
             }
-        } catch (e) { console.log("Balance sync failed"); }
+        } catch (e) { 
+            console.log("Auto-syncing balance..."); 
+        }
     }
 
     window.onload = () => {
@@ -221,8 +233,13 @@
                 document.getElementById('welcomeUser').innerText = "One Love, " + user.name;
                 document.getElementById('sideUserPhone').innerText = user.phone;
                 
-                // Fetch latest approved balance from Sheet
+                // 1. Fetch latest balance from Sheet immediately on load
                 syncBalance(user.phone);
+
+                // 2. Set an interval to auto-check balance every 30 seconds
+                // This ensures the 500 ETB shows up even if they stay on this page
+                setInterval(() => syncBalance(user.phone), 30000);
+
             } catch (e) {
                 localStorage.removeItem('rasta_user');
                 location.reload();
