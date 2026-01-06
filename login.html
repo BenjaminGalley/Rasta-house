@@ -34,6 +34,9 @@
         }
         .btn-reg:active { transform: scale(0.98); }
         #msg { margin-top: 15px; font-size: 0.9rem; color: var(--rasta-gold); display: none; }
+        
+        .footer-link { margin-top: 15px; font-size: 0.8rem; color: #666; }
+        .footer-link a { color: var(--rasta-gold); text-decoration: none; }
     </style>
 </head>
 <body>
@@ -57,8 +60,12 @@
         <input type="password" id="regPass" placeholder="Set a password">
     </div>
 
-    <button class="btn-reg" id="regBtn" onclick="handleRegister()">CREATE ACCOUNT</button>
+    <button class="btn-reg" id="regBtn" onclick="handleRegister()">LOGIN / JOIN</button>
     <div id="msg">Connecting to Rasta House...</div>
+    
+    <div class="footer-link">
+        New here? Fill details to <a href="register.html">Register</a>
+    </div>
 </div>
 
 <script>
@@ -79,26 +86,30 @@
         btn.disabled = true;
         btn.style.opacity = "0.5";
         msg.style.display = "block";
+        msg.innerText = "Authenticating...";
 
         try {
-            // Updated to include 'pass' to match your Google Script requirements
-            const response = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}&name=${name}&pass=${pass}`);
+            // Updated to ensure exact parameter matching with the Google Script login action
+            const response = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}&name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}`);
             const userData = await response.json();
 
             if(userData.playerID) {
-                // Save complete user object locally
+                // Save complete user object locally for the session
                 localStorage.setItem('rasta_user', JSON.stringify(userData));
                 msg.innerText = "Welcome! Redirecting...";
                 
-                // Fixed redirect: Ensure this matches your renamed index.html file
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 1000);
             } else {
-                throw new Error("Registration failed");
+                alert("Login Failed: Check your Phone/Password or Register a new account.");
+                btn.disabled = false;
+                btn.style.opacity = "1";
+                msg.style.display = "none";
             }
         } catch (error) {
-            alert("Network Error: Ensure your Google Script is deployed for 'Anyone'.");
+            console.error(error);
+            alert("Network Error: Please check your connection.");
             btn.disabled = false;
             btn.style.opacity = "1";
             msg.style.display = "none";
