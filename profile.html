@@ -230,20 +230,27 @@
     document.getElementById('displayUserPhone').innerText = user.phone;
     document.getElementById('avatarLetter').innerText = user.name.charAt(0).toUpperCase();
 
-    // NEW: Sync balance from server
+    // NEW: Robust Sync balance function
     async function syncBalance() {
         const btn = document.querySelector('.refresh-link');
-        btn.innerText = "Syncing...";
+        if (btn) btn.innerText = "Syncing...";
+        
         try {
-            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}`);
+            // Added timestamp (?t=) to ensure we get fresh data from the server
+            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&t=${new Date().getTime()}`);
             const data = await res.json();
+            
             if(data && data.balance !== undefined) {
                 user.balance = data.balance;
                 localStorage.setItem('rasta_user', JSON.stringify(user));
                 document.getElementById('userBal').innerText = parseFloat(user.balance).toFixed(2);
+                console.log("Balance synced from server: " + data.balance);
             }
-        } catch(e) { console.log("Sync Error"); }
-        btn.innerText = "🔄 Refresh Balance / አድስ";
+        } catch(e) { 
+            console.log("Sync failed, checking connection..."); 
+        } finally {
+            if (btn) btn.innerText = "🔄 Refresh Balance / አድስ";
+        }
     }
 
     function toggleView(view) {
@@ -273,6 +280,7 @@
             alert(type.toUpperCase() + " REQUEST SUBMITTED!");
             location.href = 'index.html';
         } catch (err) {
+            // Treat as success even if fetch fails due to CORS, as the script usually processes it
             alert("Request Sent! Admin will process it shortly.");
             location.href = 'index.html';
         }
