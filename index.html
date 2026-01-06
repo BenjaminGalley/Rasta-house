@@ -6,12 +6,12 @@
     <title>RASTA HOUSE | LOBBY</title>
     <style>
         :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; --dark-bg: #0a0a0a; }
-        body { background: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; }
+        body { background: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; overflow-x: hidden; }
         
         /* --- VISITOR SECTION (FRONT GATE) --- */
         #visitor-gate {
             height: 100vh;
-            display: none; /* Controlled by Script */
+            display: none; 
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -31,12 +31,14 @@
         .btn-reg { border: 2px solid var(--rasta-gold); color: var(--rasta-gold); }
 
         /* --- LOBBY SECTION --- */
-        #lobby-view { display: none; } /* Controlled by Script */
+        #lobby-view { display: none; } 
         
         header { 
             background: #111; padding: 15px; display: flex; justify-content: space-between; 
             align-items: center; border-bottom: 2px solid var(--rasta-gold); position: sticky; top: 0; z-index: 1000;
         }
+        /* New Menu Button */
+        .menu-toggle { background: none; border: none; color: var(--rasta-gold); font-size: 1.5rem; cursor: pointer; padding: 0 5px; }
         .logo-text { font-weight: bold; color: var(--rasta-gold); font-size: 1.2rem; letter-spacing: 1px; }
         .balance-pill { 
             background: var(--rasta-green); padding: 8px 15px; border-radius: 20px; 
@@ -44,14 +46,34 @@
             box-shadow: 0 0 10px rgba(0, 133, 66, 0.4);
         }
 
+        /* --- SIDE MENU STYLES --- */
+        .sidebar {
+            position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
+            background: #111; z-index: 2000; transition: 0.3s ease;
+            border-right: 2px solid var(--rasta-gold); box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+        }
+        .sidebar.active { left: 0; }
+        .sidebar-header { padding: 30px 20px; background: #000; text-align: center; border-bottom: 1px solid #333; }
+        .sidebar-menu { padding: 10px 0; }
+        .menu-item { 
+            display: block; padding: 15px 25px; color: white; text-decoration: none; 
+            font-size: 1rem; border-bottom: 1px solid #222; transition: 0.2s;
+        }
+        .menu-item:active { background: #222; color: var(--rasta-gold); }
+        .logout-btn { color: var(--rasta-red) !important; font-weight: bold; margin-top: 20px; border-top: 1px solid #333; }
+        
+        .overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.7); display: none; z-index: 1500; 
+        }
+
+        /* --- CONTENT SECTION --- */
         .banner { 
             height: 160px; background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.7)), url('asset/asset.bg.jpg');
             background-size: cover; background-position: center; display: flex; flex-direction: column; align-items: center; justify-content: center;
             border-bottom: 3px solid var(--rasta-green);
         }
-
         .game-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 12px; }
-        
         .game-card { 
             background: #1a1a1a; border-radius: 15px; overflow: hidden; 
             border: 1px solid #333; position: relative; aspect-ratio: 1/1; cursor: pointer;
@@ -59,20 +81,16 @@
         }
         .game-card img { width: 100%; height: 100%; object-fit: cover; transition: 0.3s; filter: brightness(0.8); }
         .game-card:active { transform: scale(0.96); }
-        .game-card:active img { filter: brightness(1.1); }
-
         .game-title { 
             position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.85); 
             padding: 8px 0; text-align: center; color: var(--rasta-gold); font-size: 0.75rem; font-weight: bold;
             border-top: 1px solid var(--rasta-green);
         }
-        
         .badge {
             position: absolute; top: 10px; right: 10px; background: var(--rasta-red);
             color: white; font-size: 0.6rem; padding: 3px 8px; border-radius: 5px; font-weight: bold;
             z-index: 5; box-shadow: 0 0 5px #000;
         }
-
         .bottom-nav { 
             position: fixed; bottom: 0; width: 100%; height: 65px; background: #111; 
             display: flex; justify-content: space-around; align-items: center; border-top: 2px solid var(--rasta-gold);
@@ -85,6 +103,21 @@
 </head>
 <body>
 
+<div class="overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+<div class="sidebar" id="mainSidebar">
+    <div class="sidebar-header">
+        <h2 style="color:var(--rasta-gold); margin:0;">RASTA HOUSE</h2>
+        <p id="sideUserPhone" style="color:#666; font-size:0.8rem; margin:5px 0 0;"></p>
+    </div>
+    <div class="sidebar-menu">
+        <a href="index.html" class="menu-item">🏠 Lobby / መግቢያ</a>
+        <a href="profile.html" class="menu-item">💰 Wallet / የኪስ ቦርሳ</a>
+        <a href="profile.html?view=withdraw" class="menu-item">💸 Withdraw / ወጪ መውሰጃ</a>
+        <a href="profile.html?view=deposit" class="menu-item">➕ Deposit / ብር ማስገቢያ</a>
+        <a href="javascript:void(0)" class="menu-item logout-btn" onclick="handleLogout()">🚪 Logout / ውጣ</a>
+    </div>
+</div>
+
 <div id="visitor-gate">
     <h1 class="gate-logo">RASTA HOUSE</h1>
     <p class="gate-sub">WIN BIG TODAY</p>
@@ -96,6 +129,7 @@
 
 <div id="lobby-view">
     <header>
+        <button class="menu-toggle" onclick="toggleMenu()">☰</button>
         <div class="logo-text">RASTA BET</div>
         <div class="balance-pill" onclick="location.href='profile.html'"><span id="userBal">0.00</span> ETB</div>
     </header>
@@ -111,29 +145,24 @@
             <img src="asset/asset.rasta.jpg">
             <div class="game-title">RASTA REVELATION</div>
         </div>
-
         <div class="game-card" onclick="location.href='premium-slots.html'">
             <div class="badge" style="background:var(--rasta-green)">4K</div>
             <img src="asset/asset.nine.jpg">
             <div class="game-title">LION SLOTS</div>
         </div>
-
         <div class="game-card" onclick="location.href='crash.html'">
             <div class="badge" style="background:var(--rasta-gold); color:black;">HOT</div>
             <img src="asset/asset.bg.jpg">
             <div class="game-title">RASTA CRASH</div>
         </div>
-
         <div class="game-card" onclick="location.href='scratch.html'">
             <img src="asset/asset.tiles.jpg">
             <div class="game-title">SCRATCH GOLD</div>
         </div>
-
         <div class="game-card" onclick="location.href='fast-keno.html'">
             <img src="asset/asset.ui.jpg">
             <div class="game-title">FAST KENO</div>
         </div>
-        
         <div class="game-card" onclick="location.href='wheel.html'">
             <img src="asset/asset.five.jpg">
             <div class="game-title">RASTA WHEEL</div>
@@ -147,15 +176,27 @@
 </div>
 
 <script>
+    function toggleMenu() {
+        const sidebar = document.getElementById('mainSidebar');
+        const overlay = document.getElementById('menuOverlay');
+        sidebar.classList.toggle('active');
+        overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+    }
+
+    function handleLogout() {
+        if(confirm("Are you sure you want to logout?")) {
+            localStorage.removeItem('rasta_user');
+            window.location.reload();
+        }
+    }
+
     window.onload = () => {
         const userData = localStorage.getItem('rasta_user');
         
         if(!userData) { 
-            // Show Gate for visitors
             document.getElementById('visitor-gate').style.display = 'flex';
             document.getElementById('lobby-view').style.display = 'none';
         } else {
-            // Show Lobby for players
             document.getElementById('visitor-gate').style.display = 'none';
             document.getElementById('lobby-view').style.display = 'block';
             
@@ -163,8 +204,8 @@
                 const user = JSON.parse(userData);
                 document.getElementById('userBal').innerText = parseFloat(user.balance || 0).toFixed(2);
                 document.getElementById('welcomeUser').innerText = "One Love, " + user.name;
+                document.getElementById('sideUserPhone').innerText = user.phone;
             } catch (e) {
-                console.error("Session error, clearing local storage.");
                 localStorage.removeItem('rasta_user');
                 location.reload();
             }
