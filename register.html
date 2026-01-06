@@ -48,7 +48,7 @@
         <input type="text" id="regName" placeholder="Enter your name">
 
         <label>Phone Number</label>
-        <input type="text" id="regPhone" placeholder="09...">
+        <input type="tel" id="regPhone" placeholder="09...">
 
         <label>Create Password</label>
         <input type="password" id="regPass" placeholder="••••••••">
@@ -65,9 +65,13 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
 
     async function handleRegister() {
-        const name = document.getElementById('regName').value.trim();
-        const phone = document.getElementById('regPhone').value.trim();
-        const pass = document.getElementById('regPass').value.trim();
+        const nameInput = document.getElementById('regName');
+        const phoneInput = document.getElementById('regPhone');
+        const passInput = document.getElementById('regPass');
+        
+        const name = nameInput.value.trim();
+        const phone = phoneInput.value.trim();
+        const pass = passInput.value.trim();
 
         if(!name || !phone || !pass) {
             return alert("Please fill all fields.");
@@ -83,25 +87,26 @@
         btn.disabled = true;
 
         try {
-            // Registering with 0.00 ETB starting balance
-            // We use the same 'login' action but provide name and pass to trigger creation
-            const response = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}&name=${name}&pass=${pass}&updateBal=0`);
+            // Updated to ensure name and phone are correctly passed to the Google Script login/create action
+            const response = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}&name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}`);
+            const userData = await response.json();
             
-            // Auto-login the user locally so they go straight to the game
-            const userData = {
-                name: name,
-                phone: phone,
-                balance: 0.00
-            };
-            
-            localStorage.setItem('rasta_user', JSON.stringify(userData));
-            
-            alert("Welcome to Rasta House, " + name + "!");
-            window.location.href = "index.html";
+            if (userData.playerID) {
+                // Save complete user object locally for the session
+                localStorage.setItem('rasta_user', JSON.stringify(userData));
+                
+                alert("Welcome to Rasta House, " + userData.name + "!");
+                window.location.href = "index.html";
+            } else {
+                alert("Registration failed. This phone might already be registered.");
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
             
         } catch (error) {
             console.error(error);
-            alert("Error connecting. Please check your internet.");
+            // Handling the case where Google Script saves the data but returns a CORS error
+            alert("Connection check: If registration was successful, please try to Login.");
             btn.innerText = originalText;
             btn.disabled = false;
         }
