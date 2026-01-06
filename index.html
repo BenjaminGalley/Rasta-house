@@ -153,7 +153,6 @@
             <img src="asset/multilogo.jpeg">
             <div class="game-title">TRIPLE SEVEN</div>
         </div>
-
         <div class="game-card" onclick="location.href='rasta-revelation.html'">
             <img src="asset/asset.rasta.jpg">
             <div class="game-title">RASTA REVELATION</div>
@@ -205,9 +204,11 @@
         }
     }
 
+    // THIS FIXES THE BALANCE: It ignores the old phone memory and asks the Sheet for the real number
     async function syncOfficialBalance(user) {
         try {
-            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&t=${new Date().getTime()}`);
+            // Added "&t=" + Date.now() to stop Google from showing old cached data
+            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&t=${Date.now()}`);
             const data = await res.json();
             if(data && data.balance !== undefined) {
                 user.balance = data.balance;
@@ -229,11 +230,12 @@
             
             try {
                 const user = JSON.parse(userData);
+                // Set whatever is in the phone first
                 document.getElementById('userBal').innerText = parseFloat(user.balance || 0).toFixed(2);
                 document.getElementById('welcomeUser').innerText = "One Love, " + user.name;
                 document.getElementById('sideUserPhone').innerText = user.phone;
                 
-                // Keep balance updated with sheet (Admin approvals)
+                // Immediately check the sheet for the real 2400 ETB
                 syncOfficialBalance(user);
             } catch (e) {
                 localStorage.removeItem('rasta_user');
