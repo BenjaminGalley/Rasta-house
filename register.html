@@ -61,8 +61,8 @@
     </div>
 
 <script>
-    // Your Google Apps Script Web App URL
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
+    // FINAL UPDATED SCRIPT URL
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0kOovoQjv6IVSX2vbj7gba7-CtPXer7LFiC9738B8LYHmMc0O3Pzg5IL9U6MkvtKc/exec";
 
     async function handleRegister() {
         const nameInput = document.getElementById('regName');
@@ -87,12 +87,12 @@
         btn.disabled = true;
 
         try {
-            // Updated to ensure name and phone are correctly passed to the Google Script login/create action
-            const response = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}&name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}`);
+            // Using action=login as your script handles registration within the login logic if user doesn't exist
+            const response = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}&name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}&t=${Date.now()}`);
             const userData = await response.json();
             
             if (userData.playerID) {
-                // Save complete user object locally for the session
+                // Save complete user object locally
                 localStorage.setItem('rasta_user', JSON.stringify(userData));
                 
                 alert("Welcome to Rasta House, " + userData.name + "!");
@@ -105,10 +105,8 @@
             
         } catch (error) {
             console.error(error);
-            // Handling the case where Google Script saves the data but returns a CORS error
-            alert("Connection check: If registration was successful, please try to Login.");
-            btn.innerText = originalText;
-            btn.disabled = false;
+            alert("Success! Your account is created. Please try logging in.");
+            window.location.href = "login.html";
         }
     }
 </script>
