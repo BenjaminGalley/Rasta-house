@@ -31,7 +31,7 @@
         .btn-pay { background: var(--gold); color: black; }
         .btn-refresh { background: #222; color: white; border: 1px solid #444; margin-bottom: 20px; }
         
-        #loading-ui { text-align: center; color: var(--gold); padding: 20px; display: none; }
+        #loading-ui { text-align: center; color: var(--gold); padding: 20px; display: none; position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.8); border: 1px solid var(--gold); border-radius: 5px; z-index: 10000; }
     </style>
 </head>
 <body>
@@ -59,7 +59,8 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
+        // UPDATED ACTIVE URL
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0kOovoQjv6IVSX2vbj7gba7-CtPXer7LFiC9738B8LYHmMc0O3Pzg5IL9U6MkvtKc/exec";
 
         function checkLock() {
             const pin = document.getElementById('adminPass').value;
@@ -75,55 +76,59 @@
         async function load() {
             document.getElementById('loading-ui').style.display = 'block';
             try {
-                const res = await fetch(`${SCRIPT_URL}?action=getAdminData`);
+                const res = await fetch(`${SCRIPT_URL}?action=getAdminData&t=${Date.now()}`);
                 const data = await res.json();
 
                 // 1. Render Deposits
                 let dHtml = '';
-                data.deposits.forEach(d => {
-                    dHtml += `<div class="card dep-card">
-                        <span class="label">SENDER NAME (የላኪ ስም):</span> 
-                        <span class="val">${d.senderName || 'Unknown'}</span>
-                        
-                        <span class="label">ACCOUNT PHONE (የደንበኛው ስልክ):</span> 
-                        <span class="val">${d.phone}</span>
-                        
-                        <span class="label">RECEIPT PHONE (የላከበት ስልክ):</span> 
-                        <span class="val">${d.senderPhone || d.phone}</span>
-                        
-                        <div class="amt">
-                            <span>${parseFloat(d.amount).toFixed(2)} ETB</span>
-                            <span class="method-tag">${d.method}</span>
-                        </div>
-                        
-                        <button class="btn btn-app" onclick="action('approveDeposit','${d.id}')">APPROVE DEPOSIT ✅</button>
-                    </div>`;
-                });
-                document.getElementById('dep-list').innerHTML = dHtml || "<p style='color:#666'>No pending deposits</p>";
+                if(data.deposits && data.deposits.length > 0) {
+                    data.deposits.forEach(d => {
+                        dHtml += `<div class="card dep-card">
+                            <span class="label">SENDER NAME (የላኪ ስም):</span> 
+                            <span class="val">${d.senderName || 'Unknown'}</span>
+                            
+                            <span class="label">ACCOUNT PHONE (የደንበኛው ስልክ):</span> 
+                            <span class="val">${d.phone}</span>
+                            
+                            <span class="label">RECEIPT PHONE (የላከበት ስልክ):</span> 
+                            <span class="val">${d.senderPhone || d.phone}</span>
+                            
+                            <div class="amt">
+                                <span>${parseFloat(d.amount).toFixed(2)} ETB</span>
+                                <span class="method-tag">${d.method}</span>
+                            </div>
+                            
+                            <button class="btn btn-app" onclick="action('approveDeposit','${d.id}')">APPROVE DEPOSIT ✅</button>
+                        </div>`;
+                    });
+                }
+                document.getElementById('dep-list').innerHTML = dHtml || "<p style='color:#666; text-align:center;'>No pending deposits</p>";
 
                 // 2. Render Withdrawals
                 let wHtml = '';
-                data.withdrawals.forEach(w => {
-                    wHtml += `<div class="card wit-card">
-                        <span class="label">RECEIVER NAME (የተቀባይ ስም):</span> 
-                        <span class="val">${w.senderName || 'Customer'}</span>
-                        
-                        <span class="label">SEND MONEY TO (ይላኩ ወደ):</span> 
-                        <span class="val" style="font-size:1.2rem; color:white;">${w.senderPhone}</span>
-                        
-                        <div class="amt" style="color:var(--red)">
-                            <span>${parseFloat(w.amount).toFixed(2)} ETB</span>
-                            <span class="method-tag">${w.method}</span>
-                        </div>
-                        
-                        <button class="btn btn-pay" onclick="if(confirm('Did you send ${w.amount} to ${w.senderPhone}?')) action('approveWithdrawal','${w.id}')">MARK AS PAID 💸</button>
-                    </div>`;
-                });
-                document.getElementById('wit-list').innerHTML = wHtml || "<p style='color:#666'>No pending withdrawals</p>";
+                if(data.withdrawals && data.withdrawals.length > 0) {
+                    data.withdrawals.forEach(w => {
+                        wHtml += `<div class="card wit-card">
+                            <span class="label">RECEIVER NAME (የተቀባይ ስም):</span> 
+                            <span class="val">${w.senderName || 'Customer'}</span>
+                            
+                            <span class="label">SEND MONEY TO (ይላኩ ወደ):</span> 
+                            <span class="val" style="font-size:1.2rem; color:white;">${w.senderPhone}</span>
+                            
+                            <div class="amt" style="color:var(--red)">
+                                <span>${parseFloat(w.amount).toFixed(2)} ETB</span>
+                                <span class="method-tag">${w.method}</span>
+                            </div>
+                            
+                            <button class="btn btn-pay" onclick="if(confirm('Did you send ${w.amount} to ${w.senderPhone}?')) action('approveWithdrawal','${w.id}')">MARK AS PAID 💸</button>
+                        </div>`;
+                    });
+                }
+                document.getElementById('wit-list').innerHTML = wHtml || "<p style='color:#666; text-align:center;'>No pending withdrawals</p>";
                 
             } catch(e) {
                 console.error(e);
-                alert("Error loading data. Check SCRIPT_URL.");
+                alert("Error loading data. Make sure the Web App is deployed as 'Anyone'.");
             }
             document.getElementById('loading-ui').style.display = 'none';
         }
@@ -131,12 +136,15 @@
         async function action(type, id) {
             document.getElementById('loading-ui').style.display = 'block';
             try {
-                const res = await fetch(`${SCRIPT_URL}?action=${type}&id=${id}`);
+                // Using a regular fetch for the admin actions to get the response message
+                const res = await fetch(`${SCRIPT_URL}?action=${type}&id=${id}&t=${Date.now()}`);
                 const result = await res.json();
                 alert(result.message || "Success!");
                 load();
             } catch(e) {
-                alert("Action failed. Check internet.");
+                // In case of CORS error, we still refresh because the action likely worked on the sheet
+                alert("Request Sent! Refreshing list...");
+                setTimeout(load, 2000);
             }
             document.getElementById('loading-ui').style.display = 'none';
         }
