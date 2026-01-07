@@ -6,18 +6,20 @@
         body { background: #000; color: #FFD100; font-family: sans-serif; text-align: center; padding-top: 100px; }
         .loader { border: 5px solid #111; border-top: 5px solid #008542; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .status-text { margin-top: 20px; font-size: 18px; }
     </style>
 </head>
 <body>
-    <div class="loader"></div>
-    <h3>Checking Ledger... / ሂሳብ በመፈተሽ ላይ...</h3>
+    <div class="loader" id="spinner"></div>
+    <h3 id="statusText">Checking Ledger... / ሂሳብ በመፈተሽ ላይ...</h3>
 
     <script>
-        // UPDATED SCRIPT URL TO MATCH SYSTEM
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0kOovoQjv6IVSX2vbj7gba7-CtPXer7LFiC9738B8LYHmMc0O3Pzg5IL9U6MkvtKc/exec";
+        // NEW DEPLOYED SCRIPT URL
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyctgyddXtB4E4GjNlm5dygmh-RI960Fa8qqa4rY7WarCZAZ0wb8VNQXtzulFh7dvAm/exec";
         
         async function sync() {
             let user = JSON.parse(localStorage.getItem('rasta_user'));
+            const statusEl = document.getElementById('statusText');
             
             // If no user is logged in, send them back to start
             if(!user) { 
@@ -26,25 +28,34 @@
             }
 
             try {
-                // 1. Ask the script for the latest balance using cache buster (t=Date.now)
+                // 1. Ask the script for the latest balance using Simba House logic
+                // Using action=login as it returns the full user object from the "Users" sheet
                 const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&t=${Date.now()}`);
                 const data = await res.json();
                 
-                if(data && data.balance !== undefined) {
-                    // 2. Update local storage with the balance from the sheet
+                if(data && data.status === "success") {
+                    // 2. Update local storage with the real balance from the sheet
                     user.balance = data.balance;
-                    user.name = data.name || user.name; // Keep name updated too
+                    user.name = data.name || user.name;
+                    user.playerID = data.playerID || user.playerID;
+                    
                     localStorage.setItem('rasta_user', JSON.stringify(user));
+                    
+                    statusEl.innerText = "Wallet Updated! / ሂሳብ ተዘምኗል!";
+                    statusEl.style.color = "#00FF88";
+                    document.getElementById('spinner').style.display = 'none';
                     
                     console.log("Sync complete. New balance:", data.balance);
                 }
             } catch (e) {
                 console.error("Sync Error:", e);
-                // We don't alert here to avoid annoying the user if the network is just slightly slow
+                statusEl.innerText = "Connection Error... Redirecting.";
             }
             
-            // 3. Move to profile regardless so the user isn't stuck on a loader
-            window.location.href = 'profile.html';
+            // 3. Brief delay so user sees the "Updated" message, then move to profile
+            setTimeout(() => {
+                window.location.href = 'profile.html';
+            }, 1200);
         }
 
         // Run sync when page loads
