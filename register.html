@@ -29,7 +29,6 @@
         }
         input:focus { border-color: var(--rasta-gold); outline: none; box-shadow: 0 0 8px rgba(255, 209, 0, 0.2); }
         
-        /* Password Eye Toggle */
         .eye-toggle {
             position: absolute; right: 15px; top: 42px; color: var(--rasta-gold);
             cursor: pointer; font-size: 1.2rem; user-select: none;
@@ -80,7 +79,7 @@
     </div>
 
 <script>
-    // NEW DEPLOYED SCRIPT URL
+    // THE MASTER SCRIPT URL
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyctgyddXtB4E4GjNlm5dygmh-RI960Fa8qqa4rY7WarCZAZ0wb8VNQXtzulFh7dvAm/exec";
 
     function togglePassword() {
@@ -89,55 +88,53 @@
     }
 
     async function handleRegister() {
-        const name = document.getElementById('regName').value.trim();
-        const phone = document.getElementById('regPhone').value.trim();
-        const pass = document.getElementById('regPass').value.trim();
+        const nameInput = document.getElementById('regName').value.trim();
+        const phoneInput = document.getElementById('regPhone').value.trim();
+        const passInput = document.getElementById('regPass').value.trim();
         const btn = document.getElementById('submitBtn');
 
-        // Clean validation
-        if(!name || !phone || !pass) {
-            alert("All fields are required! / እባክዎ ሁሉንም መረጃዎች ይሙሉ");
+        if(!nameInput || !phoneInput || !passInput) {
+            alert("All fields are required!");
             return;
         }
 
-        if(phone.length < 10) {
-            alert("Invalid Phone Number! / የተሳሳተ ስልክ ቁጥር");
-            return;
-        }
-
-        if(pass.length < 4) {
-            alert("Password too short! / የይለፍ ቃል ቢያንስ 4 መሆን አለበት");
-            return;
-        }
+        // Clean phone for Google Sheet consistency (removes leading 0)
+        const cleanPhone = phoneInput.replace(/^0+/, '');
 
         btn.innerText = "PROCESSING...";
         btn.disabled = true;
 
         try {
-            // Your script handles registration via 'action=login'
-            // It searches for the phone; if not found, it appends a new row
-            const url = `${SCRIPT_URL}?action=login&phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}&t=${Date.now()}`;
+            // STEP 1: Call 'register' action
+            const regUrl = `${SCRIPT_URL}?action=register&phone=${encodeURIComponent(cleanPhone)}&name=${encodeURIComponent(nameInput)}&pass=${encodeURIComponent(passInput)}`;
             
-            const response = await fetch(url);
-            const data = await response.json();
+            const response = await fetch(regUrl);
+            const result = await response.text();
             
-            if (data && data.status === "success") {
-                // Save complete user object to browser memory
-                localStorage.setItem('rasta_user', JSON.stringify(data));
+            if (result === "EXISTS") {
+                alert("This phone number is already registered! / ይህ ስልክ ቀድሞ ተመዝግቧል");
+                btn.innerText = "CREATE ACCOUNT";
+                btn.disabled = false;
+            } else if (result === "SUCCESS") {
+                // STEP 2: Registration worked, now fetch the user data to log them in automatically
+                const loginUrl = `${SCRIPT_URL}?action=login&phone=${encodeURIComponent(cleanPhone)}`;
+                const loginRes = await fetch(loginUrl);
+                const userData = await loginRes.json();
                 
-                alert("Account Created Successfully! Welcome " + (data.name || name));
+                localStorage.setItem('rasta_user', JSON.stringify(userData));
+                alert("Welcome to Rasta House, " + nameInput + "!");
                 window.location.href = "index.html";
             } else {
-                alert("Registration Failed. Please try again.");
+                alert("Registration Error. Please try again.");
                 btn.innerText = "CREATE ACCOUNT";
                 btn.disabled = false;
             }
             
         } catch (error) {
             console.error("Register Error:", error);
-            // In case of a slight network error, usually the row is still created
-            alert("Checking account status... Please try to Login.");
-            window.location.href = "login.html";
+            alert("Connection Error. Please try again.");
+            btn.innerText = "CREATE ACCOUNT";
+            btn.disabled = false;
         }
     }
 </script>
