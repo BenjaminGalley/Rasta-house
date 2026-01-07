@@ -2,48 +2,79 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RASTA CRASH</title>
     <style>
-        :root { --gold: #FFD100; --green: #008542; --red: #E71D36; }
-        body { background: #000; color: white; font-family: sans-serif; text-align: center; margin: 0; }
-        .header { padding: 15px; background: #111; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; }
+        :root { --gold: #FFD100; --green: #008542; --red: #E71D36; --dark: #0a0a0a; }
         
+        body { 
+            background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; 
+            text-align: center; margin: 0; overflow: hidden;
+        }
+
+        .header { 
+            padding: 15px; background: #000; border-bottom: 3px solid var(--gold); 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .bal-pill { 
+            background: linear-gradient(to right, var(--green), #004d26); 
+            padding: 8px 15px; border-radius: 20px; border: 1px solid var(--gold); font-weight: bold; 
+        }
+
+        /* --- GAME AREA --- */
         .game-area { 
-            height: 300px; margin: 20px; background: #0a0a0a; border-radius: 20px; 
-            position: relative; overflow: hidden; border: 1px solid #333;
+            height: 320px; margin: 15px; background: radial-gradient(circle at center, #111, #000); 
+            border-radius: 20px; position: relative; overflow: hidden; border: 2px solid #222;
         }
         
         #multiplier { 
-            font-size: 4rem; font-weight: bold; margin-top: 100px; color: var(--gold);
-            text-shadow: 0 0 20px rgba(255,208,0,0.5);
+            position: relative; z-index: 10; font-size: 4.5rem; font-weight: 900; 
+            margin-top: 100px; color: var(--gold); text-shadow: 0 0 30px rgba(255,208,0,0.4);
         }
 
         .rocket {
-            width: 60px; height: 60px;
+            width: 70px; height: 70px;
             background-image: url('asset/asset.nine.jpg');
-            background-size: 240px 240px;
-            background-position: -120px -60px; /* Focuses on the Portal/Rocket icon */
+            background-size: 400% 400%; /* Sprite mapping */
+            background-position: 33.3% 33.3%; /* Focuses on the rocket/portal icon */
             position: absolute; bottom: 20px; left: 20px;
-            transition: all 0.1s linear;
+            transition: transform 0.1s linear;
+            filter: drop-shadow(0 0 10px var(--green));
+            z-index: 5;
         }
 
-        .controls { padding: 20px; }
-        input { background: #111; border: 1px solid #444; color: white; padding: 15px; width: 100px; border-radius: 10px; font-size: 1.2rem; }
+        /* --- CONTROLS --- */
+        .controls { padding: 10px; }
         
-        .btn { 
-            width: 80%; padding: 20px; margin-top: 15px; border: none; border-radius: 10px; 
-            font-size: 1.5rem; font-weight: bold; cursor: pointer; color: white;
+        .bet-bar {
+            display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px;
         }
-        .btn-bet { background: var(--green); }
-        .btn-cash { background: var(--gold); color: black; display: none; }
+        .step-btn {
+            width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--gold);
+            background: #222; color: var(--gold); font-size: 1.5rem; font-weight: bold;
+        }
+        .step-btn:active { background: var(--gold); color: black; }
+        
+        .bet-info { background: #000; padding: 5px 20px; border-radius: 12px; border: 1px solid #333; }
+        .bet-info small { display: block; font-size: 0.6rem; color: #888; text-transform: uppercase; }
+        .bet-info b { font-size: 1.4rem; color: var(--gold); }
+
+        .btn { 
+            width: 90%; padding: 20px; border: none; border-radius: 50px; 
+            font-size: 1.6rem; font-weight: 900; cursor: pointer; color: white;
+            text-shadow: 2px 2px #000; transition: 0.2s;
+        }
+        .btn-bet { background: linear-gradient(var(--green), #004d26); box-shadow: 0 6px 0 #002e17; }
+        .btn-cash { background: linear-gradient(var(--gold), #b39200); color: black; text-shadow: none; box-shadow: 0 6px 0 #6e5a00; display: none; }
+        .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 inherit; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <span>RASTA CRASH</span>
-    <span id="balDisplay">0.00 ETB</span>
+    <div onclick="location.href='index.html'" style="cursor:pointer">🏠</div>
+    <div class="bal-pill" id="balDisplay">0.00 ETB</div>
+    <div id="speaker" onclick="toggleMusic()" style="cursor:pointer; font-size: 1.2rem;">🔈</div>
 </div>
 
 <div class="game-area">
@@ -52,49 +83,73 @@
 </div>
 
 <div class="controls">
-    <input type="number" id="betAmt" value="2" min="2">
+    <div class="bet-bar" id="betBar">
+        <button class="step-btn" onclick="adjustBet(-5)">-</button>
+        <div class="bet-info">
+            <small>BET AMOUNT</small>
+            <b id="betAmtLabel">2</b>
+        </div>
+        <button class="step-btn" onclick="adjustBet(5)">+</button>
+    </div>
+
     <button class="btn btn-bet" id="betBtn" onclick="startGame()">PLACE BET</button>
     <button class="btn btn-cash" id="cashBtn" onclick="cashOut()">CASH OUT</button>
 </div>
 
+<audio id="bgMusic" loop>
+    <source src="https://www.free-stock-music.com/music/alexander-nakarada-be-jammin.mp3" type="audio/mpeg">
+</audio>
+
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
-    let user = JSON.parse(localStorage.getItem('rasta_user'));
+    let user = JSON.parse(localStorage.getItem('rasta_user')) || { balance: 0, phone: "000" };
     let currentMult = 1.00;
     let crashPoint = 0;
     let gameInterval;
     let activeBet = 0;
+    let currentBetInput = 2;
 
-    document.getElementById('balDisplay').innerText = user.balance.toFixed(2) + " ETB";
+    function init() {
+        document.getElementById('balDisplay').innerText = parseFloat(user.balance).toFixed(2) + " ETB";
+    }
+
+    function adjustBet(val) {
+        currentBetInput = Math.max(2, currentBetInput + val);
+        document.getElementById('betAmtLabel').innerText = currentBetInput;
+    }
+
+    function toggleMusic() {
+        const m = document.getElementById('bgMusic');
+        const s = document.getElementById('speaker');
+        if(m.paused) { m.play(); s.innerText = "🔊"; }
+        else { m.pause(); s.innerText = "🔈"; }
+    }
 
     function startGame() {
-        const bet = parseFloat(document.getElementById('betAmt').value);
-        if (bet < 2) return alert("Min bet 2 ETB");
-        if (bet > user.balance) return alert("Insufficient Balance");
+        if (currentBetInput > user.balance) return alert("Insufficient Balance");
 
-        // Deduct bet
-        user.balance -= bet;
-        activeBet = bet;
+        user.balance -= currentBetInput;
+        activeBet = currentBetInput;
         updateUI();
 
-        // UI Changes
         document.getElementById('betBtn').style.display = 'none';
+        document.getElementById('betBar').style.visibility = 'hidden';
         document.getElementById('cashBtn').style.display = 'inline-block';
         
-        // Generate Crash Point (House Edge Built-in)
-        // 96% RTP Logic
-        crashPoint = Math.random() * 10 + 1;
-        if (Math.random() < 0.04) crashPoint = 1.00; // Instant crash 4% of the time
+        // Casino Logic: 97% RTP. Crash point distribution.
+        const r = Math.random();
+        if (r < 0.03) crashPoint = 1.00; // Instant crash
+        else crashPoint = 0.97 / (1 - Math.random()); 
+        if (crashPoint > 50) crashPoint = 50; // Cap at 50x
 
         currentMult = 1.00;
         gameInterval = setInterval(() => {
-            currentMult += 0.01;
+            currentMult += (currentMult * 0.005) + 0.01; // Exponential growth
             document.getElementById('multiplier').innerText = currentMult.toFixed(2) + "x";
             
-            // Move Rocket
-            let pos = (currentMult - 1) * 20;
-            document.getElementById('rocket').style.left = (20 + pos) + "px";
-            document.getElementById('rocket').style.bottom = (20 + pos) + "px";
+            // Move Rocket diagonally
+            let pos = Math.min((currentMult - 1) * 40, 250);
+            document.getElementById('rocket').style.transform = `translate(${pos}px, -${pos}px)`;
 
             if (currentMult >= crashPoint) {
                 endGame(true);
@@ -103,9 +158,11 @@
     }
 
     function cashOut() {
+        if(activeBet <= 0) return;
         let win = activeBet * currentMult;
         user.balance += win;
-        alert("CASHED OUT! You won " + win.toFixed(2) + " ETB");
+        document.getElementById('multiplier').innerText = "WON " + win.toFixed(2);
+        document.getElementById('multiplier').style.color = 'var(--green)';
         endGame(false);
     }
 
@@ -114,30 +171,34 @@
         if (crashed) {
             document.getElementById('multiplier').style.color = 'var(--red)';
             document.getElementById('multiplier').innerText = "CRASHED!";
+            document.getElementById('rocket').style.filter = 'grayscale(1) brightness(0.5)';
         }
         
         activeBet = 0;
         updateUI();
-        syncDB();
+        saveAndSync();
 
         setTimeout(() => {
             document.getElementById('betBtn').style.display = 'inline-block';
+            document.getElementById('betBar').style.visibility = 'visible';
             document.getElementById('cashBtn').style.display = 'none';
             document.getElementById('multiplier').style.color = 'var(--gold)';
             document.getElementById('multiplier').innerText = "1.00x";
-            document.getElementById('rocket').style.left = "20px";
-            document.getElementById('rocket').style.bottom = "20px";
-        }, 2000);
+            document.getElementById('rocket').style.transform = `translate(0, 0)`;
+            document.getElementById('rocket').style.filter = 'drop-shadow(0 0 10px var(--green))';
+        }, 2500);
     }
 
     function updateUI() {
-        document.getElementById('balDisplay').innerText = user.balance.toFixed(2) + " ETB";
-        localStorage.setItem('rasta_user', JSON.stringify(user));
+        document.getElementById('balDisplay').innerText = parseFloat(user.balance).toFixed(2) + " ETB";
     }
 
-    function syncDB() {
-        fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&name=${user.name}&updateBal=${user.balance}`);
+    function saveAndSync() {
+        localStorage.setItem('rasta_user', JSON.stringify(user));
+        fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&updateBal=${user.balance}`);
     }
+
+    window.onload = init;
 </script>
 </body>
 </html>
