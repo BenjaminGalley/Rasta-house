@@ -2,186 +2,262 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RASTA REVELATION</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RASTA REVELATION | SLOT</title>
     <style>
-        :root { --gold: #FFD100; --green: #008542; --red: #E71D36; }
-        body { background: #000; color: white; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; overflow-x: hidden; }
+        :root { 
+            --gold: #FFD100; --green: #008542; --red: #E71D36; 
+            --dark: #0a0a0a; --glass: rgba(255,255,255,0.1);
+        }
         
-        .header { padding: 15px; background: #111; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; }
-        .bal-display { background: #222; padding: 8px 15px; border-radius: 20px; border: 1px solid var(--gold); font-weight: bold; }
-
-        /* The Slot Machine Body */
-        .machine-frame { 
-            margin: 20px auto; width: 340px; background: linear-gradient(145deg, #1a1a1a, #000); 
-            padding: 20px; border: 6px solid var(--gold); border-radius: 30px;
-            box-shadow: 0 0 50px rgba(0, 133, 66, 0.3);
+        body { 
+            background: var(--dark); color: white; font-family: 'Segoe UI', Arial, sans-serif; 
+            margin: 0; text-align: center; overflow: hidden;
         }
 
-        .reels-container { display: flex; justify-content: center; gap: 10px; background: #000; padding: 15px; border-radius: 15px; overflow: hidden; }
+        /* --- HEADER --- */
+        .header { 
+            padding: 15px; background: #000; border-bottom: 3px solid var(--gold); 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .balance-box { 
+            background: linear-gradient(to right, var(--green), #004d26);
+            padding: 8px 15px; border-radius: 20px; border: 1px solid var(--gold); font-weight: 900;
+        }
+
+        /* --- SLOT MACHINE --- */
+        .machine-container {
+            margin: 20px auto; width: 92%; max-width: 360px;
+            background: #1a1a1a; padding: 15px; border: 5px solid #333;
+            border-radius: 25px; box-shadow: 0 0 40px rgba(0,0,0,0.8);
+            position: relative;
+        }
         
-        .reel-box { width: 90px; height: 90px; background: #111; border-radius: 12px; overflow: hidden; position: relative; border: 1px solid #333; }
-        
+        /* Win Flashing Effect */
+        .win-glow { animation: gold-glow 0.5s infinite alternate; }
+        @keyframes gold-glow { 
+            from { box-shadow: 0 0 10px var(--gold); border-color: var(--gold); } 
+            to { box-shadow: 0 0 30px var(--gold); border-color: white; } 
+        }
+
+        .reels-window {
+            display: flex; justify-content: space-around; gap: 8px;
+            background: #000; padding: 10px; border-radius: 15px;
+            height: 100px; overflow: hidden; border: 2px solid #222;
+        }
+
+        .reel {
+            width: 90px; position: relative;
+            transition: transform 2.5s cubic-bezier(0.1, 0, 0.1, 1);
+        }
+
         .symbol {
-            width: 90px; height: 90px;
+            width: 90px; height: 100px;
             background-image: url('asset/asset.rasta.jpg');
-            background-size: 360px 360px; /* 4x4 Grid */
-            position: absolute; top: 0; left: 0;
-            transition: transform 0.1s;
+            background-size: 400% 400%; /* Points to 4x4 grid */
+            background-repeat: no-repeat;
         }
 
-        /* Fast Slide Animation */
-        .slide-anim { animation: rastaSlide 0.12s infinite linear; }
-        @keyframes rastaSlide { 
-            0% { transform: translateY(-100%); filter: blur(3px); } 
-            100% { transform: translateY(100%); filter: blur(6px); } 
-        }
+        /* --- CONTROLS --- */
+        .status-msg { height: 40px; color: var(--gold); font-weight: bold; margin: 15px 0; font-size: 1.1rem; text-transform: uppercase; }
 
-        .controls { margin-top: 15px; }
-        .bet-box { margin-bottom: 15px; }
-        input { background: #111; border: 2px solid #444; color: var(--gold); padding: 12px; width: 80px; text-align: center; font-size: 1.2rem; border-radius: 10px; }
-        
-        .btn-spin { 
-            width: 85%; padding: 20px; background: linear-gradient(to bottom, var(--green), #004d26); 
-            color: white; border: none; border-radius: 50px; font-weight: bold; font-size: 1.4rem; 
-            cursor: pointer; box-shadow: 0 6px 0 #002e17; text-shadow: 1px 1px 2px #000;
+        .bet-bar {
+            display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px;
         }
-        .btn-spin:active { transform: translateY(4px); box-shadow: 0 2px 0 #002e17; }
+        .step-btn {
+            width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--gold);
+            background: #222; color: var(--gold); font-size: 1.5rem; font-weight: bold; cursor: pointer;
+        }
+        .step-btn:active { transform: scale(0.9); background: var(--gold); color: #000; }
         
-        #message { height: 30px; color: var(--gold); font-weight: bold; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
-        
-        /* Music Control */
-        .music-toggle { margin-top: 20px; font-size: 0.8rem; color: #666; cursor: pointer; }
+        .bet-display {
+            background: #000; border: 2px solid #444; border-radius: 10px;
+            padding: 5px 15px; min-width: 80px;
+        }
+        .bet-display span { display: block; font-size: 0.7rem; color: #888; }
+        .bet-display b { font-size: 1.4rem; color: var(--gold); }
+
+        .spin-btn {
+            width: 85%; padding: 18px; border-radius: 50px; border: none;
+            background: linear-gradient(var(--green), #004d26); color: white;
+            font-size: 1.6rem; font-weight: 900; cursor: pointer;
+            box-shadow: 0 6px 0 #002e17; text-shadow: 2px 2px #000;
+        }
+        .spin-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #002e17; }
+        .spin-btn:disabled { background: #444; box-shadow: 0 2px 0 #222; filter: grayscale(1); }
+
+        .audio-icon { font-size: 1.5rem; cursor: pointer; filter: drop-shadow(0 0 5px var(--gold)); }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div style="text-align:left">
-        <div style="font-weight:bold; color:var(--gold)">RASTA REVELATION</div>
-        <div style="font-size:0.6rem; color:var(--green)">HAIL THE KING</div>
-    </div>
-    <div class="bal-display" id="balDisplay">0.00 ETB</div>
+    <div onclick="location.href='index.html'" style="cursor:pointer">⬅️</div>
+    <div class="balance-box" id="userBalance">0.00 ETB</div>
+    <div class="audio-icon" onclick="toggleMusic()" id="speaker">🔈</div>
 </div>
 
-<div class="machine-frame">
-    <div id="message">PRESS SPIN TO REVEAL</div>
-    <div class="reels-container">
-        <div class="reel-box"><div class="symbol" id="r1"></div></div>
-        <div class="reel-box"><div class="symbol" id="r2"></div></div>
-        <div class="reel-box"><div class="symbol" id="r3"></div></div>
+<div class="machine-container" id="machine">
+    <div class="status-msg" id="msg">RASTA REVELATION</div>
+    <div class="reels-window">
+        <div class="reel" id="reel0"></div>
+        <div class="reel" id="reel1"></div>
+        <div class="reel" id="reel2"></div>
     </div>
 </div>
 
-<div class="controls">
-    <div class="bet-box">
-        <small style="display:block; color:#888; margin-bottom:5px;">BET (MIN 2 BIRR)</small>
-        <input type="number" id="betAmt" value="5" min="2">
+<div class="bet-bar">
+    <button class="step-btn" onclick="changeBet(-2)">-</button>
+    <div class="bet-display">
+        <span>BET BIRR</span>
+        <b id="betAmt">2</b>
     </div>
-    <button class="btn-spin" onclick="handleSpin()" id="spinBtn">SPIN</button>
-    <div class="music-toggle" onclick="toggleMusic()">🎵 CLICK FOR REGGAE VIBES</div>
+    <button class="step-btn" onclick="changeBet(2)">+</button>
 </div>
 
-<audio id="reggaeBg" loop>
+<button class="spin-btn" id="spinBtn" onclick="spin()">REVEAL</button>
+
+<audio id="bgMusic" loop>
     <source src="https://www.free-stock-music.com/music/alexander-nakarada-be-jammin.mp3" type="audio/mpeg">
 </audio>
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
-    let user = JSON.parse(localStorage.getItem('rasta_user')) || { balance: 100, name: "King", phone: "000" };
-    
-    // Mapping symbols based on the 4x4 asset.rasta.jpg
-    const rastaIcons = [
-        { name: 'Haile Selassie', x: 0, y: 0, mult: 50 },  // Jackpot
-        { name: 'Bob Marley', x: 90, y: 0, mult: 25 },     // High
-        { name: 'Damian Marley', x: 180, y: 0, mult: 15 }, // Med
-        { name: 'Lion of Judah', x: 270, y: 0, mult: 10 }, // Med
-        { name: 'Marijuana Tree', x: 0, y: 90, mult: 5 },  // Low
-        { name: 'Marijuana Leaf', x: 90, y: 90, mult: 3 }, // Low
-        { name: 'Rolled Ganja', x: 180, y: 90, mult: 2 }   // Low
+    let user = JSON.parse(localStorage.getItem('rasta_user')) || { balance: 0, phone: "000" };
+    let currentBet = 2;
+    let isSpinning = false;
+
+    // SPRITE MAP: Standardizing the 4x4 asset grid
+    // Logic: [Haile, Bob, Damian, Lion, Tree, Leaf, Joint]
+    const icons = [
+        { name: 'Jackpot', x: 0, y: 0, mult: 100 },
+        { name: 'King', x: 33.3, y: 0, mult: 50 },
+        { name: 'Prince', x: 66.6, y: 0, mult: 20 },
+        { name: 'Lion', x: 100, y: 0, mult: 15 },
+        { name: 'Herb', x: 0, y: 33.3, mult: 10 },
+        { name: 'Leaf', x: 33.3, y: 33.3, mult: 5 },
+        { name: 'Vibe', x: 66.6, y: 33.3, mult: 2 }
     ];
 
-    function updateUI() {
-        document.getElementById('balDisplay').innerText = user.balance.toFixed(2) + " ETB";
+    function init() {
+        document.getElementById('userBalance').innerText = parseFloat(user.balance).toFixed(2) + " ETB";
+        // Fill reels with random symbols initially
+        for(let i=0; i<3; i++) {
+            populateReel(i);
+        }
     }
 
-    function setSymbol(id, idx) {
-        const el = document.getElementById(id);
-        el.style.backgroundPosition = `-${rastaIcons[idx].x}px -${rastaIcons[idx].y}px`;
+    function populateReel(reelIdx) {
+        const reel = document.getElementById('reel' + reelIdx);
+        reel.innerHTML = '';
+        // Create 20 symbols for the "strip"
+        for(let i=0; i<20; i++) {
+            const sym = document.createElement('div');
+            sym.className = 'symbol';
+            const randomIcon = icons[Math.floor(Math.random() * icons.length)];
+            sym.style.backgroundPosition = `${randomIcon.x}% ${randomIcon.y}%`;
+            reel.appendChild(sym);
+        }
     }
 
-    // Initial State
-    setSymbol('r1', 0); setSymbol('r2', 1); setSymbol('r3', 3);
-    updateUI();
+    function changeBet(val) {
+        if(isSpinning) return;
+        currentBet += val;
+        if(currentBet < 2) currentBet = 2;
+        document.getElementById('betAmt').innerText = currentBet;
+    }
 
     function toggleMusic() {
-        const audio = document.getElementById('reggaeBg');
-        if (audio.paused) {
-            audio.play().catch(e => console.log("User interaction needed first"));
-            document.querySelector('.music-toggle').innerText = "🔊 VIBING...";
+        const music = document.getElementById('bgMusic');
+        const speaker = document.getElementById('speaker');
+        if(music.paused) {
+            music.play();
+            speaker.innerText = "🔊";
         } else {
-            audio.pause();
-            document.querySelector('.music-toggle').innerText = "🔇 MUSIC OFF";
+            music.pause();
+            speaker.innerText = "🔈";
         }
     }
 
-    async function handleSpin() {
-        const bet = parseFloat(document.getElementById('betAmt').value);
-        if (bet < 2) return alert("Min bet 2 Birr");
-        if (bet > user.balance) return alert("Insufficient Balance");
+    async function spin() {
+        if(isSpinning) return;
+        if(user.balance < currentBet) return alert("Low Balance!");
 
-        // Start Music automatically if it's the first spin
-        document.getElementById('reggaeBg').play().catch(e => {});
-
-        user.balance -= bet;
+        isSpinning = true;
+        user.balance -= currentBet;
         updateUI();
-        document.getElementById('spinBtn').disabled = true;
-        document.getElementById('message').innerText = "REVEALING...";
-
-        // Start Animations
-        document.querySelectorAll('.symbol').forEach(s => s.classList.add('slide-anim'));
-
-        setTimeout(() => {
-            stopReels(bet);
-        }, 1500);
-    }
-
-    function stopReels(bet) {
-        document.querySelectorAll('.symbol').forEach(s => s.classList.remove('slide-anim'));
         
-        const res = [
-            Math.floor(Math.random() * rastaIcons.length),
-            Math.floor(Math.random() * rastaIcons.length),
-            Math.floor(Math.random() * rastaIcons.length)
+        document.getElementById('spinBtn').disabled = true;
+        document.getElementById('msg').innerText = "SHUFFLING...";
+        document.getElementById('machine').classList.remove('win-glow');
+
+        // Spin Animation
+        for(let i=0; i<3; i++) {
+            const reel = document.getElementById('reel' + i);
+            reel.style.transition = 'none';
+            reel.style.transform = 'translateY(0)';
+            
+            // Forces reflow
+            void reel.offsetWidth;
+
+            reel.style.transition = `transform ${2 + (i * 0.5)}s cubic-bezier(0.1, 0, 0.1, 1)`;
+            reel.style.transform = 'translateY(-1800px)'; // Moves to the end of the 20 symbols
+        }
+
+        // Logic for outcome
+        const results = [
+            Math.floor(Math.random() * icons.length),
+            Math.floor(Math.random() * icons.length),
+            Math.floor(Math.random() * icons.length)
         ];
 
-        setSymbol('r1', res[0]);
-        setSymbol('r2', res[1]);
-        setSymbol('r3', res[2]);
+        // After animation ends
+        setTimeout(() => {
+            // Set the final symbol at the bottom to match result
+            for(let i=0; i<3; i++) {
+                const reel = document.getElementById('reel' + i);
+                const lastSymbol = reel.lastElementChild;
+                lastSymbol.style.backgroundPosition = `${icons[results[i]].x}% ${icons[results[i]].y}%`;
+            }
+            
+            checkWin(results);
+            isSpinning = false;
+            document.getElementById('spinBtn').disabled = false;
+        }, 3000);
+    }
 
-        let win = 0;
-        // Logic: 3 of a kind wins big
-        if (res[0] === res[1] && res[1] === res[2]) {
-            win = bet * rastaIcons[res[0]].mult;
-            document.getElementById('message').innerText = "JAH BLESS! WIN: " + win + " ETB";
+    function checkWin(res) {
+        let winAmt = 0;
+        const msgEl = document.getElementById('msg');
+
+        if(res[0] === res[1] && res[1] === res[2]) {
+            winAmt = currentBet * icons[res[0]].mult;
+            msgEl.innerText = "✨ BIG REVELATION: " + winAmt + " ETB ✨";
+            document.getElementById('machine').classList.add('win-glow');
         } 
-        // Logic: 2 of a kind wins smaller
-        else if (res[0] === res[1] || res[1] === res[2] || res[0] === res[2]) {
-            win = bet * 1.5;
-            document.getElementById('message').innerText = "NICE VIBE: " + win + " ETB";
-        } else {
-            document.getElementById('message').innerText = "TRY AGAIN";
+        else if(res[0] === res[1] || res[1] === res[2] || res[0] === res[2]) {
+            winAmt = currentBet * 2;
+            msgEl.innerText = "NICE VIBE: " + winAmt + " ETB";
+        } 
+        else {
+            msgEl.innerText = "TRY AGAIN";
         }
 
-        user.balance += win;
+        user.balance += winAmt;
         updateUI();
-        document.getElementById('spinBtn').disabled = false;
-        
-        // Sync with Database
-        localStorage.setItem('rasta_user', JSON.stringify(user));
-        fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&name=${user.name}&updateBal=${user.balance}`);
+        saveAndSync();
     }
-</script>
 
+    function updateUI() {
+        document.getElementById('userBalance').innerText = parseFloat(user.balance).toFixed(2) + " ETB";
+    }
+
+    function saveAndSync() {
+        localStorage.setItem('rasta_user', JSON.stringify(user));
+        fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&updateBal=${user.balance}`);
+    }
+
+    window.onload = init;
+</script>
 </body>
 </html>
