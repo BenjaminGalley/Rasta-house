@@ -23,7 +23,6 @@
             align-items: center; 
         }
 
-        /* Header Style */
         .profile-header {
             width: 100%;
             background: var(--dark-surface);
@@ -68,7 +67,6 @@
         .balance-amount { font-size: 2.5rem; font-weight: bold; color: var(--rasta-green); margin: 5px 0; }
         .refresh-status { font-size: 0.7rem; color: #666; margin-top: 5px; }
 
-        /* Form Styling */
         .container { width: 90%; max-width: 400px; padding-bottom: 100px; }
         
         .action-tabs { 
@@ -224,7 +222,6 @@
     </div>
 
 <script>
-    // SCRIPT URL
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyctgyddXtB4E4GjNlm5dygmh-RI960Fa8qqa4rY7WarCZAZ0wb8VNQXtzulFh7dvAm/exec";
     
     let user = JSON.parse(localStorage.getItem('rasta_user'));
@@ -234,11 +231,8 @@
     function updateUI() {
         document.getElementById('userBal').innerText = parseFloat(user.balance || 0).toFixed(2);
         document.getElementById('displayUserName').innerText = user.name || "Rasta Player";
-        
-        // This ensures the UI shows the phone number regardless of which label was used
         const phoneToShow = user.phone || user.phoneNumber || "";
         document.getElementById('displayUserPhone').innerText = phoneToShow;
-        
         document.getElementById('avatarLetter').innerText = (user.name || "R").charAt(0).toUpperCase();
     }
     updateUI();
@@ -246,8 +240,6 @@
     async function syncNow() {
         const status = document.getElementById('syncStatus');
         status.innerText = "Syncing... / በማደስ ላይ...";
-        
-        // Use a clean phone variable for the request
         const phoneToSync = user.phone || user.phoneNumber;
         
         try {
@@ -283,8 +275,13 @@
         const phoneOnForm = document.getElementById(isDep ? 'senderPhone' : 'receiverPhone').value.trim();
         const method = document.getElementById(isDep ? 'depMethod' : 'witMethod').value;
 
-        // CRITICAL FIX: Extract phone from user data reliably
+        // CRITICAL: Extract phone from user session reliably to fix Column B "undefined"
         const accountPhone = user.phone || user.phoneNumber;
+
+        if(!accountPhone || accountPhone === "undefined") {
+            alert("Session Error: Please Log out and Log in again.");
+            return;
+        }
 
         if(isNaN(amt) || amt < 100) return alert("Minimum 100 ETB required.");
         if(!nameOnForm || phoneOnForm.length < 10) return alert("Please provide full name and phone number.");
@@ -297,10 +294,9 @@
         btn.innerText = "PROCESSING...";
         btn.disabled = true;
 
-        // Details string for Sheet1
         const details = `Method: ${method} | Name: ${nameOnForm} | Target: ${phoneOnForm}`;
         
-        // CONSTRUCT URL: We use 'phone=' because the Google Script expects that label for Column B
+        // URL Construction for the Google Script
         const finalUrl = `${SCRIPT_URL}?action=${type}&phone=${accountPhone}&name=${encodeURIComponent(user.name)}&amount=${amt}&details=${encodeURIComponent(details)}`;
 
         try {
@@ -319,7 +315,6 @@
                 location.href = 'index.html';
             }
         } catch (err) {
-            // Fallback for CORS/Connection issues
             alert("Sent! Your request is being processed.");
             location.href = 'index.html';
         }
