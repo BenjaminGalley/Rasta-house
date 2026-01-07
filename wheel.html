@@ -3,59 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RASTA | Prize Wheel</title>
+    <title>RASTA MEGA WHEEL</title>
     <link href="https://fonts.googleapis.com/css2?family=Goldman&display=swap" rel="stylesheet">
     <style>
-        :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; }
-        body { background: #000; color: white; font-family: 'Goldman', cursive; text-align: center; margin: 0; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
-        .header { padding: 15px; border-bottom: 2px solid var(--rasta-gold); display: flex; justify-content: space-between; align-items: center; background: #111; }
-        .wheel-container { position: relative; flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .pointer { position: absolute; top: 20px; z-index: 10; width: 50px; filter: drop-shadow(0 0 10px #000); }
-        .wheel-img { width: 85vw; max-width: 400px; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); border-radius: 50%; border: 5px solid #222; }
-        .controls { background: #111; padding: 25px; border-top: 2px solid var(--rasta-gold); }
-        .spin-btn { width: 80%; padding: 20px; background: var(--rasta-green); color: white; border: none; border-radius: 50px; font-weight: bold; font-size: 1.5rem; }
+        :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; --dark: #0a0a0a; }
+        
+        body { 
+            background: var(--dark); color: white; font-family: 'Goldman', cursive; 
+            text-align: center; margin: 0; overflow: hidden; display: flex; flex-direction: column; height: 100vh; 
+        }
+
+        /* --- HEADER --- */
+        .header { 
+            padding: 15px; background: #000; border-bottom: 3px solid var(--rasta-gold); 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .balance-pill { 
+            background: linear-gradient(to right, var(--rasta-green), #004d26); 
+            padding: 8px 15px; border-radius: 20px; border: 1px solid var(--rasta-gold); font-weight: bold; 
+        }
+
+        /* --- WHEEL SECTION --- */
+        .wheel-container { 
+            position: relative; flex: 1; display: flex; align-items: center; justify-content: center; 
+            perspective: 1000px;
+        }
+        
+        /* The Pointer Shadow/Effect */
+        .pointer { 
+            position: absolute; top: 10%; left: 50%; transform: translateX(-50%); 
+            z-index: 100; width: 60px; filter: drop-shadow(0 0 10px #000); 
+            animation: pointer-wiggle 0.3s infinite alternate;
+            animation-play-state: paused;
+        }
+
+        .wheel-img { 
+            width: 85vw; max-width: 380px; aspect-ratio: 1/1;
+            transition: transform 5s cubic-bezier(0.15, 0, 0.15, 1); 
+            border-radius: 50%; border: 8px solid #222;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8), 0 0 20px var(--rasta-green);
+        }
+
+        /* --- CONTROLS --- */
+        .controls { 
+            background: #111; padding: 20px 10px 40px 10px; 
+            border-top: 3px solid var(--rasta-gold); border-radius: 30px 30px 0 0;
+        }
+
+        #status-msg { color: var(--rasta-gold); margin-bottom: 15px; height: 20px; text-transform: uppercase; font-size: 0.9rem; }
+
+        .bet-bar {
+            display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px;
+        }
+        .step-btn {
+            width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--rasta-gold);
+            background: #222; color: var(--rasta-gold); font-size: 1.5rem; font-weight: bold;
+        }
+        .step-btn:active { background: var(--rasta-gold); color: black; transform: scale(0.9); }
+        
+        .bet-info { background: #000; padding: 5px 20px; border-radius: 12px; border: 1px solid #333; }
+        .bet-info small { display: block; font-size: 0.6rem; color: #888; }
+        .bet-info b { font-size: 1.4rem; color: var(--rasta-gold); }
+
+        .spin-btn { 
+            width: 90%; padding: 20px; background: linear-gradient(var(--rasta-green), #004d26); 
+            color: white; border: none; border-radius: 50px; font-weight: bold; font-size: 1.6rem; 
+            cursor: pointer; box-shadow: 0 6px 0 #002e17; text-shadow: 2px 2px #000;
+        }
+        .spin-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #002e17; }
+        .spin-btn:disabled { background: #444; box-shadow: 0 2px 0 #222; filter: grayscale(1); }
+
+        @keyframes pointer-wiggle {
+            from { transform: translateX(-50%) rotate(-5deg); }
+            to { transform: translateX(-50%) rotate(5deg); }
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <button onclick="location.href='index.html'" style="background:none; border:1px solid #444; color:white; padding:5px 15px; border-radius:5px;">BACK</button>
-        <div id="bal-display" style="color:var(--rasta-green)">BAL: 0.00</div>
-    </div>
-    <div class="wheel-container">
-        <img src="https://img.icons8.com/color/96/down.png" class="pointer">
-        <img src="assets/asset.five.jpg" id="wheel" class="wheel-img">
-    </div>
-    <div class="controls">
-        <div style="margin-bottom: 15px; font-size: 1.2rem;">
-            BET: <input type="number" id="bet" value="2" min="2" style="width:80px; padding:10px; background:#000; color:var(--rasta-gold); border:1px solid var(--rasta-gold); border-radius:10px; text-align:center;">
+
+<div class="header">
+    <button onclick="location.href='index.html'" style="background:none; border:1px solid #444; color:white; padding:8px 15px; border-radius:10px; cursor:pointer;">🏠 HOME</button>
+    <div class="balance-pill" id="balDisplay">0.00 ETB</div>
+    <div id="speaker" onclick="toggleMusic()" style="cursor:pointer; font-size: 1.2rem;">🔈</div>
+</div>
+
+<div class="wheel-container">
+    <img src="https://img.icons8.com/color/96/down.png" class="pointer" id="pointer">
+    <img src="assets/asset.five.jpg" id="wheel" class="wheel-img">
+</div>
+
+<div class="controls">
+    <div id="status-msg">SPIN THE RASTA WHEEL</div>
+    
+    <div class="bet-bar">
+        <button class="step-btn" onclick="adjustBet(-2)">-</button>
+        <div class="bet-info">
+            <small>BET AMOUNT</small>
+            <b id="betAmt">2</b>
         </div>
-        <button class="spin-btn" id="spinBtn" onclick="spinWheel()">SPIN WHEEL</button>
+        <button class="step-btn" onclick="adjustBet(2)">+</button>
     </div>
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDMA1puOQXKQXEUO0I2O3125Gp0fUwBlIzVFkc3-9mSmA74ss5YkPNMHfnw6GKP3-llw/exec";
-        let user = JSON.parse(localStorage.getItem('rasta_user') || '{"balance":0}');
-        let rotation = 0;
-        window.onload = () => { document.getElementById('bal-display').innerText = "BAL: " + user.balance.toFixed(2); };
 
-        async function spinWheel() {
-            const bet = parseFloat(document.getElementById('bet').value);
-            if(bet < 2 || bet > user.balance) return alert("Check Bet/Balance");
-            document.getElementById('spinBtn').disabled = true;
+    <button class="spin-btn" id="spinBtn" onclick="spinWheel()">SPIN TO WIN</button>
+</div>
 
-            const res = await fetch(`${SCRIPT_URL}?action=calculateSpin&bet=${bet}&playerID=${user.playerID}`);
-            const data = await res.json();
+<audio id="bgMusic" loop>
+    <source src="https://www.free-stock-music.com/music/alexander-nakarada-be-jammin.mp3" type="audio/mpeg">
+</audio>
 
-            rotation += 1800 + (data.win ? 0 : 45); // Adjust based on your image sectors
-            document.getElementById('wheel').style.transform = `rotate(${rotation}deg)`;
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
+    let user = JSON.parse(localStorage.getItem('rasta_user')) || { balance: 0, phone: "000" };
+    let currentRotation = 0;
+    let currentBet = 2;
+    let isSpinning = false;
 
-            setTimeout(() => {
-                user.balance = data.newBalance;
-                localStorage.setItem('rasta_user', JSON.stringify(user));
-                document.getElementById('bal-display').innerText = "BAL: " + user.balance.toFixed(2);
-                document.getElementById('spinBtn').disabled = false;
-                if(data.win) alert("WINNER!");
-            }, 4100);
+    // Define the segments of your wheel (Assuming 8 sections in your JPG)
+    // Multipliers: x0, x2, x0, x5, x0, x1.5, x0, x10
+    const segments = [0, 2, 0, 5, 0, 1.5, 0, 10]; 
+
+    function init() {
+        document.getElementById('balDisplay').innerText = parseFloat(user.balance).toFixed(2) + " ETB";
+    }
+
+    function adjustBet(val) {
+        if(isSpinning) return;
+        currentBet = Math.max(2, currentBet + val);
+        document.getElementById('betAmt').innerText = currentBet;
+    }
+
+    function toggleMusic() {
+        const music = document.getElementById('bgMusic');
+        const speaker = document.getElementById('speaker');
+        if(music.paused) {
+            music.play();
+            speaker.innerText = "🔊";
+        } else {
+            music.pause();
+            speaker.innerText = "🔈";
         }
-    </script>
+    }
+
+    function spinWheel() {
+        if(isSpinning) return;
+        if(user.balance < currentBet) return alert("Insufficient Balance");
+
+        isSpinning = true;
+        user.balance -= currentBet;
+        updateUI();
+
+        document.getElementById('spinBtn').disabled = true;
+        document.getElementById('status-msg').innerText = "WHEEL IS TURNING...";
+        document.getElementById('pointer').style.animationPlayState = 'running';
+
+        // 1. Calculate Random Result (8 segments = 45 degrees each)
+        const segmentIndex = Math.floor(Math.random() * segments.length);
+        const extraDegrees = segmentIndex * 45;
+        const totalSpins = 5; // How many full circles
+        currentRotation += (totalSpins * 360) + extraDegrees;
+
+        // 2. Apply Rotation
+        const wheel = document.getElementById('wheel');
+        wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+        // 3. Wait for animation
+        setTimeout(() => {
+            finalizeSpin(segmentIndex);
+        }, 5000);
+    }
+
+    function finalizeSpin(idx) {
+        isSpinning = false;
+        document.getElementById('spinBtn').disabled = false;
+        document.getElementById('pointer').style.animationPlayState = 'paused';
+
+        const multiplier = segments[idx];
+        const winAmt = currentBet * multiplier;
+
+        if(winAmt > 0) {
+            user.balance += winAmt;
+            document.getElementById('status-msg').innerText = `JAH BLESS! YOU WON ${winAmt} ETB!`;
+        } else {
+            document.getElementById('status-msg').innerText = "NO LUCK, TRY AGAIN!";
+        }
+
+        updateUI();
+        saveAndSync();
+    }
+
+    function updateUI() {
+        document.getElementById('balDisplay').innerText = parseFloat(user.balance).toFixed(2) + " ETB";
+    }
+
+    function saveAndSync() {
+        localStorage.setItem('rasta_user', JSON.stringify(user));
+        fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&updateBal=${user.balance}`);
+    }
+
+    window.onload = init;
+</script>
 </body>
 </html>
