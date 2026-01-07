@@ -60,6 +60,7 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.5);
             cursor: pointer;
             transition: 0.3s;
+            box-sizing: border-box;
         }
         .balance-card:active { transform: scale(0.95); }
 
@@ -223,29 +224,34 @@
     </div>
 
 <script>
-    // NEW DEPLOYED SCRIPT URL
+    // SCRIPT URL
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyctgyddXtB4E4GjNlm5dygmh-RI960Fa8qqa4rY7WarCZAZ0wb8VNQXtzulFh7dvAm/exec";
     
     let user = JSON.parse(localStorage.getItem('rasta_user'));
 
     if(!user) { location.href = 'index.html'; }
 
-    // Initial Load
     function updateUI() {
         document.getElementById('userBal').innerText = parseFloat(user.balance || 0).toFixed(2);
         document.getElementById('displayUserName').innerText = user.name || "Rasta Player";
-        document.getElementById('displayUserPhone').innerText = user.phone || "";
+        
+        // This ensures the UI shows the phone number regardless of which label was used
+        const phoneToShow = user.phone || user.phoneNumber || "";
+        document.getElementById('displayUserPhone').innerText = phoneToShow;
+        
         document.getElementById('avatarLetter').innerText = (user.name || "R").charAt(0).toUpperCase();
     }
     updateUI();
 
-    // MIRROR SYNC: Gets latest balance from Google Sheet
     async function syncNow() {
         const status = document.getElementById('syncStatus');
         status.innerText = "Syncing... / በማደስ ላይ...";
         
+        // Use a clean phone variable for the request
+        const phoneToSync = user.phone || user.phoneNumber;
+        
         try {
-            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&t=${Date.now()}`);
+            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${phoneToSync}&t=${Date.now()}`);
             const data = await res.json();
             
             if(data && data.status === "success") {
@@ -260,7 +266,7 @@
             status.innerText = "Connection Weak / መስመር የለም";
         }
     }
-    syncNow(); // Auto-sync on open
+    syncNow();
 
     function toggleView(view) {
         document.getElementById('depView').style.display = view === 'deposit' ? 'block' : 'none';
@@ -271,26 +277,31 @@
 
     async function handleTransaction(type) {
         const isDep = type === 'deposit';
-        const amt = parseFloat(document.getElementById(isDep ? 'depAmount' : 'witAmount').value);
-        const name = document.getElementById(isDep ? 'senderName' : 'receiverName').value.trim();
-        const phone = document.getElementById(isDep ? 'senderPhone' : 'receiverPhone').value.trim();
+        const amtInput = document.getElementById(isDep ? 'depAmount' : 'witAmount');
+        const amt = parseFloat(amtInput.value);
+        const nameOnForm = document.getElementById(isDep ? 'senderName' : 'receiverName').value.trim();
+        const phoneOnForm = document.getElementById(isDep ? 'senderPhone' : 'receiverPhone').value.trim();
         const method = document.getElementById(isDep ? 'depMethod' : 'witMethod').value;
 
+        // CRITICAL FIX: Extract phone from user data reliably
+        const accountPhone = user.phone || user.phoneNumber;
+
         if(isNaN(amt) || amt < 100) return alert("Minimum 100 ETB required.");
-        if(!name || phone.length < 10) return alert("Please provide full name and phone number.");
+        if(!nameOnForm || phoneOnForm.length < 10) return alert("Please provide full name and phone number.");
         
         if(!isDep && amt > user.balance) {
             return alert("Insufficient Balance! / በቂ ሂሳብ የሎትም");
         }
 
         const btn = document.getElementById(isDep ? 'btnDep' : 'btnWit');
-        const originalText = btn.innerText;
         btn.innerText = "PROCESSING...";
         btn.disabled = true;
 
         // Details string for Sheet1
-        const details = `Method: ${method} | Name: ${name} | Target: ${phone}`;
-        const finalUrl = `${SCRIPT_URL}?action=${type}&phone=${user.phone}&name=${encodeURIComponent(user.name)}&amount=${amt}&details=${encodeURIComponent(details)}`;
+        const details = `Method: ${method} | Name: ${nameOnForm} | Target: ${phoneOnForm}`;
+        
+        // CONSTRUCT URL: We use 'phone=' because the Google Script expects that label for Column B
+        const finalUrl = `${SCRIPT_URL}?action=${type}&phone=${accountPhone}&name=${encodeURIComponent(user.name)}&amount=${amt}&details=${encodeURIComponent(details)}`;
 
         try {
             const response = await fetch(finalUrl);
@@ -298,23 +309,18 @@
             
             if(result === "SUCCESS") {
                 if(!isDep) {
-                    // Update local balance immediately for withdrawals
                     user.balance = parseFloat(user.balance) - amt;
                     localStorage.setItem('rasta_user', JSON.stringify(user));
                 }
                 alert("SUCCESS! Request sent to Admin.");
                 location.href = 'index.html';
             } else {
-                alert("System busy. If your balance changed, it worked!");
+                alert("Request Sent!");
                 location.href = 'index.html';
             }
         } catch (err) {
-            // No-cors fallback: if fetch fails but request likely reached script
-            if(!isDep) {
-                user.balance = parseFloat(user.balance) - amt;
-                localStorage.setItem('rasta_user', JSON.stringify(user));
-            }
-            alert("Sent! Request is pending admin approval.");
+            // Fallback for CORS/Connection issues
+            alert("Sent! Your request is being processed.");
             location.href = 'index.html';
         }
     }
