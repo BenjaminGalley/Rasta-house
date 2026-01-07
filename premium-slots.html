@@ -2,203 +2,253 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RASTA LION PREMIUM</title>
     <style>
         :root { --gold: #FFD100; --green: #008542; --red: #E71D36; --dark: #0a0a0a; }
-        body { background: #000; color: white; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; text-align: center; margin: 0; overflow-x: hidden; }
         
-        .header { padding: 15px; background: #111; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; }
-        .bal-box { background: #222; padding: 5px 15px; border-radius: 20px; border: 1px solid var(--gold); font-weight: bold; }
+        body { 
+            background: #000; color: white; font-family: 'Segoe UI', Arial, sans-serif; 
+            text-align: center; margin: 0; overflow: hidden;
+        }
+        
+        .header { 
+            padding: 15px; background: #111; border-bottom: 3px solid var(--gold); 
+            display: flex; justify-content: space-between; align-items: center; 
+        }
+        
+        .bal-box { 
+            background: linear-gradient(to right, var(--green), #004d26); 
+            padding: 8px 18px; border-radius: 20px; border: 1px solid var(--gold); font-weight: 900; 
+        }
 
         .slot-container { 
-            margin: 20px auto; width: 320px; background: var(--dark); 
-            padding: 20px; border: 4px solid var(--gold); border-radius: 25px;
-            box-shadow: 0 0 40px rgba(255, 209, 0, 0.2);
-            position: relative;
+            margin: 20px auto; width: 92%; max-width: 360px; background: #1a1a1a; 
+            padding: 15px; border: 5px solid #333; border-radius: 25px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.8); position: relative;
         }
 
-        .reels-row { display: flex; justify-content: center; gap: 12px; background: #000; padding: 15px; border-radius: 15px; border: 2px solid #333; overflow: hidden; }
-        
-        /* The "Window" for the symbol */
-        .reel-window { width: 80px; height: 80px; background: #1a1a1a; border-radius: 10px; overflow: hidden; position: relative; box-shadow: inset 0 0 10px #000; }
-        
-        /* The Sprite Sheet Logic */
+        /* Feature Modes Glow */
+        .free-spin-mode { border-color: var(--red) !important; animation: feature-glow 0.8s infinite alternate; }
+        @keyframes feature-glow { 
+            from { box-shadow: 0 0 10px var(--red); } 
+            to { box-shadow: 0 0 30px var(--red); } 
+        }
+
+        .reels-window { 
+            display: flex; justify-content: space-around; gap: 8px; 
+            background: #000; padding: 10px; border-radius: 15px; 
+            height: 100px; overflow: hidden; border: 2px solid #222; 
+        }
+
+        .reel {
+            width: 90px; position: relative;
+            transition: transform 2.5s cubic-bezier(0.1, 0, 0.1, 1);
+        }
+
         .symbol {
-            width: 80px; height: 80px;
+            width: 90px; height: 100px;
             background-image: url('asset/asset.nine.jpg');
-            background-size: 320px 320px; /* 4x4 grid of icons */
-            position: absolute; top: 0; left: 0;
-            transition: transform 0.1s cubic-bezier(.45,.05,.55,.95);
+            background-size: 300% 300%; /* Perfect 3x3 mapping */
+            background-repeat: no-repeat;
         }
 
-        /* Animation for Spinning */
-        .spin-anim { animation: blurSpin 0.15s infinite linear; }
-        @keyframes blurSpin { 
-            0% { transform: translateY(-100%); filter: blur(2px); } 
-            100% { transform: translateY(100%); filter: blur(5px); } 
-        }
+        /* --- CONTROLS --- */
+        #msg { height: 35px; color: var(--gold); font-weight: bold; margin: 15px 0; font-size: 1rem; text-transform: uppercase; }
 
-        .controls { margin-top: 10px; padding: 15px; background: #111; border-radius: 20px; display: inline-block; width: 320px; }
-        .bet-input-group { margin-bottom: 15px; }
-        label { font-size: 0.8rem; color: #888; display: block; margin-bottom: 5px; }
-        input { background: #000; border: 1px solid #444; color: var(--gold); padding: 10px; width: 80px; text-align: center; font-size: 1.2rem; border-radius: 10px; font-weight: bold; }
+        .bet-bar {
+            display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px;
+        }
+        .step-btn {
+            width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--gold);
+            background: #222; color: var(--gold); font-size: 1.5rem; font-weight: bold; cursor: pointer;
+        }
+        .step-btn:active { transform: scale(0.9); background: var(--gold); color: #000; }
         
+        .bet-display {
+            background: #000; border: 2px solid #444; border-radius: 10px;
+            padding: 5px 15px; min-width: 80px;
+        }
+        .bet-display span { display: block; font-size: 0.7rem; color: #888; }
+        .bet-display b { font-size: 1.4rem; color: var(--gold); }
+
         .btn-spin { 
-            width: 100%; padding: 18px; background: linear-gradient(to bottom, var(--green), #005a2d); 
-            color: white; border: none; border-radius: 40px; font-weight: bold; font-size: 1.3rem; 
-            cursor: pointer; box-shadow: 0 6px 0 #003a1d; transition: 0.1s;
+            width: 85%; padding: 18px; border-radius: 50px; border: none;
+            background: linear-gradient(var(--green), #004d26); color: white;
+            font-size: 1.6rem; font-weight: 900; cursor: pointer;
+            box-shadow: 0 6px 0 #002e17; text-shadow: 2px 2px #000;
         }
-        .btn-spin:active { transform: translateY(4px); box-shadow: 0 2px 0 #003a1d; }
-        .btn-spin:disabled { background: #333; box-shadow: none; color: #666; cursor: not-allowed; }
-        
-        /* Feature Modes */
-        .free-spin-mode { border: 5px solid var(--red) !important; animation: featureGlow 0.8s infinite alternate; }
-        @keyframes featureGlow { from { box-shadow: 0 0 10px var(--red); } to { box-shadow: 0 0 30px var(--red); } }
-        
-        #msg { height: 20px; margin-bottom: 10px; color: var(--gold); font-weight: bold; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-spin:active { transform: translateY(4px); box-shadow: 0 2px 0 #002e17; }
+        .btn-spin:disabled { background: #444; box-shadow: 0 2px 0 #222; filter: grayscale(1); }
+
+        .fs-status { color: var(--red); font-weight: bold; font-size: 0.9rem; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div style="text-align:left">
-        <div style="font-size:0.7rem; color:var(--gold)">PREMIUM SLOT</div>
-        <div style="font-weight:bold; letter-spacing:1px;">RASTA LION</div>
-    </div>
+    <div onclick="location.href='index.html'" style="cursor:pointer; font-size: 1.5rem;">🏠</div>
     <div class="bal-box" id="balDisplay">0.00 ETB</div>
+    <div onclick="toggleMusic()" id="speaker" style="cursor:pointer; font-size: 1.2rem;">🔈</div>
 </div>
 
 <div class="slot-container" id="machine">
-    <div id="msg">READY TO SPIN</div>
-    <div class="reels-row">
-        <div class="reel-window"><div class="symbol" id="r1"></div></div>
-        <div class="reel-window"><div class="symbol" id="r2"></div></div>
-        <div class="reel-window"><div class="symbol" id="r3"></div></div>
+    <div id="msg">RASTA LION PREMIUM</div>
+    <div class="reels-window">
+        <div class="reel" id="reel0"></div>
+        <div class="reel" id="reel1"></div>
+        <div class="reel" id="reel2"></div>
     </div>
+    <div id="fsIndicator" class="fs-status">FREE SPINS REMAINING: <span id="fsLeft">0</span></div>
 </div>
 
-<div class="controls">
-    <div class="bet-input-group">
-        <label>BET AMOUNT (MIN 2 ETB)</label>
-        <input type="number" id="betAmt" value="5" min="2">
+<div class="bet-bar">
+    <button class="step-btn" onclick="changeBet(-2)">-</button>
+    <div class="bet-display">
+        <span>BET BIRR</span>
+        <b id="betAmt">2</b>
     </div>
-    <button class="btn-spin" onclick="handleSpin()" id="spinBtn">SPIN REELS</button>
-    <div id="fsCount" style="margin-top:10px; color:var(--red); font-weight:bold; display:none;">FREE SPINS: <span id="fsLeft">0</span></div>
+    <button class="step-btn" onclick="changeBet(2)">+</button>
 </div>
+
+<button class="btn-spin" onclick="handleSpin()" id="spinBtn">SPIN REELS</button>
+
+<audio id="bgMusic" loop>
+    <source src="https://www.free-stock-music.com/music/alexander-nakarada-be-jammin.mp3" type="audio/mpeg">
+</audio>
 
 <script>
-    // Live URL from your project
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
-    
-    let user = JSON.parse(localStorage.getItem('rasta_user')) || { balance: 0, name: "Guest", phone: "000" };
+    let user = JSON.parse(localStorage.getItem('rasta_user')) || { balance: 0, phone: "000" };
     let freeSpins = 0;
+    let currentBet = 2;
+    let isSpinning = false;
 
-    // Sprite Mapping (X, Y positions on asset.nine.jpg)
+    // Correct Sprite Mapping for asset.nine.jpg (3x3 grid)
     const icons = [
-        { name: 'Lion', x: 0, y: 80 }, 
-        { name: 'Crown', x: 240, y: 0 },
-        { name: 'Chest', x: 80, y: 80 },
-        { name: 'Portal', x: 160, y: 80 }, // SCATTER for Free Spins
-        { name: 'Wild', x: 160, y: 160 }
+        { name: 'Lion', x: 0, y: 50, mult: 50 }, 
+        { name: 'Crown', x: 100, y: 0, mult: 20 },
+        { name: 'Chest', x: 50, y: 50, mult: 10 },
+        { name: 'Portal', x: 100, y: 50, mult: 5 }, // Scatter
+        { name: 'Leaf', x: 50, y: 0, mult: 2 }
     ];
 
-    function updateUI() {
-        document.getElementById('balDisplay').innerText = user.balance.toFixed(2) + " ETB";
-        if (freeSpins > 0) {
-            document.getElementById('fsCount').style.display = 'block';
-            document.getElementById('fsLeft').innerText = freeSpins;
-            document.getElementById('machine').classList.add('free-spin-mode');
-        } else {
-            document.getElementById('fsCount').style.display = 'none';
-            document.getElementById('machine').classList.remove('free-spin-mode');
+    function init() {
+        document.getElementById('balDisplay').innerText = parseFloat(user.balance).toFixed(2) + " ETB";
+        for(let i=0; i<3; i++) populateReel(i);
+    }
+
+    function populateReel(idx) {
+        const reel = document.getElementById('reel' + idx);
+        reel.innerHTML = '';
+        for(let i=0; i<20; i++) {
+            const sym = document.createElement('div');
+            sym.className = 'symbol';
+            const randomIcon = icons[Math.floor(Math.random() * icons.length)];
+            sym.style.backgroundPosition = `${randomIcon.x}% ${randomIcon.y}%`;
+            reel.appendChild(sym);
         }
     }
 
-    function setSymbol(id, iconIdx) {
-        const el = document.getElementById(id);
-        el.style.backgroundPosition = `-${icons[iconIdx].x}px -${icons[iconIdx].y}px`;
+    function changeBet(val) {
+        if(isSpinning || freeSpins > 0) return;
+        currentBet = Math.max(2, currentBet + val);
+        document.getElementById('betAmt').innerText = currentBet;
     }
 
-    // Initialize random symbols
-    setSymbol('r1', 0); setSymbol('r2', 1); setSymbol('r3', 2);
-    updateUI();
+    function toggleMusic() {
+        const m = document.getElementById('bgMusic');
+        const s = document.getElementById('speaker');
+        if(m.paused) { m.play(); s.innerText = "🔊"; }
+        else { m.pause(); s.innerText = "🔈"; }
+    }
 
     async function handleSpin() {
-        const bet = parseFloat(document.getElementById('betAmt').value);
+        if (isSpinning) return;
         
         if (freeSpins === 0) {
-            if (bet < 2) { alert("Minimum bet is 2 ETB / ዝቅተኛ መወራረድ 2 ብር ነው"); return; }
-            if (bet > user.balance) { alert("Insufficient Balance / በቂ ሂሳብ የሎትም"); return; }
-            user.balance -= bet;
-            document.getElementById('msg').innerText = "SPINNING...";
+            if (user.balance < currentBet) return alert("Low Balance!");
+            user.balance -= currentBet;
         } else {
             freeSpins--;
-            document.getElementById('msg').innerText = "FREE SPINNING!";
         }
-        
+
+        isSpinning = true;
         updateUI();
         document.getElementById('spinBtn').disabled = true;
+        document.getElementById('msg').innerText = freeSpins > 0 ? "FREE SPINNING!" : "SPINNING...";
 
-        // Start Spin Animation
-        document.querySelectorAll('.symbol').forEach(s => s.classList.add('spin-anim'));
+        // Roll Animation
+        for(let i=0; i<3; i++) {
+            const reel = document.getElementById('reel' + i);
+            reel.style.transition = 'none';
+            reel.style.transform = 'translateY(0)';
+            void reel.offsetWidth;
+            reel.style.transition = `transform ${2 + (i * 0.5)}s cubic-bezier(0.1, 0, 0.1, 1)`;
+            reel.style.transform = 'translateY(-1800px)';
+        }
 
-        // Timing the result
-        setTimeout(() => {
-            stopReels(bet);
-        }, 1200);
-    }
-
-    function stopReels(bet) {
-        document.querySelectorAll('.symbol').forEach(s => s.classList.remove('spin-anim'));
-        
-        // Random results based on icon list length
-        const res = [
+        const results = [
             Math.floor(Math.random() * icons.length),
             Math.floor(Math.random() * icons.length),
             Math.floor(Math.random() * icons.length)
         ];
 
-        setSymbol('r1', res[0]);
-        setSymbol('r2', res[1]);
-        setSymbol('r3', res[2]);
+        setTimeout(() => {
+            for(let i=0; i<3; i++) {
+                const reel = document.getElementById('reel' + i);
+                reel.lastElementChild.style.backgroundPosition = `${icons[results[i]].x}% ${icons[results[i]].y}%`;
+            }
+            checkWin(results);
+        }, 3000);
+    }
 
+    function checkWin(res) {
         let win = 0;
         let scatterCount = res.filter(i => icons[i].name === 'Portal').length;
 
-        // Check for Free Spin Scatters (2 or more Portals)
         if (scatterCount >= 2) {
             freeSpins += 5;
             document.getElementById('msg').innerText = "FEATURE! +5 FREE SPINS";
         }
 
-        // Win Logic (3 of a kind or 2 of a kind)
         if (res[0] === res[1] && res[1] === res[2]) {
-            win = bet * 15; // 3 of a kind pays 15x
+            win = currentBet * icons[res[0]].mult;
             document.getElementById('msg').innerText = "MEGA WIN: " + win + " ETB!";
         } else if (res[0] === res[1] || res[1] === res[2] || res[0] === res[2]) {
-            win = bet * 1.5; // 2 of a kind pays 1.5x
+            win = currentBet * 1.5;
             document.getElementById('msg').innerText = "NICE WIN: " + win + " ETB";
-        } else if (win === 0 && scatterCount < 2) {
+        } else if (scatterCount < 2) {
             document.getElementById('msg').innerText = "TRY AGAIN";
         }
 
         user.balance += win;
-        updateUI();
-        
-        // Reactivate button
+        isSpinning = false;
         document.getElementById('spinBtn').disabled = false;
-        
-        // Save to Google Sheet
+        updateUI();
+        saveAndSync();
+    }
+
+    function updateUI() {
+        document.getElementById('balDisplay').innerText = parseFloat(user.balance).toFixed(2) + " ETB";
+        const fsBox = document.getElementById('fsIndicator');
+        const machine = document.getElementById('machine');
+        if(freeSpins > 0) {
+            fsBox.style.display = 'block';
+            document.getElementById('fsLeft').innerText = freeSpins;
+            machine.classList.add('free-spin-mode');
+        } else {
+            fsBox.style.display = 'none';
+            machine.classList.remove('free-spin-mode');
+        }
+    }
+
+    function saveAndSync() {
         localStorage.setItem('rasta_user', JSON.stringify(user));
-        syncWithDatabase();
+        fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&updateBal=${user.balance}`);
     }
 
-    function syncWithDatabase() {
-        fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&name=${user.name}&updateBal=${user.balance}`)
-        .catch(err => console.log("Sync delay..."));
-    }
+    window.onload = init;
 </script>
-
 </body>
 </html>
