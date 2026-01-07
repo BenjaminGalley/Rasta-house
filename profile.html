@@ -45,6 +45,7 @@
             font-size: 2rem;
             color: black;
             font-weight: bold;
+            box-shadow: 0 0 15px rgba(255, 209, 0, 0.3);
         }
 
         .balance-card {
@@ -57,7 +58,10 @@
             border: 1px solid #333;
             text-align: center;
             box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: 0.3s;
         }
+        .balance-card:active { transform: scale(0.95); }
 
         .balance-label { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
         .balance-amount { font-size: 2.5rem; font-weight: bold; color: var(--rasta-green); margin: 5px 0; }
@@ -148,10 +152,10 @@
         <p id="displayUserPhone" style="margin:5px 0 0; font-size:0.8rem; color:#666;"></p>
     </div>
 
-    <div class="balance-card">
+    <div class="balance-card" onclick="syncNow()">
         <div class="balance-label">Verified Balance / የተረጋገጠ ሂሳብ</div>
         <div class="balance-amount"><span id="userBal">0.00</span> <small style="font-size:1rem">ETB</small></div>
-        <div class="refresh-status" id="syncStatus">Connected to Sheet / ተገናኝቷል</div>
+        <div class="refresh-status" id="syncStatus">Tap to Refresh / ለማደስ ይንኩ</div>
     </div>
 
     <div class="container">
@@ -176,12 +180,12 @@
                 </select>
 
                 <label>AMOUNT (MIN 100 ETB) / መጠን</label>
-                <input type="number" id="depAmount" placeholder="100 - 10,000" min="100" max="10000">
+                <input type="number" id="depAmount" placeholder="100 - 10,000" min="100">
 
                 <label>SENDER FULL NAME / የላኪው ሙሉ ስም</label>
                 <input type="text" id="senderName" placeholder="Name on receipt">
 
-                <label>SENDER PHONE NUMBER / የላኪው ስልክ ቁጥር</label>
+                <label>SENDER PHONE / የላኪው ስልክ</label>
                 <input type="text" id="senderPhone" placeholder="09...">
 
                 <button class="btn-main btn-deposit" id="btnDep" onclick="handleTransaction('deposit')">SUBMIT DEPOSIT / ገቢ አድርግ</button>
@@ -191,7 +195,7 @@
         <div id="witView" style="display:none;">
             <div class="form-group">
                 <div class="instr">
-                    Withdrawal is processed instantly from your balance. / ወጪ ወዲያውኑ ከሂሳብዎ ይቀነሳል::
+                    Instant deduction from balance. Admin will pay you shortly. / ወጪ ወዲያውኑ ከሂሳብዎ ይቀነሳል::
                 </div>
 
                 <label>RECEIVE METHOD / መቀበያ ዘዴ</label>
@@ -201,7 +205,7 @@
                 </select>
 
                 <label>AMOUNT (MIN 100 ETB) / መጠን</label>
-                <input type="number" id="witAmount" placeholder="100 - 10,000" min="100" max="10000">
+                <input type="number" id="witAmount" placeholder="100 - 10,000" min="100">
 
                 <label>RECEIVER FULL NAME / የተቀባይ ሙሉ ስም</label>
                 <input type="text" id="receiverName" placeholder="Full name for transfer">
@@ -219,31 +223,44 @@
     </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0kOovoQjv6IVSX2vbj7gba7-CtPXer7LFiC9738B8LYHmMc0O3Pzg5IL9U6MkvtKc/exec";
+    // NEW DEPLOYED SCRIPT URL
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyctgyddXtB4E4GjNlm5dygmh-RI960Fa8qqa4rY7WarCZAZ0wb8VNQXtzulFh7dvAm/exec";
+    
     let user = JSON.parse(localStorage.getItem('rasta_user'));
 
     if(!user) { location.href = 'index.html'; }
 
-    document.getElementById('userBal').innerText = parseFloat(user.balance || 0).toFixed(2);
-    document.getElementById('displayUserName').innerText = user.name;
-    document.getElementById('displayUserPhone').innerText = user.phone;
-    document.getElementById('avatarLetter').innerText = user.name.charAt(0).toUpperCase();
+    // Initial Load
+    function updateUI() {
+        document.getElementById('userBal').innerText = parseFloat(user.balance || 0).toFixed(2);
+        document.getElementById('displayUserName').innerText = user.name || "Rasta Player";
+        document.getElementById('displayUserPhone').innerText = user.phone || "";
+        document.getElementById('avatarLetter').innerText = (user.name || "R").charAt(0).toUpperCase();
+    }
+    updateUI();
 
+    // MIRROR SYNC: Gets latest balance from Google Sheet
     async function syncNow() {
+        const status = document.getElementById('syncStatus');
+        status.innerText = "Syncing... / በማደስ ላይ...";
+        
         try {
             const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&t=${Date.now()}`);
             const data = await res.json();
-            if(data && data.balance !== undefined) {
+            
+            if(data && data.status === "success") {
                 user.balance = data.balance;
+                user.name = data.name || user.name;
                 localStorage.setItem('rasta_user', JSON.stringify(user));
-                document.getElementById('userBal').innerText = parseFloat(user.balance).toFixed(2);
-                document.getElementById('syncStatus').innerText = "Last synced: Just now";
+                updateUI();
+                status.innerText = "Synced! / ተዘምኗል";
+                setTimeout(() => status.innerText = "Tap to Refresh / ለማደስ ይንኩ", 2000);
             }
         } catch(e) { 
-            document.getElementById('syncStatus').innerText = "Offline Mode";
+            status.innerText = "Connection Weak / መስመር የለም";
         }
     }
-    syncNow();
+    syncNow(); // Auto-sync on open
 
     function toggleView(view) {
         document.getElementById('depView').style.display = view === 'deposit' ? 'block' : 'none';
@@ -253,35 +270,51 @@
     }
 
     async function handleTransaction(type) {
-        const amtInput = document.getElementById(type === 'deposit' ? 'depAmount' : 'witAmount');
-        const amt = parseFloat(amtInput.value);
-        const nameInput = document.getElementById(type === 'deposit' ? 'senderName' : 'receiverName');
-        const phoneInput = document.getElementById(type === 'deposit' ? 'senderPhone' : 'receiverPhone');
-        const method = document.getElementById(type === 'deposit' ? 'depMethod' : 'witMethod').value;
+        const isDep = type === 'deposit';
+        const amt = parseFloat(document.getElementById(isDep ? 'depAmount' : 'witAmount').value);
+        const name = document.getElementById(isDep ? 'senderName' : 'receiverName').value.trim();
+        const phone = document.getElementById(isDep ? 'senderPhone' : 'receiverPhone').value.trim();
+        const method = document.getElementById(isDep ? 'depMethod' : 'witMethod').value;
 
-        if(isNaN(amt) || amt < 100) return alert("Minimum amount is 100 ETB.");
-        if(!nameInput.value || phoneInput.value.length < 10) return alert("Please fill in name and phone.");
+        if(isNaN(amt) || amt < 100) return alert("Minimum 100 ETB required.");
+        if(!name || phone.length < 10) return alert("Please provide full name and phone number.");
         
-        if(type === 'withdraw' && amt > user.balance) {
-            return alert("Insufficient balance!");
+        if(!isDep && amt > user.balance) {
+            return alert("Insufficient Balance! / በቂ ሂሳብ የሎትም");
         }
 
-        const btn = document.getElementById(type === 'deposit' ? 'btnDep' : 'btnWit');
-        btn.innerText = "SENDING TO ADMIN...";
+        const btn = document.getElementById(isDep ? 'btnDep' : 'btnWit');
+        const originalText = btn.innerText;
+        btn.innerText = "PROCESSING...";
         btn.disabled = true;
 
-        const finalUrl = `${SCRIPT_URL}?action=${type}&phone=${user.phone}&amount=${amt}&method=${method}&senderName=${encodeURIComponent(nameInput.value)}&senderPhone=${phoneInput.value}`;
+        // Details string for Sheet1
+        const details = `Method: ${method} | Name: ${name} | Target: ${phone}`;
+        const finalUrl = `${SCRIPT_URL}?action=${type}&phone=${user.phone}&name=${encodeURIComponent(user.name)}&amount=${amt}&details=${encodeURIComponent(details)}`;
 
         try {
-            await fetch(finalUrl, { mode: 'no-cors' });
-            if(type === 'withdraw') {
+            const response = await fetch(finalUrl);
+            const result = await response.text();
+            
+            if(result === "SUCCESS") {
+                if(!isDep) {
+                    // Update local balance immediately for withdrawals
+                    user.balance = parseFloat(user.balance) - amt;
+                    localStorage.setItem('rasta_user', JSON.stringify(user));
+                }
+                alert("SUCCESS! Request sent to Admin.");
+                location.href = 'index.html';
+            } else {
+                alert("System busy. If your balance changed, it worked!");
+                location.href = 'index.html';
+            }
+        } catch (err) {
+            // No-cors fallback: if fetch fails but request likely reached script
+            if(!isDep) {
                 user.balance = parseFloat(user.balance) - amt;
                 localStorage.setItem('rasta_user', JSON.stringify(user));
             }
-            alert("SUCCESS! Request sent to Admin.");
-            location.href = 'index.html';
-        } catch (err) {
-            alert("Sent! Admin will verify soon.");
+            alert("Sent! Request is pending admin approval.");
             location.href = 'index.html';
         }
     }
