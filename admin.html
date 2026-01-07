@@ -51,16 +51,13 @@
         <button class="btn btn-refresh" onclick="load()">🔄 REFRESH DATA / አድስ</button>
         <div id="loading-ui">PROCESSING...</div>
 
-        <h3 style="color:var(--green)">📥 DEPOSITS (ገንዘብ ገቢ)</h3>
-        <div id="dep-list">Fetching...</div>
-
-        <h3 style="color:var(--red); margin-top:40px;">📤 WITHDRAWALS (ገንዘብ ወጪ)</h3>
-        <div id="wit-list">Fetching...</div>
+        <h3 style="color:var(--green)">📥 PENDING REQUESTS (ገቢ እና ወጪ ጥያቄዎች)</h3>
+        <div id="request-list">Fetching...</div>
     </div>
 
     <script>
-        // UPDATED ACTIVE URL
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0kOovoQjv6IVSX2vbj7gba7-CtPXer7LFiC9738B8LYHmMc0O3Pzg5IL9U6MkvtKc/exec";
+        // NEW DEPLOYED SCRIPT URL
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyctgyddXtB4E4GjNlm5dygmh-RI960Fa8qqa4rY7WarCZAZ0wb8VNQXtzulFh7dvAm/exec";
 
         function checkLock() {
             const pin = document.getElementById('adminPass').value;
@@ -76,75 +73,72 @@
         async function load() {
             document.getElementById('loading-ui').style.display = 'block';
             try {
-                const res = await fetch(`${SCRIPT_URL}?action=getAdminData&t=${Date.now()}`);
+                // Simba Logic: getPending fetches rows from Sheet1
+                const res = await fetch(`${SCRIPT_URL}?action=getPending&t=${Date.now()}`);
                 const data = await res.json();
 
-                // 1. Render Deposits
-                let dHtml = '';
-                if(data.deposits && data.deposits.length > 0) {
-                    data.deposits.forEach(d => {
-                        dHtml += `<div class="card dep-card">
-                            <span class="label">SENDER NAME (የላኪ ስም):</span> 
-                            <span class="val">${d.senderName || 'Unknown'}</span>
+                let listHtml = '';
+                if(data && data.length > 0) {
+                    data.forEach(item => {
+                        const isDeposit = item.type === "DEPOSIT";
+                        const cardClass = isDeposit ? "dep-card" : "wit-card";
+                        const btnText = isDeposit ? "APPROVE DEPOSIT ✅" : "MARK AS PAID 💸";
+                        const btnClass = isDeposit ? "btn-app" : "btn-pay";
+                        
+                        listHtml += `<div class="card ${cardClass}">
+                            <span class="label">PLAYER NAME (የደንበኛው ስም):</span> 
+                            <span class="val">${item.name || 'Unknown'}</span>
                             
-                            <span class="label">ACCOUNT PHONE (የደንበኛው ስልክ):</span> 
-                            <span class="val">${d.phone}</span>
+                            <span class="label">PLAYER PHONE (የደንበኛው ስልክ):</span> 
+                            <span class="val">${item.phone}</span>
                             
-                            <span class="label">RECEIPT PHONE (የላከበት ስልክ):</span> 
-                            <span class="val">${d.senderPhone || d.phone}</span>
+                            <span class="label">TRANSACTION TYPE (የጥያቄ አይነት):</span> 
+                            <span class="val" style="color:${isDeposit ? 'var(--green)' : 'var(--red)'}">${item.type}</span>
+                            
+                            <span class="label">DETAILS (ዝርዝር):</span> 
+                            <span class="val">${item.details || 'No details provided'}</span>
                             
                             <div class="amt">
-                                <span>${parseFloat(d.amount).toFixed(2)} ETB</span>
-                                <span class="method-tag">${d.method}</span>
+                                <span>${parseFloat(item.amount).toFixed(2)} ETB</span>
+                                <span class="method-tag">Sheet Row: ${item.row}</span>
                             </div>
                             
-                            <button class="btn btn-app" onclick="action('approveDeposit','${d.id}')">APPROVE DEPOSIT ✅</button>
+                            <button class="btn ${btnClass}" onclick="handleAction('${item.row}', '${item.type}', '${item.amount}')">${btnText}</button>
                         </div>`;
                     });
                 }
-                document.getElementById('dep-list').innerHTML = dHtml || "<p style='color:#666; text-align:center;'>No pending deposits</p>";
+                document.getElementById('request-list').innerHTML = listHtml || "<p style='color:#666; text-align:center;'>No pending requests</p>";
 
-                // 2. Render Withdrawals
-                let wHtml = '';
-                if(data.withdrawals && data.withdrawals.length > 0) {
-                    data.withdrawals.forEach(w => {
-                        wHtml += `<div class="card wit-card">
-                            <span class="label">RECEIVER NAME (የተቀባይ ስም):</span> 
-                            <span class="val">${w.senderName || 'Customer'}</span>
-                            
-                            <span class="label">SEND MONEY TO (ይላኩ ወደ):</span> 
-                            <span class="val" style="font-size:1.2rem; color:white;">${w.senderPhone}</span>
-                            
-                            <div class="amt" style="color:var(--red)">
-                                <span>${parseFloat(w.amount).toFixed(2)} ETB</span>
-                                <span class="method-tag">${w.method}</span>
-                            </div>
-                            
-                            <button class="btn btn-pay" onclick="if(confirm('Did you send ${w.amount} to ${w.senderPhone}?')) action('approveWithdrawal','${w.id}')">MARK AS PAID 💸</button>
-                        </div>`;
-                    });
-                }
-                document.getElementById('wit-list').innerHTML = wHtml || "<p style='color:#666; text-align:center;'>No pending withdrawals</p>";
-                
             } catch(e) {
                 console.error(e);
-                alert("Error loading data. Make sure the Web App is deployed as 'Anyone'.");
+                alert("Error loading data. Check Connection.");
             }
             document.getElementById('loading-ui').style.display = 'none';
         }
 
-        async function action(type, id) {
+        async function handleAction(row, type, amount) {
+            const confirmMsg = type === "DEPOSIT" 
+                ? `Confirm: Add ${amount} ETB to player's balance?` 
+                : `Confirm: Mark withdrawal as Paid? (Balance already deducted)`;
+            
+            if(!confirm(confirmMsg)) return;
+
             document.getElementById('loading-ui').style.display = 'block';
             try {
-                // Using a regular fetch for the admin actions to get the response message
-                const res = await fetch(`${SCRIPT_URL}?action=${type}&id=${id}&t=${Date.now()}`);
-                const result = await res.json();
-                alert(result.message || "Success!");
-                load();
+                // In your Google Script, action=approve handles the balance math using the row index
+                const res = await fetch(`${SCRIPT_URL}?action=approve&row=${row}&t=${Date.now()}`);
+                const result = await res.text();
+                
+                if(result === "SUCCESS") {
+                    alert("Action Completed Successfully!");
+                    load();
+                } else {
+                    alert("System Response: " + result);
+                    load();
+                }
             } catch(e) {
-                // In case of CORS error, we still refresh because the action likely worked on the sheet
-                alert("Request Sent! Refreshing list...");
-                setTimeout(load, 2000);
+                alert("Request Sent! Refreshing...");
+                setTimeout(load, 1500);
             }
             document.getElementById('loading-ui').style.display = 'none';
         }
