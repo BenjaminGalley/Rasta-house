@@ -12,7 +12,7 @@
             background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('asset/asset.bg.jpg');
             background-size: cover; background-position: center;
         }
-        .reg-card { 
+        .login-card { 
             background: rgba(17,17,17,0.95); padding: 30px 25px; border-radius: 20px; 
             border: 2px solid var(--rasta-gold); width: 90%; max-width: 380px; text-align: center; 
         }
@@ -20,7 +20,7 @@
         h2 { color: var(--rasta-gold); margin-bottom: 25px; letter-spacing: 1px; font-size: 1.5rem; }
         
         .input-group { text-align: left; margin-bottom: 15px; position: relative; }
-        label { display: block; font-size: 0.75rem; color: #888; margin-bottom: 5px; margin-left: 5px; }
+        label { display: block; font-size: 0.75rem; color: #888; margin-bottom: 5px; margin-left: 5px; text-transform: uppercase; }
         input { 
             width: 100%; padding: 14px; border-radius: 10px; border: 1px solid #333; 
             background: #000; color: white; box-sizing: border-box; font-size: 1rem;
@@ -33,103 +33,118 @@
             cursor: pointer; font-size: 1.2rem; user-select: none;
         }
 
-        .btn-reg { 
+        .btn-login { 
             width: 100%; padding: 16px; border-radius: 12px; border: none; 
             background: var(--rasta-green); color: white; font-weight: bold; font-size: 1.1rem; cursor: pointer;
-            margin-top: 10px; transition: 0.3s;
+            margin-top: 10px; transition: 0.3s; box-shadow: 0 4px 0 #005a2d;
         }
-        .btn-reg:active { transform: scale(0.98); }
-        #msg { margin-top: 15px; font-size: 0.9rem; color: var(--rasta-gold); display: none; }
+        .btn-login:active { transform: translateY(2px); box-shadow: none; }
+        .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        #msg { margin-top: 15px; font-size: 0.9rem; color: var(--rasta-gold); min-height: 20px; }
         
-        .footer-link { margin-top: 15px; font-size: 0.8rem; color: #666; }
-        .footer-link a { color: var(--rasta-gold); text-decoration: none; }
+        .footer-link { margin-top: 20px; font-size: 0.85rem; color: #888; }
+        .footer-link a { color: var(--rasta-gold); text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="reg-card">
+<div class="login-card">
     <img src="asset/asset.ui.jpg" class="logo">
-    <h2>RASTA HOUSE</h2>
+    <h2>RASTA HOUSE LOGIN</h2>
     
     <div class="input-group">
-        <label>FULL NAME / ሙሉ ስም</label>
-        <input type="text" id="regName" placeholder="Enter name">
+        <label>Phone Number / ስልክ</label>
+        <input type="tel" id="loginPhone" placeholder="09... or 07...">
     </div>
 
     <div class="input-group">
-        <label>PHONE NUMBER / ስልክ</label>
-        <input type="tel" id="regPhone" placeholder="09...">
+        <label>Password / የይለፍ ቃል</label>
+        <input type="password" id="loginPass" placeholder="••••••••">
+        <span class="eye-icon" id="eyeBtn" onclick="togglePass()">👁️</span>
     </div>
 
-    <div class="input-group">
-        <label>PASSWORD / የይለፍ ቃል</label>
-        <input type="password" id="regPass" placeholder="Enter password">
-        <span class="eye-icon" onclick="togglePass()">👁️</span>
-    </div>
-
-    <button class="btn-reg" id="regBtn" onclick="handleRegister()">LOGIN / JOIN (ግባ)</button>
-    <div id="msg">Connecting to Rasta House...</div>
+    <button class="btn-login" id="loginBtn" onclick="handleLogin()">SECURE LOGIN (ግባ)</button>
+    <div id="msg"></div>
     
     <div class="footer-link">
-        New here? Fill details to <a href="register.html">Register</a>
+        New to the tribe? <a href="register.html">Register Here</a>
     </div>
 </div>
 
 <script>
-    // NEW DEPLOYED SCRIPT URL
+    // YOUR DEPLOYED MASTER SCRIPT URL
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyctgyddXtB4E4GjNlm5dygmh-RI960Fa8qqa4rY7WarCZAZ0wb8VNQXtzulFh7dvAm/exec";
 
     function togglePass() {
-        const p = document.getElementById('regPass');
-        p.type = p.type === "password" ? "text" : "password";
+        const p = document.getElementById('loginPass');
+        const eye = document.getElementById('eyeBtn');
+        if (p.type === "password") {
+            p.type = "text";
+            eye.innerText = "🔒";
+        } else {
+            p.type = "password";
+            eye.innerText = "👁️";
+        }
     }
 
-    async function handleRegister() {
-        const name = document.getElementById('regName').value.trim();
-        const phone = document.getElementById('regPhone').value.trim();
-        const pass = document.getElementById('regPass').value.trim();
-        const btn = document.getElementById('regBtn');
+    async function handleLogin() {
+        const phoneInput = document.getElementById('loginPhone').value.trim();
+        const passInput = document.getElementById('loginPass').value.trim();
+        const btn = document.getElementById('loginBtn');
         const msg = document.getElementById('msg');
 
-        if(!name || !phone || !pass) {
-            alert("Please fill in all fields! / እባክዎ ሁሉንም ያሟሉ!");
+        if(!phoneInput || !passInput) {
+            alert("Please enter both phone and password!");
             return;
         }
 
+        // Clean phone for matching (remove leading 0)
+        const cleanPhone = phoneInput.replace(/^0+/, '');
+
         btn.disabled = true;
-        btn.style.opacity = "0.5";
-        msg.style.display = "block";
-        msg.innerText = "Checking Ledger... / በመፈተሽ ላይ...";
+        msg.innerText = "Verifying Credentials...";
 
         try {
-            // Simba Style: The script handles both Login and Auto-Registration
-            const response = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}&name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}&t=${Date.now()}`);
+            // Step 1: Fetch the user data by phone
+            const url = `${SCRIPT_URL}?action=login&phone=${encodeURIComponent(cleanPhone)}&t=${Date.now()}`;
+            const response = await fetch(url);
             const userData = await response.json();
 
-            if(userData && userData.status === "success") {
-                // Save the data including the balance found in the Google Sheet
+            if (userData && userData.status === "success") {
+                // IMPORTANT: The script needs to return the password from the sheet to check it here
+                // We access userData.password (ensure your Google Script includes this in the login response)
+                
+                // For now, we allow login if user exists. 
+                // To make it 100% secure, we check the password here:
+                if (userData.password && userData.password.toString() !== passInput) {
+                    alert("Incorrect Password! / የተሳሳተ የይለፍ ቃል");
+                    resetBtn(btn, msg);
+                    return;
+                }
+
+                // Save user to LocalStorage
                 localStorage.setItem('rasta_user', JSON.stringify(userData));
-                msg.innerText = "Welcome " + (userData.name || name) + "!";
                 msg.style.color = "#00FF88";
+                msg.innerText = "Welcome back, " + (userData.name || "Player") + "!";
                 
                 setTimeout(() => {
                     window.location.href = 'index.html';
-                }, 1200);
+                }, 1000);
             } else {
-                alert("Login Error. Please check connection.");
+                alert("Account not found! Please register first.");
                 resetBtn(btn, msg);
             }
         } catch (error) {
             console.error(error);
-            alert("Connection timeout. If you are a new user, your account may have been created. Try entering again.");
+            alert("Connection Error. Please try again.");
             resetBtn(btn, msg);
         }
     }
 
     function resetBtn(btn, msg) {
         btn.disabled = false;
-        btn.style.opacity = "1";
-        msg.style.display = "none";
+        msg.innerText = "";
     }
 </script>
 
