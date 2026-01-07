@@ -174,33 +174,61 @@
     </div>
 
     <div class="game-grid">
+        <div class="game-card" onclick="location.href='keno.html'">
+            <div class="game-tag" style="background:var(--rasta-gold); color:black;">Fast</div>
+            <img src="https://images.unsplash.com/photo-1518133835878-5a93cc3f89e5?q=80&w=400&auto=format&fit=crop">
+            <div class="game-title">FAST KENO</div>
+        </div>
+
         <div class="game-card" onclick="location.href='safari-simba.html'">
             <div class="game-tag">Hot</div>
             <img src="asset/safari.jpeg">
             <div class="game-title">SAFARI SIMBA</div>
         </div>
+
         <div class="game-card" onclick="location.href='multi-hot-5.html'">
             <div class="game-tag">New</div>
             <img src="asset/multi logo2.jpeg">
             <div class="game-title">MULTI HOT 5</div>
         </div>
+
         <div class="game-card" onclick="location.href='triple-seven.html'">
             <img src="asset/multilogo.jpeg">
             <div class="game-title">TRIPLE SEVEN</div>
         </div>
+
+        <div class="game-card" onclick="location.href='dice.html'">
+            <div class="game-tag" style="background:var(--rasta-green);">Popular</div>
+            <img src="https://images.unsplash.com/photo-1596838132731-3301c3fd4317?q=80&w=400&auto=format&fit=crop">
+            <div class="game-title">RASTA DICE</div>
+        </div>
+
+        <div class="game-card" onclick="location.href='wheel.html'">
+            <div class="game-tag" style="background:var(--rasta-red);">Big Win</div>
+            <img src="https://images.unsplash.com/photo-1606167668584-78701c57f13d?q=80&w=400&auto=format&fit=crop">
+            <div class="game-title">MEGA WHEEL</div>
+        </div>
+
+        <div class="game-card" onclick="location.href='mines.html'">
+            <div class="game-tag" style="background:var(--rasta-gold); color:black;">Tactical</div>
+            <img src="https://images.unsplash.com/photo-1614332287897-cdc485fa562d?q=80&w=400&auto=format&fit=crop">
+            <div class="game-title">RASTA MINES</div>
+        </div>
+
+        <div class="game-card" onclick="location.href='crash.html'">
+            <div class="game-tag">Instant</div>
+            <img src="asset/asset.bg.jpg">
+            <div class="game-title">RASTA CRASH</div>
+        </div>
+
         <div class="game-card" onclick="location.href='rasta-revelation.html'">
-            <div class="game-tag">Classic</div>
             <img src="asset/asset.rasta.jpg">
             <div class="game-title">RASTA REVELATION</div>
         </div>
+
         <div class="game-card" onclick="location.href='premium-slots.html'">
             <img src="asset/asset.nine.jpg">
             <div class="game-title">LION SLOTS</div>
-        </div>
-        <div class="game-card" onclick="location.href='crash.html'">
-            <div class="game-tag">Easy Win</div>
-            <img src="asset/asset.bg.jpg">
-            <div class="game-title">RASTA CRASH</div>
         </div>
     </div>
 
@@ -229,7 +257,6 @@
     }
 
     async function syncBalance(user) {
-        // Universal catch for phone label
         const userPhone = user.phone || user.phoneNumber;
         if(!userPhone) return;
 
@@ -268,7 +295,7 @@
             setInterval(updateJackpot, 3000);
             
             const names = ["Abebe", "Selam", "Dawit", "Hanna", "Mulugeta", "Aster"];
-            const games = ["Safari Simba", "Multi Hot", "Lion Slots", "Rasta Crash"];
+            const games = ["Safari Simba", "Multi Hot", "Lion Slots", "Rasta Crash", "Keno"];
             let tickerText = "";
             for(let i=0; i<10; i++) {
                 const name = names[Math.floor(Math.random()*names.length)];
