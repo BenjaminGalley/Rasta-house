@@ -2,126 +2,251 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RASTA GOLD SCRATCH</title>
     <style>
-        :root { --gold: #FFD100; --green: #008542; }
-        body { background: #000; color: white; font-family: sans-serif; text-align: center; margin: 0; }
-        .header { padding: 15px; background: #111; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; }
+        :root { --gold: #FFD100; --green: #008542; --red: #E71D36; --dark: #0a0a0a; }
         
-        .scratch-card { 
-            width: 300px; height: 300px; margin: 30px auto; 
-            background: #222; border: 4px solid var(--gold); border-radius: 15px;
-            position: relative; overflow: hidden;
+        body { 
+            background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; 
+            text-align: center; margin: 0; overflow: hidden; 
         }
 
-        /* The hidden prize icons from asset.nine.jpg */
-        .prize-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; width: 100%; height: 100%; }
+        .header { 
+            padding: 15px; background: #000; border-bottom: 3px solid var(--gold); 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .bal-display { 
+            background: linear-gradient(to right, var(--green), #004d26); 
+            padding: 8px 15px; border-radius: 20px; border: 1px solid var(--gold); font-weight: bold; 
+        }
+
+        /* --- SCRATCH CARD --- */
+        .card-container {
+            margin: 20px auto; width: 320px; position: relative;
+            background: #1a1a1a; padding: 10px; border-radius: 20px;
+            border: 4px solid #333; box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+        
+        .win-glow { animation: win-pulse 0.5s infinite alternate; }
+        @keyframes win-pulse { 
+            from { border-color: var(--gold); box-shadow: 0 0 10px var(--gold); } 
+            to { border-color: white; box-shadow: 0 0 30px var(--gold); } 
+        }
+
+        .prize-grid { 
+            display: grid; grid-template-columns: repeat(2, 1fr); 
+            grid-template-rows: repeat(2, 1fr); gap: 5px; 
+            width: 300px; height: 300px; background: #000;
+        }
+
         .prize-cell { 
-            border: 1px solid #333; display: flex; align-items: center; justify-content: center;
             background-image: url('asset/asset.nine.jpg');
-            background-size: 300px 300px; 
+            background-size: 300% 300%; /* Perfect 3x3 Sprite Mapping */
+            background-repeat: no-repeat;
+            background-color: #111;
+            border-radius: 10px;
         }
 
-        canvas { position: absolute; top: 0; left: 0; cursor: crosshair; touch-action: none; }
-        .btn-buy { width: 80%; padding: 18px; background: var(--green); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1.2rem; cursor: pointer; }
+        canvas { 
+            position: absolute; top: 10px; left: 10px; 
+            cursor: crosshair; touch-action: none; border-radius: 10px;
+        }
+
+        /* --- CONTROLS --- */
+        #msg { height: 30px; color: var(--gold); font-weight: bold; margin: 15px 0; text-transform: uppercase; letter-spacing: 1px; }
+
+        .bet-bar {
+            display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px;
+        }
+        .step-btn {
+            width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--gold);
+            background: #222; color: var(--gold); font-size: 1.5rem; font-weight: bold;
+        }
+        .step-btn:active { background: var(--gold); color: black; }
+        
+        .bet-info { background: #000; padding: 5px 15px; border-radius: 10px; border: 1px solid #444; }
+        .bet-info small { display: block; font-size: 0.6rem; color: #888; }
+        .bet-info b { font-size: 1.2rem; color: var(--gold); }
+
+        .btn-buy { 
+            width: 85%; padding: 18px; background: linear-gradient(var(--green), #004d26); 
+            color: white; border: none; border-radius: 50px; font-weight: bold; font-size: 1.4rem; 
+            cursor: pointer; box-shadow: 0 6px 0 #002e17;
+        }
+        .btn-buy:active { transform: translateY(4px); box-shadow: 0 2px 0 #002e17; }
+        .btn-buy:disabled { background: #444; box-shadow: 0 2px 0 #222; opacity: 0.7; }
+
+        .audio-icon { cursor: pointer; font-size: 1.2rem; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <span>RASTA GOLD SCRATCH</span>
-    <span id="balDisplay">0.00 ETB</span>
+    <div onclick="location.href='index.html'" style="cursor:pointer">🏠</div>
+    <div class="bal-display" id="balDisplay">0.00 ETB</div>
+    <div class="audio-icon" onclick="toggleMusic()">🔊</div>
 </div>
 
-<div class="scratch-card" id="cardArea">
+<div class="card-container" id="cardBox">
     <div class="prize-grid" id="prizeGrid">
+        <div class="prize-cell" id="p0"></div>
         <div class="prize-cell" id="p1"></div>
         <div class="prize-cell" id="p2"></div>
         <div class="prize-cell" id="p3"></div>
-        <div class="prize-cell" id="p4"></div>
     </div>
     <canvas id="scratchCanvas" width="300" height="300"></canvas>
 </div>
 
-<div id="msg" style="margin-bottom:15px; font-weight:bold; color:var(--gold);">BUY A CARD TO START</div>
-<button class="btn-buy" onclick="buyCard()" id="buyBtn">BUY CARD (2 ETB)</button>
+<div id="msg">GET 3 MATCHING TO WIN!</div>
+
+<div class="bet-bar">
+    <button class="step-btn" onclick="adjustBet(-2)">-</button>
+    <div class="bet-info">
+        <small>TICKET COST</small>
+        <b id="betDisplay">2</b>
+    </div>
+    <button class="step-btn" onclick="adjustBet(2)">+</button>
+</div>
+
+<button class="btn-buy" onclick="buyCard()" id="buyBtn">BUY SCRATCH CARD</button>
+
+<audio id="bgMusic" loop>
+    <source src="https://www.free-stock-music.com/music/alexander-nakarada-be-jammin.mp3" type="audio/mpeg">
+</audio>
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
-    let user = JSON.parse(localStorage.getItem('rasta_user'));
+    let user = JSON.parse(localStorage.getItem('rasta_user')) || { balance: 0, phone: "000" };
+    let currentBet = 2;
+    let isScratched = false;
+    let gameActive = false;
+
     const canvas = document.getElementById('scratchCanvas');
     const ctx = canvas.getContext('2d');
-    let isDrawing = false;
 
-    // Sprite Mapping for Prizes
-    const iconCoords = [
-        { name: 'Lion', pos: '0px -75px' },
-        { name: 'Chest', pos: '-75px -75px' },
-        { name: 'Crown', pos: '-225px 0px' }
+    // Sprite Mapping from asset.nine.jpg (3x3 grid)
+    const icons = [
+        { name: 'Lion', pos: '0% 50%', mult: 20 },
+        { name: 'Chest', pos: '50% 50%', mult: 10 },
+        { name: 'Crown', pos: '100% 0%', mult: 50 },
+        { name: 'Seven', pos: '0% 0%', mult: 5 }
     ];
 
-    function updateUI() {
-        document.getElementById('balDisplay').innerText = user.balance.toFixed(2) + " ETB";
+    function init() {
+        document.getElementById('balDisplay').innerText = parseFloat(user.balance).toFixed(2) + " ETB";
+        resetCanvas();
     }
-    updateUI();
 
-    function initCanvas() {
-        ctx.fillStyle = '#888'; // Silver scratch layer
+    function resetCanvas() {
+        ctx.globalCompositeOperation = 'source-over';
+        // Create a gold scratch texture
+        const grad = ctx.createLinearGradient(0,0,300,300);
+        grad.addColorStop(0, '#C5A000');
+        grad.addColorStop(0.5, '#FFD100');
+        grad.addColorStop(1, '#8A6E00');
+        ctx.fillStyle = grad;
         ctx.fillRect(0, 0, 300, 300);
+        
+        // Add some "texture" dots
+        ctx.fillStyle = "rgba(255,255,255,0.2)";
+        for(let i=0; i<100; i++) {
+            ctx.fillRect(Math.random()*300, Math.random()*300, 2, 2);
+        }
         ctx.globalCompositeOperation = 'destination-out';
     }
-    initCanvas();
+
+    function adjustBet(amt) {
+        if(gameActive) return;
+        currentBet = Math.max(2, currentBet + amt);
+        document.getElementById('betDisplay').innerText = currentBet;
+    }
 
     function buyCard() {
-        if (user.balance < 2) return alert("Min bet 2 ETB");
-        user.balance -= 2;
+        if (user.balance < currentBet) return alert("Insufficient Balance");
+        
+        user.balance -= currentBet;
         updateUI();
+        gameActive = true;
+        isScratched = false;
         document.getElementById('buyBtn').disabled = true;
-        document.getElementById('msg').innerText = "SCRATCH TO REVEAL!";
+        document.getElementById('cardBox').classList.remove('win-glow');
+        document.getElementById('msg').innerText = "SCRATCH THE GOLD!";
+        resetCanvas();
 
-        // Setup random prizes
-        const results = [
-            Math.floor(Math.random()*3), Math.floor(Math.random()*3),
-            Math.floor(Math.random()*3), Math.floor(Math.random()*3)
-        ];
-        results.forEach((res, i) => {
-            document.getElementById('p' + (i+1)).style.backgroundPosition = iconCoords[res].pos;
-        });
+        // Generate Results
+        const results = [];
+        for(let i=0; i<4; i++) {
+            const idx = Math.floor(Math.random() * icons.length);
+            results.push(idx);
+            document.getElementById('p'+i).style.backgroundPosition = icons[idx].pos;
+        }
 
-        // Check for win (e.g., 3 matching icons)
-        let counts = {};
-        results.forEach(r => counts[r] = (counts[r] || 0) + 1);
+        // Win Logic (If any icon appears 3 or more times)
         let winAmt = 0;
-        if (Object.values(counts).some(v => v >= 3)) winAmt = 10; // Win 10 ETB if 3 match
-
-        setTimeout(() => { // Delay check until scratched
-            if(winAmt > 0) {
-                user.balance += winAmt;
-                document.getElementById('msg').innerText = "YOU WON " + winAmt + " ETB!";
-            } else {
-                document.getElementById('msg').innerText = "TRY AGAIN!";
+        const counts = {};
+        results.forEach(idx => counts[idx] = (counts[idx] || 0) + 1);
+        
+        for(let idx in counts) {
+            if(counts[idx] >= 3) {
+                winAmt = currentBet * icons[idx].mult;
             }
-            updateUI();
-            document.getElementById('buyBtn').disabled = false;
-            syncDB();
-        }, 5000);
+        }
+
+        // Detect if scratched enough
+        const checkScratch = setInterval(() => {
+            if(isScratched) {
+                clearInterval(checkScratch);
+                finalizeGame(winAmt);
+            }
+        }, 500);
     }
 
-    // Scratching logic
-    canvas.addEventListener('mousedown', () => isDrawing = true);
-    canvas.addEventListener('mouseup', () => isDrawing = false);
-    canvas.addEventListener('mousemove', (e) => {
-        if (!isDrawing) return;
+    function finalizeGame(win) {
+        if(win > 0) {
+            user.balance += win;
+            document.getElementById('msg').innerText = "WINNER: " + win + " ETB!";
+            document.getElementById('cardBox').classList.add('win-glow');
+        } else {
+            document.getElementById('msg').innerText = "NO LUCK THIS TIME";
+        }
+        updateUI();
+        saveAndSync();
+        gameActive = false;
+        document.getElementById('buyBtn').disabled = false;
+    }
+
+    // Scratching Input
+    function scratch(e) {
+        if(!gameActive) return;
         const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX || e.touches[0].clientX) - rect.left;
+        const y = (e.clientY || e.touches[0].clientY) - rect.top;
+        
         ctx.beginPath();
-        ctx.arc(e.clientX - rect.left, e.clientY - rect.top, 20, 0, Math.PI * 2);
+        ctx.arc(x, y, 25, 0, Math.PI * 2);
         ctx.fill();
-    });
-
-    function syncDB() {
-        fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&name=${user.name}&updateBal=${user.balance}`);
+        isScratched = true; // Simplified: First scratch starts the reveal
     }
+
+    canvas.addEventListener('mousemove', (e) => { if(e.buttons == 1) scratch(e); });
+    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); scratch(e); });
+
+    function updateUI() {
+        document.getElementById('balDisplay').innerText = parseFloat(user.balance).toFixed(2) + " ETB";
+    }
+
+    function saveAndSync() {
+        localStorage.setItem('rasta_user', JSON.stringify(user));
+        fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&updateBal=${user.balance}`);
+    }
+
+    function toggleMusic() {
+        const m = document.getElementById('bgMusic');
+        m.paused ? m.play() : m.pause();
+    }
+
+    window.onload = init;
 </script>
 </body>
 </html>
