@@ -14,98 +14,129 @@
         
         .reg-card { 
             width: 85%; max-width: 350px; background: rgba(17, 17, 17, 0.95); 
-            padding: 30px; border-radius: 20px; border: 1px solid var(--rasta-gold); 
-            box-shadow: 0 0 20px rgba(255, 209, 0, 0.2); 
+            padding: 30px; border-radius: 25px; border: 1px solid var(--rasta-gold); 
+            box-shadow: 0 0 25px rgba(255, 209, 0, 0.15); 
         }
-        h2 { color: var(--rasta-gold); margin: 0; text-align: center; letter-spacing: 2px; }
-        .sub-text { text-align:center; font-size: 0.8rem; color: var(--rasta-green); font-weight: bold; margin-bottom: 20px; }
+        h2 { color: var(--rasta-gold); margin: 0; text-align: center; letter-spacing: 2px; font-size: 1.8rem; }
+        .sub-text { text-align:center; font-size: 0.75rem; color: var(--rasta-green); font-weight: bold; margin-bottom: 20px; letter-spacing: 1px; }
         
-        label { display: block; margin: 15px 0 5px; font-size: 0.8rem; color: #aaa; text-transform: uppercase; }
+        .input-group { position: relative; width: 100%; }
+        label { display: block; margin: 15px 0 5px; font-size: 0.75rem; color: #888; text-transform: uppercase; font-weight: bold; }
+        
         input { 
             width: 100%; padding: 14px; background: #000; border: 1px solid #333; 
-            color: white; border-radius: 10px; box-sizing: border-box; font-size: 1rem; 
+            color: white; border-radius: 12px; box-sizing: border-box; font-size: 1rem; transition: 0.3s;
         }
-        input:focus { border-color: var(--rasta-green); outline: none; }
+        input:focus { border-color: var(--rasta-gold); outline: none; box-shadow: 0 0 8px rgba(255, 209, 0, 0.2); }
         
+        /* Password Eye Toggle */
+        .eye-toggle {
+            position: absolute; right: 15px; top: 42px; color: var(--rasta-gold);
+            cursor: pointer; font-size: 1.2rem; user-select: none;
+        }
+
         .btn-join { 
             width: 100%; padding: 16px; background: var(--rasta-green); color: white; 
-            border: none; border-radius: 10px; font-weight: bold; font-size: 1.1rem; 
-            cursor: pointer; margin-top: 25px; box-shadow: 0 4px 0 #005a2d; 
+            border: none; border-radius: 12px; font-weight: bold; font-size: 1.1rem; 
+            cursor: pointer; margin-top: 25px; box-shadow: 0 4px 0 #005a2d; transition: 0.2s;
         }
         .btn-join:active { transform: translateY(2px); box-shadow: none; }
+        .btn-join:disabled { background: #444; box-shadow: none; cursor: not-allowed; }
         
+        .terms { font-size: 0.65rem; color: #555; margin-top: 15px; line-height: 1.4; }
         .footer-link { margin-top: 20px; font-size: 0.85rem; color: #888; text-align: center; }
-        .footer-link a { color: var(--rasta-gold); text-decoration: none; font-weight: bold; }
+        .footer-link a { color: var(--rasta-gold); text-decoration: none; font-weight: bold; border-bottom: 1px solid var(--rasta-gold); }
     </style>
 </head>
 <body>
 
     <div class="reg-card">
         <h2>REGISTER</h2>
-        <p class="sub-text">START YOUR JOURNEY</p>
+        <p class="sub-text">JOIN THE TRIBE / አባል ይሁኑ</p>
 
-        <label>Full Name</label>
-        <input type="text" id="regName" placeholder="Enter your name">
+        <div class="input-group">
+            <label>Full Name / ሙሉ ስም</label>
+            <input type="text" id="regName" placeholder="e.g. Abebe Kebede">
+        </div>
 
-        <label>Phone Number</label>
-        <input type="tel" id="regPhone" placeholder="09...">
+        <div class="input-group">
+            <label>Phone Number / ስልክ</label>
+            <input type="tel" id="regPhone" placeholder="09... or 07...">
+        </div>
 
-        <label>Create Password</label>
-        <input type="password" id="regPass" placeholder="••••••••">
+        <div class="input-group">
+            <label>Create Password / የይለፍ ቃል</label>
+            <input type="password" id="regPass" placeholder="Min. 4 characters">
+            <span class="eye-toggle" onclick="togglePassword()">👁️</span>
+        </div>
 
-        <button class="btn-join" onclick="handleRegister()">CREATE ACCOUNT</button>
+        <button class="btn-join" id="submitBtn" onclick="handleRegister()">CREATE ACCOUNT (ክፈት)</button>
+
+        <p class="terms">By registering, you agree to Rasta House rules and confirm you are 18+ years old.</p>
 
         <div class="footer-link">
-            Already have an account? <a href="login.html">Login</a>
+            Already have an account? <a href="login.html">Login Here</a>
         </div>
     </div>
 
 <script>
-    // FINAL UPDATED SCRIPT URL
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0kOovoQjv6IVSX2vbj7gba7-CtPXer7LFiC9738B8LYHmMc0O3Pzg5IL9U6MkvtKc/exec";
+    // NEW DEPLOYED SCRIPT URL
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyctgyddXtB4E4GjNlm5dygmh-RI960Fa8qqa4rY7WarCZAZ0wb8VNQXtzulFh7dvAm/exec";
+
+    function togglePassword() {
+        const passInput = document.getElementById('regPass');
+        passInput.type = passInput.type === "password" ? "text" : "password";
+    }
 
     async function handleRegister() {
-        const nameInput = document.getElementById('regName');
-        const phoneInput = document.getElementById('regPhone');
-        const passInput = document.getElementById('regPass');
-        
-        const name = nameInput.value.trim();
-        const phone = phoneInput.value.trim();
-        const pass = passInput.value.trim();
+        const name = document.getElementById('regName').value.trim();
+        const phone = document.getElementById('regPhone').value.trim();
+        const pass = document.getElementById('regPass').value.trim();
+        const btn = document.getElementById('submitBtn');
 
+        // Clean validation
         if(!name || !phone || !pass) {
-            return alert("Please fill all fields.");
+            alert("All fields are required! / እባክዎ ሁሉንም መረጃዎች ይሙሉ");
+            return;
         }
 
         if(phone.length < 10) {
-            return alert("Enter a valid phone number.");
+            alert("Invalid Phone Number! / የተሳሳተ ስልክ ቁጥር");
+            return;
         }
 
-        const btn = document.querySelector('.btn-join');
-        const originalText = btn.innerText;
-        btn.innerText = "CREATING...";
+        if(pass.length < 4) {
+            alert("Password too short! / የይለፍ ቃል ቢያንስ 4 መሆን አለበት");
+            return;
+        }
+
+        btn.innerText = "PROCESSING...";
         btn.disabled = true;
 
         try {
-            // Using action=login as your script handles registration within the login logic if user doesn't exist
-            const response = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}&name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}&t=${Date.now()}`);
-            const userData = await response.json();
+            // Your script handles registration via 'action=login'
+            // It searches for the phone; if not found, it appends a new row
+            const url = `${SCRIPT_URL}?action=login&phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}&t=${Date.now()}`;
             
-            if (userData.playerID) {
-                // Save complete user object locally
-                localStorage.setItem('rasta_user', JSON.stringify(userData));
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (data && data.status === "success") {
+                // Save complete user object to browser memory
+                localStorage.setItem('rasta_user', JSON.stringify(data));
                 
-                alert("Welcome to Rasta House, " + userData.name + "!");
+                alert("Account Created Successfully! Welcome " + (data.name || name));
                 window.location.href = "index.html";
             } else {
-                alert("Registration failed. This phone might already be registered.");
-                btn.innerText = originalText;
+                alert("Registration Failed. Please try again.");
+                btn.innerText = "CREATE ACCOUNT";
                 btn.disabled = false;
             }
             
         } catch (error) {
-            console.error(error);
-            alert("Success! Your account is created. Please try logging in.");
+            console.error("Register Error:", error);
+            // In case of a slight network error, usually the row is still created
+            alert("Checking account status... Please try to Login.");
             window.location.href = "login.html";
         }
     }
