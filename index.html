@@ -212,7 +212,6 @@
 </div>
 
 <script>
-    // --- UPDATED PRODUCTION SCRIPT URL ---
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyctgyddXtB4E4GjNlm5dygmh-RI960Fa8qqa4rY7WarCZAZ0wb8VNQXtzulFh7dvAm/exec";
 
     function toggleMenu() {
@@ -229,10 +228,13 @@
         }
     }
 
-    // MIRROR SYNC: Ensures browser matches Google Sheet Exactly
     async function syncBalance(user) {
+        // Universal catch for phone label
+        const userPhone = user.phone || user.phoneNumber;
+        if(!userPhone) return;
+
         try {
-            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&t=${Date.now()}`);
+            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${userPhone}&t=${Date.now()}`);
             const data = await res.json();
             if(data && data.status === "success") {
                 user.balance = data.balance;
@@ -243,7 +245,6 @@
         } catch(e) { console.warn("Balance sync pending..."); }
     }
 
-    // Dynamic Jackpot Simulation
     function updateJackpot() {
         const jack = document.getElementById('jackpotAmt');
         let current = parseFloat(jack.innerText.replace(',', ''));
@@ -259,16 +260,13 @@
             document.getElementById('lobby-view').style.display = 'block';
             const user = JSON.parse(userData);
             
-            // Set basic info immediately
             document.getElementById('userBal').innerText = parseFloat(user.balance || 0).toFixed(2);
-            document.getElementById('welcomeUser').innerText = "RESPECT, " + user.name.toUpperCase();
-            document.getElementById('sideUserPhone').innerText = "ID: " + user.phone;
+            document.getElementById('welcomeUser').innerText = "RESPECT, " + (user.name || "PLAYER").toUpperCase();
+            document.getElementById('sideUserPhone').innerText = "ID: " + (user.phone || user.phoneNumber);
             
-            // Start background tasks
             syncBalance(user);
             setInterval(updateJackpot, 3000);
             
-            // Setup ticker names
             const names = ["Abebe", "Selam", "Dawit", "Hanna", "Mulugeta", "Aster"];
             const games = ["Safari Simba", "Multi Hot", "Lion Slots", "Rasta Crash"];
             let tickerText = "";
