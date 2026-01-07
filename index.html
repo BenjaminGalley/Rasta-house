@@ -3,107 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RASTA HOUSE | LOBBY</title>
+    <title>RASTA HOUSE | LOBBY - WIN BIG</title>
     <style>
-        :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; --dark-bg: #0a0a0a; }
-        body { background: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; overflow-x: hidden; }
+        :root { 
+            --rasta-green: #008542; 
+            --rasta-gold: #FFD100; 
+            --rasta-red: #E71D36; 
+            --dark-bg: #0a0a0a; 
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+        
+        body { 
+            background: var(--dark-bg); 
+            color: white; 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            margin: 0; 
+            padding-bottom: 90px; 
+            overflow-x: hidden; 
+        }
         
         /* --- SIDE MENU --- */
         .sidebar {
-            position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
-            background: #111; z-index: 2000; transition: 0.3s ease;
-            border-right: 2px solid var(--rasta-gold); box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+            position: fixed; top: 0; left: -300px; width: 280px; height: 100%;
+            background: #111; z-index: 2000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-right: 3px solid var(--rasta-gold); box-shadow: 10px 0 30px rgba(0,0,0,0.8);
         }
         .sidebar.active { left: 0; }
-        .sidebar-header { padding: 30px 20px; background: #000; text-align: center; border-bottom: 1px solid #333; }
-        .sidebar-menu { padding: 10px 0; }
+        .sidebar-header { padding: 40px 20px; background: #000; text-align: center; border-bottom: 1px solid #222; }
+        .sidebar-menu { padding: 15px 0; }
         .menu-item { 
-            display: block; padding: 15px 25px; color: white; text-decoration: none; 
-            font-size: 1rem; border-bottom: 1px solid #222; transition: 0.2s;
+            display: flex; align-items: center; padding: 18px 25px; color: #ccc; text-decoration: none; 
+            font-size: 1rem; border-bottom: 1px solid #1a1a1a; transition: 0.3s;
         }
         .menu-item:active { background: #222; color: var(--rasta-gold); }
-        .logout-btn { color: var(--rasta-red) !important; font-weight: bold; margin-top: 20px; border-top: 1px solid #333; }
+        .menu-icon { margin-right: 15px; font-size: 1.2rem; }
+        .logout-btn { color: var(--rasta-red) !important; font-weight: bold; margin-top: 30px; border-top: 1px solid #333; }
         
         .overlay { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.7); display: none; z-index: 1500; 
+            background: rgba(0,0,0,0.8); display: none; z-index: 1500; backdrop-filter: blur(4px);
         }
 
         /* --- LOBBY STYLES --- */
         header { 
-            background: #111; padding: 15px; display: flex; justify-content: space-between; 
+            background: rgba(17, 17, 17, 0.95); padding: 15px 20px; display: flex; justify-content: space-between; 
             align-items: center; border-bottom: 2px solid var(--rasta-gold); position: sticky; top: 0; z-index: 1000;
+            backdrop-filter: blur(10px);
         }
-        .menu-toggle { background: none; border: none; color: var(--rasta-gold); font-size: 1.5rem; cursor: pointer; padding: 0 5px; }
-        .logo-text { font-weight: bold; color: var(--rasta-gold); font-size: 1.2rem; letter-spacing: 1px; }
+        .menu-toggle { background: none; border: none; color: var(--rasta-gold); font-size: 1.8rem; cursor: pointer; padding: 0; }
+        .logo-text { font-weight: 900; color: var(--rasta-gold); font-size: 1.3rem; letter-spacing: 2px; font-style: italic; }
         .balance-pill { 
-            background: var(--rasta-green); padding: 8px 15px; border-radius: 20px; 
+            background: linear-gradient(to right, var(--rasta-green), #00a852); padding: 8px 16px; border-radius: 25px; 
             font-weight: bold; border: 1px solid var(--rasta-gold); cursor: pointer;
-            box-shadow: 0 0 10px rgba(0, 133, 66, 0.4);
+            box-shadow: 0 0 15px rgba(0, 133, 66, 0.5); font-size: 0.9rem;
         }
 
+        /* LIVE JACKPOT BANNER */
         .banner { 
-            height: 160px; background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.7)), url('asset/asset.bg.jpg');
+            height: 180px; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url('asset/asset.bg.jpg');
             background-size: cover; background-position: center; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border-bottom: 3px solid var(--rasta-green);
+            border-bottom: 4px solid var(--rasta-green); position: relative;
+        }
+        .jackpot-box {
+            background: rgba(0,0,0,0.7); padding: 10px 20px; border-radius: 10px; border: 1px solid var(--rasta-gold);
+            text-align: center; box-shadow: 0 0 20px var(--rasta-red); animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { box-shadow: 0 0 5px var(--rasta-red); } 50% { box-shadow: 0 0 20px var(--rasta-red); } 100% { box-shadow: 0 0 5px var(--rasta-red); } }
+
+        /* WINNER TICKER */
+        .ticker { background: #111; padding: 8px; font-size: 0.75rem; color: var(--rasta-gold); border-bottom: 1px solid #222; overflow: hidden; white-space: nowrap; }
+        .ticker-text { display: inline-block; animation: scroll 20s linear infinite; }
+        @keyframes scroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+
+        .game-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; }
+        .game-card { 
+            background: #1a1a1a; border-radius: 20px; overflow: hidden; 
+            border: 1px solid #2a2a2a; position: relative; aspect-ratio: 1/1; cursor: pointer;
+            transition: 0.3s ease; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .game-card img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; filter: brightness(0.9); }
+        .game-card:hover img { transform: scale(1.1); filter: brightness(1.1); }
+        .game-card:active { transform: scale(0.94); }
+        
+        .game-tag {
+            position: absolute; top: 10px; right: 10px; background: var(--rasta-red); color: white;
+            font-size: 0.6rem; font-weight: bold; padding: 3px 8px; border-radius: 5px; text-transform: uppercase;
         }
 
-        .game-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 12px; }
-        .game-card { 
-            background: #1a1a1a; border-radius: 15px; overflow: hidden; 
-            border: 1px solid #333; position: relative; aspect-ratio: 1/1; cursor: pointer;
-            transition: 0.2s;
-        }
-        .game-card img { width: 100%; height: 100%; object-fit: cover; transition: 0.3s; filter: brightness(0.8); }
-        .game-card:active { transform: scale(0.96); }
         .game-title { 
-            position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.85); 
-            padding: 8px 0; text-align: center; color: var(--rasta-gold); font-size: 0.75rem; font-weight: bold;
-            border-top: 1px solid var(--rasta-green);
+            position: absolute; bottom: 0; width: 100%; background: linear-gradient(transparent, rgba(0,0,0,0.95)); 
+            padding: 15px 0 8px; text-align: center; color: white; font-size: 0.85rem; font-weight: bold;
+            border-bottom: 3px solid var(--rasta-gold);
         }
 
         /* --- VISITOR GATE --- */
         #visitor-gate {
             height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center;
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.8)), url('asset/asset.bg.jpg');
-            background-size: cover; text-align: center;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('asset/asset.bg.jpg');
+            background-size: cover; background-position: center; text-align: center;
         }
+        .gate-logo { width: 120px; height: 120px; margin-bottom: 20px; border: 4px solid var(--rasta-gold); border-radius: 50%; }
         .btn-gate { 
-            display: block; width: 220px; padding: 18px; margin: 12px 0; border-radius: 35px; 
-            text-decoration: none; font-weight: bold; font-size: 1.1rem; text-align: center;
+            display: block; width: 240px; padding: 20px; margin: 15px 0; border-radius: 40px; 
+            text-decoration: none; font-weight: 900; font-size: 1.2rem; text-align: center; transition: 0.3s;
         }
-        .btn-login { background: var(--rasta-green); color: white; box-shadow: 0 4px 0 #004d26; }
-        .btn-reg { border: 2px solid var(--rasta-gold); color: var(--rasta-gold); }
+        .btn-login { background: var(--rasta-green); color: white; box-shadow: 0 6px 0 #004d26; }
+        .btn-reg { border: 2px solid var(--rasta-gold); color: var(--rasta-gold); background: rgba(0,0,0,0.5); }
+        .btn-gate:active { transform: translateY(4px); box-shadow: none; }
 
         .bottom-nav { 
-            position: fixed; bottom: 0; width: 100%; height: 65px; background: #111; 
+            position: fixed; bottom: 0; width: 100%; height: 75px; background: #000; 
             display: flex; justify-content: space-around; align-items: center; border-top: 2px solid var(--rasta-gold);
-            z-index: 1000;
+            z-index: 1000; padding-bottom: env(safe-area-inset-bottom);
         }
-        .nav-link { text-decoration: none; color: #888; text-align: center; font-size: 0.65rem; font-weight: bold; }
-        .nav-link.active { color: var(--rasta-gold); }
+        .nav-link { text-decoration: none; color: #555; text-align: center; font-size: 0.7rem; font-weight: bold; transition: 0.3s; }
+        .nav-link i { display: block; font-size: 1.5rem; margin-bottom: 4px; }
+        .nav-link.active { color: var(--rasta-gold); text-shadow: 0 0 10px var(--rasta-gold); }
     </style>
 </head>
 <body>
 
 <div class="overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+
 <div class="sidebar" id="mainSidebar">
     <div class="sidebar-header">
-        <h2 style="color:var(--rasta-gold); margin:0;">RASTA HOUSE</h2>
-        <p id="sideUserPhone" style="color:#666; font-size:0.8rem; margin:5px 0 0;"></p>
+        <img src="asset/asset.ui.jpg" style="width:70px; border-radius:50%; border:2px solid var(--rasta-gold); margin-bottom:10px;">
+        <h2 style="color:var(--rasta-gold); margin:0; letter-spacing:1px;">RASTA HOUSE</h2>
+        <p id="sideUserPhone" style="color:#888; font-size:0.85rem; margin:8px 0 0;"></p>
     </div>
     <div class="sidebar-menu">
-        <a href="index.html" class="menu-item">🏠 Lobby / መግቢያ</a>
-        <a href="profile.html" class="menu-item">💰 Wallet / የኪስ ቦርሳ</a>
-        <a href="profile.html?view=withdraw" class="menu-item">💸 Withdraw / ወጪ መውሰጃ</a>
-        <a href="profile.html?view=deposit" class="menu-item">➕ Deposit / ብር ማስገቢያ</a>
-        <a href="javascript:void(0)" class="menu-item logout-btn" onclick="handleLogout()">🚪 Logout / ውጣ</a>
+        <a href="index.html" class="menu-item"><span class="menu-icon">🏠</span> Lobby / መግቢያ</a>
+        <a href="profile.html" class="menu-item"><span class="menu-icon">💰</span> Wallet / የኪስ ቦርሳ</a>
+        <a href="profile.html?view=withdraw" class="menu-item"><span class="menu-icon">💸</span> Withdraw / ወጪ</a>
+        <a href="profile.html?view=deposit" class="menu-item"><span class="menu-icon">➕</span> Deposit / ገቢ</a>
+        <a href="support.html" class="menu-item"><span class="menu-icon">🎧</span> Support / እርዳታ</a>
+        <a href="javascript:void(0)" class="menu-item logout-btn" onclick="handleLogout()"><span class="menu-icon">🚪</span> Logout / ውጣ</a>
     </div>
 </div>
 
 <div id="visitor-gate">
-    <h1 style="color:var(--rasta-gold); font-size: 3rem; margin: 0;">RASTA HOUSE</h1>
-    <p style="color:var(--rasta-green); font-weight:bold; letter-spacing:3px; margin-bottom:30px;">WIN BIG TODAY</p>
+    <img src="asset/asset.ui.jpg" class="gate-logo">
+    <h1 style="color:var(--rasta-gold); font-size: 2.5rem; margin: 0; letter-spacing: 2px;">RASTA HOUSE</h1>
+    <p style="color:var(--rasta-green); font-weight:bold; letter-spacing:4px; margin: 5px 0 40px;">ONE LOVE • WIN BIG</p>
     <div class="gate-buttons">
         <a href="login.html" class="btn-gate btn-login">LOGIN</a>
         <a href="register.html" class="btn-gate btn-reg">REGISTER</a>
@@ -117,17 +158,29 @@
         <div class="balance-pill" onclick="location.href='profile.html'"><span id="userBal">0.00</span> ETB</div>
     </header>
 
+    <div class="ticker">
+        <div class="ticker-text" id="winnerTicker">
+            Loading winners... Abebe won 500 ETB on Safari Simba! • Selam won 1,200 ETB on Lion Slots! • Kebede won 300 ETB on Multi Hot! • 
+        </div>
+    </div>
+
     <div class="banner">
-        <h2 style="color:white; text-shadow: 2px 2px 10px #000; margin:0;">WIN BIG TODAY!</h2>
-        <p id="welcomeUser" style="color:var(--rasta-gold); margin:5px 0 0 0; font-size:0.8rem; font-weight:bold;"></p>
+        <div class="jackpot-box">
+            <div style="color:white; font-size:0.7rem; text-transform:uppercase;">Grand Rasta Jackpot</div>
+            <div style="color:var(--rasta-gold); font-size:1.8rem; font-weight:bold;" id="jackpotAmt">24,580.00</div>
+            <div style="color:var(--rasta-green); font-size:0.6rem; font-weight:bold;">LIVE ETB</div>
+        </div>
+        <p id="welcomeUser" style="color:white; margin:15px 0 0 0; font-size:0.9rem; font-weight:bold; text-shadow: 0 2px 4px #000;"></p>
     </div>
 
     <div class="game-grid">
         <div class="game-card" onclick="location.href='safari-simba.html'">
+            <div class="game-tag">Hot</div>
             <img src="asset/safari.jpeg">
             <div class="game-title">SAFARI SIMBA</div>
         </div>
         <div class="game-card" onclick="location.href='multi-hot-5.html'">
+            <div class="game-tag">New</div>
             <img src="asset/multi logo2.jpeg">
             <div class="game-title">MULTI HOT 5</div>
         </div>
@@ -136,6 +189,7 @@
             <div class="game-title">TRIPLE SEVEN</div>
         </div>
         <div class="game-card" onclick="location.href='rasta-revelation.html'">
+            <div class="game-tag">Classic</div>
             <img src="asset/asset.rasta.jpg">
             <div class="game-title">RASTA REVELATION</div>
         </div>
@@ -144,20 +198,22 @@
             <div class="game-title">LION SLOTS</div>
         </div>
         <div class="game-card" onclick="location.href='crash.html'">
+            <div class="game-tag">Easy Win</div>
             <img src="asset/asset.bg.jpg">
             <div class="game-title">RASTA CRASH</div>
         </div>
     </div>
 
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-link active">HOME</a>
-        <a href="profile.html" class="nav-link">WALLET</a>
+        <a href="index.html" class="nav-link active"><span>🏠</span><br>HOME</a>
+        <a href="profile.html" class="nav-link"><span>💰</span><br>WALLET</a>
+        <a href="profile.html?view=withdraw" class="nav-link"><span>💸</span><br>CASHOUT</a>
     </nav>
 </div>
 
 <script>
-    // --- FINAL ACTIVE SCRIPT URL ---
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0kOovoQjv6IVSX2vbj7gba7-CtPXer7LFiC9738B8LYHmMc0O3Pzg5IL9U6MkvtKc/exec";
+    // --- UPDATED PRODUCTION SCRIPT URL ---
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyctgyddXtB4E4GjNlm5dygmh-RI960Fa8qqa4rY7WarCZAZ0wb8VNQXtzulFh7dvAm/exec";
 
     function toggleMenu() {
         const sidebar = document.getElementById('mainSidebar');
@@ -167,22 +223,32 @@
     }
 
     function handleLogout() {
-        if(confirm("Are you sure you want to logout?")) {
+        if(confirm("Exit Rasta House? / መውጣት ትፈልጋለህ?")) {
             localStorage.removeItem('rasta_user');
             window.location.reload();
         }
     }
 
+    // MIRROR SYNC: Ensures browser matches Google Sheet Exactly
     async function syncBalance(user) {
         try {
             const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&t=${Date.now()}`);
             const data = await res.json();
-            if(data && data.balance !== undefined) {
+            if(data && data.status === "success") {
                 user.balance = data.balance;
+                user.name = data.name || user.name;
                 localStorage.setItem('rasta_user', JSON.stringify(user));
                 document.getElementById('userBal').innerText = parseFloat(data.balance).toFixed(2);
             }
-        } catch(e) { console.log("Sync Error"); }
+        } catch(e) { console.warn("Balance sync pending..."); }
+    }
+
+    // Dynamic Jackpot Simulation
+    function updateJackpot() {
+        const jack = document.getElementById('jackpotAmt');
+        let current = parseFloat(jack.innerText.replace(',', ''));
+        current += Math.random() * 0.5;
+        jack.innerText = current.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
 
     window.onload = () => {
@@ -192,10 +258,27 @@
         } else {
             document.getElementById('lobby-view').style.display = 'block';
             const user = JSON.parse(userData);
+            
+            // Set basic info immediately
             document.getElementById('userBal').innerText = parseFloat(user.balance || 0).toFixed(2);
-            document.getElementById('welcomeUser').innerText = "One Love, " + user.name.toUpperCase();
-            document.getElementById('sideUserPhone').innerText = user.phone;
+            document.getElementById('welcomeUser').innerText = "RESPECT, " + user.name.toUpperCase();
+            document.getElementById('sideUserPhone').innerText = "ID: " + user.phone;
+            
+            // Start background tasks
             syncBalance(user);
+            setInterval(updateJackpot, 3000);
+            
+            // Setup ticker names
+            const names = ["Abebe", "Selam", "Dawit", "Hanna", "Mulugeta", "Aster"];
+            const games = ["Safari Simba", "Multi Hot", "Lion Slots", "Rasta Crash"];
+            let tickerText = "";
+            for(let i=0; i<10; i++) {
+                const name = names[Math.floor(Math.random()*names.length)];
+                const game = games[Math.floor(Math.random()*games.length)];
+                const win = (Math.random()*1500 + 100).toFixed(0);
+                tickerText += ` • ${name} won ${win} ETB on ${game}! `;
+            }
+            document.getElementById('winnerTicker').innerText = tickerText + tickerText;
         }
     };
 </script>
