@@ -19,13 +19,19 @@
         .logo { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--rasta-green); margin-bottom: 15px; }
         h2 { color: var(--rasta-gold); margin-bottom: 25px; letter-spacing: 1px; font-size: 1.5rem; }
         
-        .input-group { text-align: left; margin-bottom: 15px; }
+        .input-group { text-align: left; margin-bottom: 15px; position: relative; }
         label { display: block; font-size: 0.75rem; color: #888; margin-bottom: 5px; margin-left: 5px; }
         input { 
             width: 100%; padding: 14px; border-radius: 10px; border: 1px solid #333; 
             background: #000; color: white; box-sizing: border-box; font-size: 1rem;
         }
         input:focus { border-color: var(--rasta-gold); outline: none; }
+
+        /* Password Eye Style */
+        .eye-icon {
+            position: absolute; right: 15px; top: 35px; color: var(--rasta-gold);
+            cursor: pointer; font-size: 1.2rem; user-select: none;
+        }
 
         .btn-reg { 
             width: 100%; padding: 16px; border-radius: 12px; border: none; 
@@ -46,21 +52,22 @@
     <h2>RASTA HOUSE</h2>
     
     <div class="input-group">
-        <label>FULL NAME</label>
+        <label>FULL NAME / ሙሉ ስም</label>
         <input type="text" id="regName" placeholder="Enter name">
     </div>
 
     <div class="input-group">
-        <label>PHONE NUMBER</label>
+        <label>PHONE NUMBER / ስልክ</label>
         <input type="tel" id="regPhone" placeholder="09...">
     </div>
 
     <div class="input-group">
-        <label>PASSWORD</label>
+        <label>PASSWORD / የይለፍ ቃል</label>
         <input type="password" id="regPass" placeholder="Enter password">
+        <span class="eye-icon" onclick="togglePass()">👁️</span>
     </div>
 
-    <button class="btn-reg" id="regBtn" onclick="handleRegister()">LOGIN / JOIN</button>
+    <button class="btn-reg" id="regBtn" onclick="handleRegister()">LOGIN / JOIN (ግባ)</button>
     <div id="msg">Connecting to Rasta House...</div>
     
     <div class="footer-link">
@@ -69,8 +76,13 @@
 </div>
 
 <script>
-    // FINAL UPDATED SCRIPT URL
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0kOovoQjv6IVSX2vbj7gba7-CtPXer7LFiC9738B8LYHmMc0O3Pzg5IL9U6MkvtKc/exec";
+    // NEW DEPLOYED SCRIPT URL
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyctgyddXtB4E4GjNlm5dygmh-RI960Fa8qqa4rY7WarCZAZ0wb8VNQXtzulFh7dvAm/exec";
+
+    function togglePass() {
+        const p = document.getElementById('regPass');
+        p.type = p.type === "password" ? "text" : "password";
+    }
 
     async function handleRegister() {
         const name = document.getElementById('regName').value.trim();
@@ -80,42 +92,44 @@
         const msg = document.getElementById('msg');
 
         if(!name || !phone || !pass) {
-            alert("Please fill in all fields (Name, Phone, and Password)");
+            alert("Please fill in all fields! / እባክዎ ሁሉንም ያሟሉ!");
             return;
         }
 
         btn.disabled = true;
         btn.style.opacity = "0.5";
         msg.style.display = "block";
-        msg.innerText = "Authenticating...";
+        msg.innerText = "Checking Ledger... / በመፈተሽ ላይ...";
 
         try {
-            // Using cache buster Date.now() to ensure we get fresh data from the sheet
+            // Simba Style: The script handles both Login and Auto-Registration
             const response = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}&name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}&t=${Date.now()}`);
             const userData = await response.json();
 
-            if(userData.playerID) {
-                // Save complete user object locally
+            if(userData && userData.status === "success") {
+                // Save the data including the balance found in the Google Sheet
                 localStorage.setItem('rasta_user', JSON.stringify(userData));
-                msg.innerText = "Welcome! Redirecting...";
+                msg.innerText = "Welcome " + (userData.name || name) + "!";
+                msg.style.color = "#00FF88";
                 
                 setTimeout(() => {
                     window.location.href = 'index.html';
-                }, 1000);
+                }, 1200);
             } else {
-                alert("Login Failed: Please check your details or Register.");
-                btn.disabled = false;
-                btn.style.opacity = "1";
-                msg.style.display = "none";
+                alert("Login Error. Please check connection.");
+                resetBtn(btn, msg);
             }
         } catch (error) {
             console.error(error);
-            // Fallback: If registration was actually successful but CORS blocked the response
-            alert("Verification Sent! Please try to enter the Lobby.");
-            btn.disabled = false;
-            btn.style.opacity = "1";
-            msg.style.display = "none";
+            alert("Connection timeout. If you are a new user, your account may have been created. Try entering again.");
+            resetBtn(btn, msg);
         }
+    }
+
+    function resetBtn(btn, msg) {
+        btn.disabled = false;
+        btn.style.opacity = "1";
+        msg.style.display = "none";
     }
 </script>
 
