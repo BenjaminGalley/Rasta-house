@@ -97,6 +97,15 @@
             border-bottom: 3px solid var(--rasta-gold);
         }
 
+        /* Special Logo Style for Keno 80 */
+        .keno-logo-overlay {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -60%);
+            background: var(--rasta-red); border: 3px solid var(--rasta-gold);
+            color: white; border-radius: 50%; width: 80px; height: 80px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-weight: 900; box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
         /* --- VISITOR GATE --- */
         #visitor-gate {
             height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center;
@@ -172,6 +181,16 @@
     </div>
 
     <div class="game-grid">
+        <div class="game-card" onclick="location.href='fast-keno-80.html'">
+            <div class="game-tag" style="background:var(--rasta-green);">FAST</div>
+            <img src="asset/asset.bg.jpg">
+            <div class="keno-logo-overlay">
+                <span style="font-size:0.7rem;">KENO</span>
+                <span style="font-size:2rem; line-height:1;">80</span>
+            </div>
+            <div class="game-title">FAST KENO 80</div>
+        </div>
+
         <div class="game-card" onclick="location.href='rasta-wheel.html'">
             <div class="game-tag" style="background:var(--rasta-red);">Big Win</div>
             <img src="asset/asset.ui.jpg">
@@ -201,12 +220,6 @@
             <img src="asset/safari.jpeg">
             <div class="game-title">SAFARI SIMBA</div>
         </div>
-
-        <div class="game-card" onclick="location.href='crash.html'">
-            <div class="game-tag">Instant</div>
-            <img src="asset/asset.bg.jpg">
-            <div class="game-title">RASTA CRASH</div>
-        </div>
     </div>
 
     <nav class="bottom-nav">
@@ -217,7 +230,6 @@
 </div>
 
 <script>
-    // Unified Script URL for Balance Syncing
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
 
     function toggleMenu() {
@@ -241,7 +253,6 @@
         const phone = user.phone || user.phoneNumber;
 
         try {
-            // Force fetch balance from Google Script to prevent the "1000" stickiness
             const res = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}&t=${Date.now()}`);
             const data = await res.json();
             if(data && data.balance !== undefined) {
@@ -267,18 +278,15 @@
             document.getElementById('lobby-view').style.display = 'block';
             const user = JSON.parse(userData);
             
-            // Initial UI update from LocalStorage
             document.getElementById('userBal').innerText = parseFloat(user.balance || 0).toFixed(2);
             document.getElementById('welcomeUser').innerText = "RESPECT, " + (user.name || "PLAYER").toUpperCase();
             document.getElementById('sideUserPhone').innerText = "ID: " + (user.phone || user.phoneNumber);
             
-            // Background Sync for fresh balance
             syncBalance();
             setInterval(updateJackpot, 3000);
             
-            // Generate Ticker
             const names = ["Abebe", "Selam", "Dawit", "Hanna", "Mulugeta", "Aster"];
-            const games = ["Safari Simba", "Multi Hot", "Lion Slots", "Rasta Wheel"];
+            const games = ["Fast Keno 80", "Safari Simba", "Multi Hot", "Lion Slots"];
             let tickerText = "";
             for(let i=0; i<10; i++) {
                 const name = names[Math.floor(Math.random()*names.length)];
