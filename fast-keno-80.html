@@ -26,20 +26,20 @@
         .game-layout { display: flex; flex: 1; overflow: hidden; background: #111; position: relative; }
 
         .side-board {
-            width: 70px; background: #000; border-right: 2px solid #333;
+            width: 60px; background: #000; border-right: 2px solid #333;
             display: flex; flex-direction: column; align-items: center; padding-top: 10px;
             overflow-y: auto; gap: 5px;
         }
         .draw-ball {
-            width: 40px; height: 40px; background: radial-gradient(circle at 30% 30%, #555, #000);
+            width: 35px; height: 35px; background: radial-gradient(circle at 30% 30%, #555, #000);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-weight: 900; border: 2px solid #444; font-size: 1rem; color: #fff;
+            font-weight: 900; border: 2px solid #444; font-size: 0.9rem; color: #fff;
             animation: slideIn 0.3s ease-out forwards;
         }
         .draw-ball.active { border-color: var(--rasta-gold); background: radial-gradient(circle at 30% 30%, var(--rasta-red), #600); }
 
-        .grid-container { flex: 1; padding: 10px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
-        .keno-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; width: 100%; max-width: 450px; }
+        .grid-container { flex: 1; padding: 5px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
+        .keno-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; width: 100%; max-width: 400px; }
         .num { 
             background: #222; border: 1px solid #444; aspect-ratio: 1; display: flex; 
             align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; border-radius: 4px; cursor: pointer;
@@ -47,6 +47,13 @@
         .num.selected { background: var(--rasta-gold); color: #000; box-shadow: 0 0 10px var(--rasta-gold); }
         .num.hit { background: var(--rasta-red) !important; color: white; animation: popBall 0.5s ease-out; }
         .num.match { background: var(--rasta-green) !important; box-shadow: 0 0 15px var(--rasta-green); border-color: white; }
+
+        /* Potential Win Display */
+        .info-bar { 
+            width: 100%; max-width: 400px; padding: 8px; margin-top: 5px; 
+            background: rgba(0,0,0,0.5); border-radius: 5px; border-left: 4px solid var(--rasta-gold);
+            font-size: 0.8rem; display: flex; justify-content: space-between;
+        }
 
         #big-reveal {
             position: absolute; top: 40%; left: 55%; transform: translate(-50%, -50%);
@@ -57,7 +64,7 @@
         }
 
         /* --- TICKETS --- */
-        .tray { height: 110px; background: #000; border-top: 2px solid #333; display: flex; overflow-x: auto; padding: 10px; gap: 10px; }
+        .tray { min-height: 80px; background: #000; border-top: 2px solid #333; display: flex; overflow-x: auto; padding: 10px; gap: 10px; }
         .ticket {
             min-width: 140px; border: 1px dashed var(--rasta-gold); border-radius: 8px;
             padding: 8px; font-size: 0.7rem; background: #0a0a0a; flex-shrink: 0;
@@ -67,7 +74,7 @@
 
         /* --- CONTROLS --- */
         .controls { 
-            background: #000; padding: 10px 15px; border-top: 2px solid var(--rasta-gold); 
+            background: #000; padding: 10px 15px 25px 15px; border-top: 2px solid var(--rasta-gold); 
             display: flex; flex-direction: column; gap: 8px; 
         }
         .bet-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -80,7 +87,7 @@
         .stake-display b { color: var(--rasta-gold); font-size: 1.2rem; }
 
         #betBtn { 
-            width: 100%; padding: 12px; background: var(--rasta-green); border: none; 
+            width: 100%; padding: 15px; background: var(--rasta-green); border: none; 
             border-radius: 10px; color: white; font-weight: 900; font-size: 1.2rem; 
             cursor: pointer; box-shadow: 0 4px 0 #004d26;
         }
@@ -116,6 +123,10 @@
     <div class="grid-container">
         <div id="big-reveal">00</div>
         <div class="keno-grid" id="grid"></div>
+        <div class="info-bar" id="potential-win-box">
+            <span>Selected: <b id="sel-count" style="color:var(--rasta-gold)">0</b></span>
+            <span>Potential Win: <b id="pot-win" style="color:var(--rasta-green)">0.00 ETB</b></span>
+        </div>
     </div>
 </div>
 
@@ -125,12 +136,12 @@
 
 <div class="controls">
     <div class="bet-bar">
-        <button class="step-btn" onclick="adjustBet(-5)">-</button>
+        <button class="step-btn" onclick="adjustBet(-2)">-</button>
         <div class="stake-display">
-            <small>Current Bet</small>
-            <b id="stakeVal">10</b>
+            <small>Stake Amount</small>
+            <b id="stakeVal">2</b>
         </div>
-        <button class="step-btn" onclick="adjustBet(5)">+</button>
+        <button class="step-btn" onclick="adjustBet(2)">+</button>
     </div>
     <button id="betBtn" onclick="placeBet()">PLACE BET</button>
 </div>
@@ -145,9 +156,12 @@
     let tickets = [];
     let timeLeft = 60;
     let drawing = false;
-    let currentStake = 10;
+    let currentStake = 2; // Min bet set to 2
 
-    const payouts = { 2: 5, 3: 15, 4: 50, 5: 150, 6: 500, 7: 1500, 8: 4000, 9: 10000, 10: 25000 };
+    // Keno Payout Multipliers (per 1 ETB staked)
+    const multipliers = {
+        2: 5, 3: 15, 4: 50, 5: 150, 6: 500, 7: 1500, 8: 4000, 9: 10000, 10: 25000
+    };
 
     function initGrid() {
         const grid = document.getElementById('grid');
@@ -166,8 +180,9 @@
 
     function adjustBet(amt) {
         if(drawing) return;
-        currentStake = Math.max(5, currentStake + amt);
+        currentStake = Math.max(2, currentStake + amt);
         document.getElementById('stakeVal').innerText = currentStake;
+        updatePotentialWin();
     }
 
     async function syncWithServer() {
@@ -191,6 +206,21 @@
             selected.push(n);
             el.classList.add('selected');
         }
+        updatePotentialWin();
+    }
+
+    function updatePotentialWin() {
+        const count = selected.length;
+        document.getElementById('sel-count').innerText = count;
+        
+        let potential = 0;
+        if(count >= 2) {
+            potential = currentStake * multipliers[count];
+        }
+        document.getElementById('pot-win').innerText = potential.toFixed(2) + " ETB";
+        
+        // Disable button if count < 2
+        document.getElementById('betBtn').disabled = (timeLeft <= 5 || count < 2);
     }
 
     function updateUI() {
@@ -212,6 +242,7 @@
         renderTickets();
         selected = [];
         document.querySelectorAll('.num').forEach(n => n.classList.remove('selected'));
+        updatePotentialWin();
         document.getElementById('snd-pop').play();
     }
 
@@ -288,16 +319,15 @@
     function checkResults() {
         let totalWin = 0;
         tickets.forEach(t => {
-            let winMult = (t.hits >= 2) ? (payouts[t.hits] || 0) : 0; 
-            // Note: Simplified logic, usually keno pays based on Catch/Spot. 
-            // Here we use hits count vs payouts table.
-            let winAmt = t.stake * (winMult / 5); // Normalized multiplier
-            if(t.hits == t.nums.length) winAmt = t.stake * payouts[t.nums.length];
-            else winAmt = 0; // Standard Keno: must match ALL selected in this version
+            let winAmt = 0;
+            // Standard Rasta Keno: Must match ALL selected numbers to win big
+            if(t.hits === t.nums.length && multipliers[t.hits]) {
+                winAmt = t.stake * multipliers[t.hits];
+            }
 
             if(winAmt > 0) {
                 totalWin += winAmt;
-                document.getElementById(`res-${t.id}`).innerText = "WIN: " + winAmt;
+                document.getElementById(`res-${t.id}`).innerText = "WIN: " + winAmt.toFixed(2);
                 document.getElementById(`res-${t.id}`).style.color = "var(--rasta-green)";
             } else {
                 document.getElementById(`res-${t.id}`).innerText = "LOSE";
@@ -330,6 +360,7 @@
         document.querySelectorAll('.num').forEach(n => n.classList.remove('hit', 'match', 'selected'));
         document.getElementById('sideBoard').innerHTML = '';
         renderTickets();
+        updatePotentialWin();
     }
 
     function saveToDB() {
