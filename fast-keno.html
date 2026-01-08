@@ -18,37 +18,42 @@
         .timer-box { text-align: center; border: 1px solid var(--rasta-red); padding: 5px 15px; border-radius: 10px; min-width: 100px; }
         #timer { font-family: 'Goldman'; color: var(--rasta-red); font-size: 1.5rem; }
 
-        /* Audio Control */
-        #mute-btn { background: none; border: 1px solid #444; color: white; padding: 5px; border-radius: 5px; cursor: pointer; }
+        .balance-pill { 
+            background: var(--rasta-green); padding: 5px 12px; border-radius: 20px; 
+            font-size: 0.8rem; font-weight: bold; border: 1px solid var(--rasta-gold);
+        }
 
         /* Layout */
         .main-layout { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
-        .grid-container { flex: 1; padding: 10px; overflow-y: auto; }
-        .keno-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 600px; margin: auto; }
+        .grid-container { flex: 1; padding: 10px; overflow-y: auto; display: flex; align-items: center; }
+        .keno-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; width: 100%; max-width: 500px; margin: auto; }
+        
         .num { 
             background: #1a1a1a; border: 1px solid #333; padding: 12px 0; text-align: center; 
-            font-size: 0.9rem; font-weight: bold; border-radius: 4px; cursor: pointer;
+            font-size: 0.8rem; font-weight: bold; border-radius: 4px; cursor: pointer; transition: 0.2s;
         }
         .num.selected { background: var(--rasta-gold); color: black; border-color: white; transform: scale(1.05); }
-        .num.draw-hit { background: var(--rasta-green); color: white; animation: pop 0.4s ease-out; box-shadow: 0 0 15px var(--rasta-green); }
+        .num.draw-hit { background: var(--rasta-red); color: white; animation: pop 0.4s ease-out; box-shadow: 0 0 15px var(--rasta-red); z-index: 2; }
+        .num.match { background: var(--rasta-green) !important; color: white !important; box-shadow: 0 0 20px var(--rasta-green); }
 
         /* Ticket Tray */
-        .info-tray { background: #111; border-top: 1px solid #333; height: 180px; display: flex; flex-direction: column; }
-        .ticket-scroll-container { display: flex; overflow-x: auto; gap: 10px; padding: 10px; scroll-snap-type: x mandatory; }
+        .info-tray { background: #111; border-top: 1px solid #333; height: 160px; display: flex; flex-direction: column; }
+        .ticket-scroll-container { display: flex; overflow-x: auto; gap: 10px; padding: 10px; flex: 1; }
         .ticket-card {
-            min-width: 140px; background: #000; border: 1px dashed var(--rasta-gold);
-            padding: 8px; border-radius: 8px; scroll-snap-align: start; flex-shrink: 0;
+            min-width: 130px; background: #000; border: 1px dashed var(--rasta-gold);
+            padding: 8px; border-radius: 8px; flex-shrink: 0; font-size: 0.75rem;
         }
-        .ticket-card.winner { border-color: var(--rasta-green); background: rgba(0, 133, 66, 0.2); border-style: solid; }
+        .ticket-card.winner { border-color: var(--rasta-green); background: rgba(0, 133, 66, 0.3); border-style: solid; transform: scale(1.05); transition: 0.3s; }
 
         /* Controls */
-        .controls { background: #000; padding: 15px; border-top: 2px solid var(--rasta-gold); }
+        .controls { background: #000; padding: 15px; border-top: 2px solid var(--rasta-gold); padding-bottom: env(safe-area-inset-bottom); }
         .play-btn { 
-            width: 100%; padding: 18px; background: var(--rasta-green); color: white; 
-            border: none; border-radius: 10px; font-weight: 800; font-size: 1.2rem;
+            width: 100%; padding: 16px; background: var(--rasta-green); color: white; 
+            border: none; border-radius: 10px; font-weight: 800; font-size: 1.1rem; cursor: pointer;
         }
+        .play-btn:disabled { background: #333; color: #666; cursor: not-allowed; }
 
-        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.4); } 100% { transform: scale(1); } }
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.5); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
@@ -59,75 +64,104 @@
 <audio id="snd-win"><source src="https://actions.google.com/sounds/v1/foley/beating_prizes.ogg" type="audio/ogg"></audio>
 
 <div class="keno-header">
-    <button onclick="location.href='index.html'" style="background:none; color:white; border:1px solid #444; padding:5px 10px; border-radius:5px;">BACK</button>
+    <button onclick="location.href='index.html'" style="background:none; color:white; border:1px solid #444; padding:5px 10px; border-radius:5px;">LOBBY</button>
     <div class="timer-box"><div id="timer">00:60</div></div>
-    <button id="mute-btn" onclick="toggleMute()">🎵 OFF</button>
+    <div class="balance-pill"><span id="top-bal">0.00</span> ETB</div>
 </div>
 
 <div class="main-layout">
     <div class="grid-container"><div class="keno-grid" id="kenoGrid"></div></div>
+    
     <div class="info-tray">
         <div class="ticket-scroll-container" id="ticketScroll">
-            <div id="no-tickets" style="color:#444; padding:20px;">No bets placed.</div>
+            <div id="no-tickets" style="color:#444; padding:20px; font-size: 0.8rem;">No active bets for this round.</div>
         </div>
-        <div id="pot-display" style="padding: 5px 15px; font-size: 0.8rem; color: var(--rasta-green);">
-            Potential: <span id="pot-win">0.00</span> ETB | Balance: <span id="top-bal">0.00</span>
+        <div style="padding: 5px 15px; font-size: 0.75rem; color: var(--rasta-gold); background: #000; display: flex; justify-content: space-between;">
+            <span>Potential Win: <span id="pot-win" style="color:white">0.00</span> ETB</span>
+            <span id="mute-btn" onclick="toggleMute()" style="cursor:pointer">🎵 MUSIC: OFF</span>
         </div>
     </div>
 </div>
 
 <div class="controls">
-    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-        <span>STAKE:</span>
-        <input type="number" id="betAmount" value="2" min="2" oninput="updatePotential()" style="width:70px; background:#111; color:var(--rasta-gold); border:1px solid var(--rasta-gold); border-radius:5px; text-align:center;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <span style="font-size: 0.9rem; font-weight: bold;">STAKE AMOUNT:</span>
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <button onclick="adjustStake(-5)" style="background:#222; color:white; border:1px solid #444; width:30px; height:30px; border-radius:5px;">-</button>
+            <input type="number" id="betAmount" value="10" min="2" oninput="updatePotential()" style="width:60px; height:30px; background:#111; color:var(--rasta-gold); border:1px solid var(--rasta-gold); border-radius:5px; text-align:center; font-weight: bold;">
+            <button onclick="adjustStake(5)" style="background:#222; color:white; border:1px solid #444; width:30px; height:30px; border-radius:5px;">+</button>
+        </div>
     </div>
     <button class="play-btn" id="playBtn" onclick="placeBet()">PLACE BET</button>
 </div>
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
-    let user = JSON.parse(localStorage.getItem('rasta_user') || '{"balance":0}');
+    let user = JSON.parse(localStorage.getItem('rasta_user') || '{"balance":0, "phone":"000"}');
     let selected = [];
     let activeTickets = [];
     let timeRemaining = 60;
     let isMuted = true;
+    let isDrawing = false;
 
-    const payoutTable = { 2: 5, 3: 15, 4: 40, 5: 100, 6: 250, 7: 500, 8: 1000, 9: 2500, 10: 5000 };
+    // Standard Keno Payout Multipliers (simplified)
+    const payoutTable = { 2: 4, 3: 10, 4: 25, 5: 60, 6: 150, 7: 400, 8: 1000, 9: 2500, 10: 5000 };
 
-    function playSound(id) { if(!isMuted) { const s = document.getElementById(id); s.currentTime = 0; s.play(); } }
+    function playSound(id) { if(!isMuted) { const s = document.getElementById(id); s.currentTime = 0; s.play().catch(()=>{}); } }
 
     function toggleMute() {
         isMuted = !isMuted;
         const bg = document.getElementById('bg-music');
-        if(!isMuted) { bg.play(); document.getElementById('mute-btn').innerText = "🎵 ON"; }
-        else { bg.pause(); document.getElementById('mute-btn').innerText = "🎵 OFF"; }
+        if(!isMuted) { bg.play(); document.getElementById('mute-btn').innerText = "🎵 MUSIC: ON"; }
+        else { bg.pause(); document.getElementById('mute-btn').innerText = "🎵 MUSIC: OFF"; }
     }
 
+    // Initialize Grid
     const grid = document.getElementById('kenoGrid');
     for(let i=1; i<=80; i++) {
         const div = document.createElement('div');
         div.className = 'num'; div.innerText = i;
         div.onclick = () => {
+            if(isDrawing) return;
             playSound('snd-tick');
-            if(selected.includes(i)) { selected = selected.filter(x => x !== i); div.classList.remove('selected'); }
-            else if (selected.length < 10) { selected.push(i); div.classList.add('selected'); }
+            if(selected.includes(i)) { 
+                selected = selected.filter(x => x !== i); 
+                div.classList.remove('selected'); 
+            } else if (selected.length < 10) { 
+                selected.push(i); 
+                div.classList.add('selected'); 
+            }
             updatePotential();
         };
         grid.appendChild(div);
     }
 
-    function updatePotential() {
-        const bet = parseFloat(document.getElementById('betAmount').value);
-        const pot = (bet / 2) * (payoutTable[selected.length] || 0);
-        document.getElementById('pot-win').innerText = pot.toFixed(2);
-        document.getElementById('top-bal').innerText = user.balance.toFixed(2);
+    function adjustStake(amt) {
+        let current = parseInt(document.getElementById('betAmount').value);
+        document.getElementById('betAmount').value = Math.max(2, current + amt);
+        updatePotential();
     }
 
+    function updatePotential() {
+        const bet = parseFloat(document.getElementById('betAmount').value) || 0;
+        const mult = payoutTable[selected.length] || 0;
+        const pot = bet * mult;
+        document.getElementById('pot-win').innerText = pot.toFixed(2);
+        document.getElementById('top-bal').innerText = parseFloat(user.balance).toFixed(2);
+    }
+
+    // Timer Logic
     setInterval(() => {
+        if(isDrawing) return;
         timeRemaining--;
-        if(timeRemaining < 0) { runDraw(); timeRemaining = 60; }
+        if(timeRemaining <= 0) { 
+            runDraw(); 
+            timeRemaining = 60; 
+        }
         document.getElementById('timer').innerText = `00:${timeRemaining < 10 ? '0'+timeRemaining : timeRemaining}`;
         document.getElementById('playBtn').disabled = (timeRemaining <= 5);
+        if(timeRemaining <= 5) document.getElementById('playBtn').innerText = "LOCKING...";
+        else document.getElementById('playBtn').innerText = "PLACE BET";
     }, 1000);
 
     function placeBet() {
@@ -137,30 +171,56 @@
 
         user.balance -= bet; 
         updateUI();
-        const t = { id: Date.now().toString().slice(-3), nums: [...selected], stake: bet, win: (bet/2)*(payoutTable[selected.length]||0) };
+        
+        const t = { 
+            id: Math.floor(100 + Math.random() * 899), 
+            nums: [...selected], 
+            stake: bet, 
+            potential: bet * (payoutTable[selected.length] || 0) 
+        };
         activeTickets.push(t);
         
         const card = document.createElement('div');
         card.className = 'ticket-card'; card.id = 't-'+t.id;
-        card.innerHTML = `<small>#${t.id}</small><br><b>${t.nums.join(',')}</b><br><small>Win: ${t.win} ETB</small>`;
+        card.innerHTML = `<div style="color:var(--rasta-gold)">Ticket #${t.id}</div>
+                          <div style="margin:4px 0; word-break:break-all;">${t.nums.join(', ')}</div>
+                          <div style="font-weight:bold">Win: ${t.potential.toFixed(2)}</div>`;
+        
         document.getElementById('ticketScroll').appendChild(card);
         document.getElementById('no-tickets').style.display = 'none';
 
-        selected = []; document.querySelectorAll('.num').forEach(d => d.classList.remove('selected'));
+        // Clear selection for next bet
+        selected = []; 
+        document.querySelectorAll('.num').forEach(d => d.classList.remove('selected'));
         updatePotential();
     }
 
     function runDraw() {
-        const draw = []; while(draw.length < 20) { let n = Math.floor(Math.random()*80)+1; if(!draw.includes(n)) draw.push(n); }
+        isDrawing = true;
+        const draw = []; 
+        while(draw.length < 20) { 
+            let n = Math.floor(Math.random()*80)+1; 
+            if(!draw.includes(n)) draw.push(n); 
+        }
+        
         const divs = document.querySelectorAll('.num');
-        divs.forEach(d => d.classList.remove('draw-hit'));
+        divs.forEach(d => d.classList.remove('draw-hit', 'match', 'selected'));
 
         draw.forEach((n, i) => {
             setTimeout(() => {
-                divs[n-1].classList.add('draw-hit');
+                const el = divs[n-1];
+                el.classList.add('draw-hit');
                 playSound('snd-pop');
-                if(i === 19) checkResults(draw);
-            }, i * 200);
+                
+                // Highlight matches in active tickets
+                activeTickets.forEach(t => {
+                    if(t.nums.includes(n)) {
+                        el.classList.add('match');
+                    }
+                });
+
+                if(i === 19) setTimeout(() => checkResults(draw), 1000);
+            }, i * 300);
         });
     }
 
@@ -168,31 +228,51 @@
         let sessionWin = 0;
         activeTickets.forEach(t => {
             const hits = t.nums.filter(n => draw.includes(n)).length;
+            // Win condition: All numbers must hit (Classic Keno style)
             if(hits === t.nums.length) { 
-                document.getElementById('t-'+t.id).classList.add('winner');
-                sessionWin += t.win;
+                const card = document.getElementById('t-'+t.id);
+                if(card) card.classList.add('winner');
+                sessionWin += t.potential;
             }
         });
+
         if(sessionWin > 0) {
             playSound('snd-win');
             user.balance += sessionWin;
             updateUI();
+            alert(`RESPECT! You won ${sessionWin.toFixed(2)} ETB!`);
         }
+        
         setTimeout(() => { 
-            document.getElementById('ticketScroll').innerHTML = '<div id="no-tickets" style="color:#444; padding:20px;">No bets placed.</div>';
+            document.getElementById('ticketScroll').innerHTML = '<div id="no-tickets" style="color:#444; padding:20px; font-size: 0.8rem;">No active bets for this round.</div>';
             activeTickets = [];
-        }, 8000);
+            document.querySelectorAll('.num').forEach(d => d.classList.remove('draw-hit', 'match'));
+            isDrawing = false;
+            updatePotential();
+        }, 5000);
     }
 
-    // Sync balance to Google Sheet
+    async function syncBalanceOnLoad() {
+        try {
+            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&t=${Date.now()}`);
+            const data = await res.json();
+            if(data && data.balance !== undefined) {
+                user.balance = parseFloat(data.balance);
+                updateUI();
+            }
+        } catch(e) { console.warn("Balance sync delayed"); }
+    }
+
     function updateUI() { 
         localStorage.setItem('rasta_user', JSON.stringify(user));
-        document.getElementById('top-bal').innerText = user.balance.toFixed(2);
-        // Silent sync to database
-        fetch(`${SCRIPT_URL}?action=syncBalance&playerID=${user.playerID}&balance=${user.balance}`).catch(e => console.log("Sync delay"));
+        document.getElementById('top-bal').innerText = parseFloat(user.balance).toFixed(2);
+        fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&updateBal=${user.balance}`).catch(e => {});
     }
 
-    window.onload = updatePotential;
+    window.onload = () => {
+        syncBalanceOnLoad();
+        updatePotential();
+    };
 </script>
 </body>
 </html>
