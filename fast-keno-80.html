@@ -13,95 +13,106 @@
         /* --- HEADER --- */
         .header {
             background: #000; padding: 10px 15px; border-bottom: 3px solid var(--rasta-gold);
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex; justify-content: space-between; align-items: center; z-index: 10;
         }
         .logo-80 {
             background: var(--rasta-red); color: white; padding: 5px 10px; border-radius: 5px;
             font-family: 'Goldman'; font-weight: 900; border: 2px solid var(--rasta-gold);
         }
-        .timer-display { font-family: 'Goldman'; color: var(--rasta-red); font-size: 1.4rem; text-shadow: 0 0 10px rgba(231,29,54,0.5); }
+        .timer-display { font-family: 'Goldman'; color: var(--rasta-red); font-size: 1.4rem; }
+        .bal-box { background: #111; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--rasta-green); font-weight: 900; color: var(--rasta-green); }
 
         /* --- MAIN GAME AREA --- */
-        .game-layout { display: flex; flex: 1; overflow: hidden; background: #111; }
+        .game-layout { display: flex; flex: 1; overflow: hidden; background: #111; position: relative; }
 
-        /* Left Side: Draw Board */
         .side-board {
-            width: 80px; background: #000; border-right: 2px solid #333;
+            width: 70px; background: #000; border-right: 2px solid #333;
             display: flex; flex-direction: column; align-items: center; padding-top: 10px;
             overflow-y: auto; gap: 5px;
         }
         .draw-ball {
-            width: 45px; height: 45px; background: radial-gradient(circle at 30% 30%, #555, #000);
+            width: 40px; height: 40px; background: radial-gradient(circle at 30% 30%, #555, #000);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-weight: 900; border: 2px solid #444; font-size: 1.1rem; color: #fff;
+            font-weight: 900; border: 2px solid #444; font-size: 1rem; color: #fff;
             animation: slideIn 0.3s ease-out forwards;
         }
         .draw-ball.active { border-color: var(--rasta-gold); background: radial-gradient(circle at 30% 30%, var(--rasta-red), #600); }
 
-        /* Center: Grid */
-        .grid-container { flex: 1; padding: 10px; display: flex; flex-direction: column; align-items: center; position: relative; }
-        .keno-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; width: 100%; max-width: 500px; }
+        .grid-container { flex: 1; padding: 10px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
+        .keno-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; width: 100%; max-width: 450px; }
         .num { 
             background: #222; border: 1px solid #444; aspect-ratio: 1; display: flex; 
-            align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; border-radius: 4px;
+            align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; border-radius: 4px; cursor: pointer;
         }
-        .num.selected { background: var(--rasta-gold); color: #000; }
+        .num.selected { background: var(--rasta-gold); color: #000; box-shadow: 0 0 10px var(--rasta-gold); }
         .num.hit { background: var(--rasta-red) !important; color: white; animation: popBall 0.5s ease-out; }
-        .num.match { background: var(--rasta-green) !important; box-shadow: 0 0 15px var(--rasta-green); }
+        .num.match { background: var(--rasta-green) !important; box-shadow: 0 0 15px var(--rasta-green); border-color: white; }
 
-        /* Big Pop Reveal Overlay */
         #big-reveal {
-            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
-            width: 120px; height: 120px; background: white; border-radius: 50%;
+            position: absolute; top: 40%; left: 55%; transform: translate(-50%, -50%);
+            width: 100px; height: 100px; background: white; border-radius: 50%;
             display: none; align-items: center; justify-content: center;
-            font-size: 3rem; font-weight: 900; color: #000; border: 8px solid var(--rasta-gold);
+            font-size: 2.5rem; font-weight: 900; color: #000; border: 6px solid var(--rasta-gold);
             z-index: 100; box-shadow: 0 0 50px rgba(0,0,0,0.8);
         }
 
         /* --- TICKETS --- */
-        .tray { height: 140px; background: #000; border-top: 2px solid #333; display: flex; overflow-x: auto; padding: 10px; gap: 10px; }
+        .tray { height: 110px; background: #000; border-top: 2px solid #333; display: flex; overflow-x: auto; padding: 10px; gap: 10px; }
         .ticket {
-            min-width: 150px; border: 1px dashed var(--rasta-gold); border-radius: 8px;
-            padding: 8px; font-size: 0.75rem; background: #0a0a0a; position: relative;
+            min-width: 140px; border: 1px dashed var(--rasta-gold); border-radius: 8px;
+            padding: 8px; font-size: 0.7rem; background: #0a0a0a; flex-shrink: 0;
         }
-        .ticket b { color: var(--rasta-gold); }
-        .ticket-num { display: inline-block; width: 22px; text-align: center; margin: 1px; border-radius: 3px; background: #222; }
-        .ticket-num.hit { background: var(--rasta-green); color: white; font-weight: bold; }
-        .ticket.won-card { border: 2px solid var(--rasta-green); background: rgba(0, 133, 66, 0.2); }
+        .ticket-num { display: inline-block; width: 20px; text-align: center; margin: 1px; border-radius: 3px; background: #222; }
+        .ticket-num.hit { background: var(--rasta-green); color: white; }
 
         /* --- CONTROLS --- */
-        .controls { background: #000; padding: 15px; border-top: 2px solid var(--rasta-gold); display: flex; gap: 10px; align-items: center; }
-        #betBtn { flex: 1; padding: 15px; background: var(--rasta-green); border: none; border-radius: 10px; color: white; font-weight: 900; font-size: 1.2rem; cursor: pointer; }
-        #betBtn:disabled { background: #333; }
-        .stake-input { background: #111; border: 1px solid var(--rasta-gold); color: var(--rasta-gold); padding: 12px; width: 80px; border-radius: 10px; text-align: center; font-weight: bold; }
+        .controls { 
+            background: #000; padding: 10px 15px; border-top: 2px solid var(--rasta-gold); 
+            display: flex; flex-direction: column; gap: 8px; 
+        }
+        .bet-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .step-btn {
+            width: 45px; height: 45px; border-radius: 10px; border: 2px solid var(--rasta-gold);
+            background: #222; color: var(--rasta-gold); font-size: 1.5rem; font-weight: bold; cursor: pointer;
+        }
+        .stake-display { flex: 1; background: #111; border: 1px solid #444; border-radius: 10px; display: flex; flex-direction: column; align-items: center; padding: 5px; }
+        .stake-display small { font-size: 0.6rem; color: #888; text-transform: uppercase; }
+        .stake-display b { color: var(--rasta-gold); font-size: 1.2rem; }
+
+        #betBtn { 
+            width: 100%; padding: 12px; background: var(--rasta-green); border: none; 
+            border-radius: 10px; color: white; font-weight: 900; font-size: 1.2rem; 
+            cursor: pointer; box-shadow: 0 4px 0 #004d26;
+        }
+        #betBtn:active { transform: translateY(2px); box-shadow: 0 2px 0 #004d26; }
+        #betBtn:disabled { background: #333; box-shadow: none; transform: none; opacity: 0.6; }
 
         #win-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); display: none; flex-direction: column;
+            background: rgba(0,0,0,0.9); display: none; flex-direction: column;
             align-items: center; justify-content: center; z-index: 1000;
         }
 
-        @keyframes popBall { 0% { transform: scale(1); } 50% { transform: scale(1.6); } 100% { transform: scale(1); } }
+        @keyframes popBall { 0% { transform: scale(1); } 50% { transform: scale(1.4); } 100% { transform: scale(1); } }
         @keyframes slideIn { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div id="win-overlay">
-    <h1 id="win-status" style="font-size: 3rem; color: var(--rasta-gold);">WON 500 ETB</h1>
-    <p style="color: white;">NEXT ROUND STARTING...</p>
+    <h1 id="win-status" style="font-size: 2.5rem; color: var(--rasta-gold); text-align: center;"></h1>
+    <p style="color: white; margin-top: 10px;">PREPARING NEXT ROUND...</p>
 </div>
 
 <div class="header">
-    <div onclick="location.href='index.html'" style="cursor:pointer">🏠</div>
+    <div onclick="location.href='index.html'" style="cursor:pointer; font-size: 1.2rem;">🏠</div>
     <div class="logo-80">KENO 80</div>
     <div class="timer-display" id="timer">00:60</div>
-    <div style="color: var(--rasta-green); font-weight: bold;" id="balance">0.00</div>
+    <div class="bal-box" id="balance">0.00</div>
 </div>
 
 <div class="game-layout">
-    <div class="side-board" id="sideBoard">
-        </div>
+    <div class="side-board" id="sideBoard"></div>
     <div class="grid-container">
         <div id="big-reveal">00</div>
         <div class="keno-grid" id="grid"></div>
@@ -109,11 +120,18 @@
 </div>
 
 <div class="tray" id="ticketTray">
-    <div style="color:#444; width:100%; text-align:center; padding-top:40px;">No bets placed.</div>
+    <div style="color:#444; width:100%; text-align:center; align-self: center;">No tickets active.</div>
 </div>
 
 <div class="controls">
-    <input type="number" class="stake-input" id="stake" value="10">
+    <div class="bet-bar">
+        <button class="step-btn" onclick="adjustBet(-5)">-</button>
+        <div class="stake-display">
+            <small>Current Bet</small>
+            <b id="stakeVal">10</b>
+        </div>
+        <button class="step-btn" onclick="adjustBet(5)">+</button>
+    </div>
     <button id="betBtn" onclick="placeBet()">PLACE BET</button>
 </div>
 
@@ -127,11 +145,13 @@
     let tickets = [];
     let timeLeft = 60;
     let drawing = false;
+    let currentStake = 10;
 
     const payouts = { 2: 5, 3: 15, 4: 50, 5: 150, 6: 500, 7: 1500, 8: 4000, 9: 10000, 10: 25000 };
 
     function initGrid() {
         const grid = document.getElementById('grid');
+        grid.innerHTML = '';
         for(let i=1; i<=80; i++) {
             let div = document.createElement('div');
             div.className = 'num';
@@ -141,19 +161,28 @@
             grid.appendChild(div);
         }
         updateUI();
-        syncBalance();
+        syncWithServer();
     }
 
-    async function syncBalance() {
+    function adjustBet(amt) {
+        if(drawing) return;
+        currentStake = Math.max(5, currentStake + amt);
+        document.getElementById('stakeVal').innerText = currentStake;
+    }
+
+    async function syncWithServer() {
         try {
-            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&t=${Date.now()}`);
+            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}`);
             const data = await res.json();
-            if(data.balance) { user.balance = data.balance; updateUI(); }
-        } catch(e) {}
+            if(data.balance !== undefined) { 
+                user.balance = parseFloat(data.balance); 
+                updateUI(); 
+            }
+        } catch(e) { console.log("Sync failed"); }
     }
 
     function selectNum(n) {
-        if(drawing) return;
+        if(drawing || timeLeft <= 5) return;
         const el = document.getElementById('n-'+n);
         if(selected.includes(n)) {
             selected = selected.filter(x => x !== n);
@@ -170,20 +199,17 @@
     }
 
     function placeBet() {
-        let stake = parseFloat(document.getElementById('stake').value);
-        if(selected.length < 2) return alert("Select 2-10 numbers!");
-        if(user.balance < stake) return alert("Low Balance!");
+        if(selected.length < 2) return alert("Select at least 2 numbers!");
+        if(user.balance < currentStake) return alert("Insufficient Balance!");
 
-        user.balance -= stake;
+        user.balance -= currentStake;
         updateUI();
+        saveToDB();
 
-        let tId = Math.floor(Math.random()*900)+100;
-        let newTicket = { id: tId, nums: [...selected], stake: stake, hits: 0 };
-        tickets.push(newTicket);
+        let tId = Math.floor(Math.random()*9000)+1000;
+        tickets.push({ id: tId, nums: [...selected], stake: currentStake, hits: 0 });
 
         renderTickets();
-        
-        // Clear selection immediately for next bet
         selected = [];
         document.querySelectorAll('.num').forEach(n => n.classList.remove('selected'));
         document.getElementById('snd-pop').play();
@@ -192,22 +218,21 @@
     function renderTickets() {
         const tray = document.getElementById('ticketTray');
         if(tickets.length === 0) {
-            tray.innerHTML = '<div style="color:#444; width:100%; text-align:center; padding-top:40px;">No bets placed.</div>';
+            tray.innerHTML = '<div style="color:#444; width:100%; text-align:center; align-self: center;">No tickets active.</div>';
             return;
         }
         tray.innerHTML = '';
         tickets.forEach(t => {
             let html = `<div class="ticket" id="t-${t.id}">
-                <b>#${t.id}</b> | Stake: ${t.stake}<br><div style="margin-top:5px">`;
+                <b style="color:var(--rasta-gold)">#${t.id}</b> | Bet: ${t.stake}<br><div style="margin-top:5px">`;
             t.nums.forEach(n => {
                 html += `<span class="ticket-num" id="tn-${t.id}-${n}">${n}</span>`;
             });
-            html += `</div><div id="res-${t.id}" style="font-weight:bold; margin-top:5px; color:var(--rasta-gold)">Waiting...</div></div>`;
+            html += `</div><div id="res-${t.id}" style="font-weight:bold; margin-top:5px; font-size:0.6rem;">PENDING...</div></div>`;
             tray.innerHTML += html;
         });
     }
 
-    // Main Timer
     setInterval(() => {
         if(drawing) return;
         timeLeft--;
@@ -216,7 +241,7 @@
             timeLeft = 60;
         }
         document.getElementById('timer').innerText = `00:${timeLeft < 10 ? '0'+timeLeft : timeLeft}`;
-        document.getElementById('betBtn').disabled = (timeLeft <= 5);
+        document.getElementById('betBtn').disabled = (timeLeft <= 5 || selected.length < 2);
     }, 1000);
 
     async function runDraw() {
@@ -233,80 +258,73 @@
 
         for(let i=0; i<drawn.length; i++) {
             let n = drawn[i];
-            
-            // 1. Big Center Reveal
             bigReveal.innerText = n;
             bigReveal.style.display = 'flex';
             document.getElementById('snd-pop').play();
 
-            // 2. Mark Grid
             let gridNum = document.getElementById('n-'+n);
-            gridNum.classList.add('hit');
+            if(gridNum) gridNum.classList.add('hit');
 
-            // 3. Side Board
             let ball = document.createElement('div');
             ball.className = 'draw-ball active';
             ball.innerText = n;
             sideBoard.prepend(ball);
 
-            // 4. Update Tickets & Mark Matches
             tickets.forEach(t => {
                 if(t.nums.includes(n)) {
                     t.hits++;
-                    gridNum.classList.add('match');
+                    if(gridNum) gridNum.classList.add('match');
                     let tNum = document.getElementById(`tn-${t.id}-${n}`);
                     if(tNum) tNum.classList.add('hit');
                 }
             });
 
-            await new Promise(r => setTimeout(r, 800)); // Sync speed (0.8s)
+            await new Promise(r => setTimeout(r, 800));
             bigReveal.style.display = 'none';
         }
-
-        checkFinalResults();
+        checkResults();
     }
 
-    function checkFinalResults() {
-        let totalWon = 0;
+    function checkResults() {
+        let totalWin = 0;
         tickets.forEach(t => {
-            let winMult = (t.hits === t.nums.length) ? payouts[t.nums.length] : 0;
-            let winAmt = t.stake * winMult;
-            let resEl = document.getElementById(`res-${t.id}`);
-            let cardEl = document.getElementById(`t-${t.id}`);
+            let winMult = (t.hits >= 2) ? (payouts[t.hits] || 0) : 0; 
+            // Note: Simplified logic, usually keno pays based on Catch/Spot. 
+            // Here we use hits count vs payouts table.
+            let winAmt = t.stake * (winMult / 5); // Normalized multiplier
+            if(t.hits == t.nums.length) winAmt = t.stake * payouts[t.nums.length];
+            else winAmt = 0; // Standard Keno: must match ALL selected in this version
 
             if(winAmt > 0) {
-                totalWon += winAmt;
-                resEl.innerText = "WON " + winAmt + " ETB";
-                cardEl.classList.add('won-card');
+                totalWin += winAmt;
+                document.getElementById(`res-${t.id}`).innerText = "WIN: " + winAmt;
+                document.getElementById(`res-${t.id}`).style.color = "var(--rasta-green)";
             } else {
-                resEl.innerText = "NO WIN";
+                document.getElementById(`res-${t.id}`).innerText = "LOSE";
+                document.getElementById(`res-${t.id}`).style.color = "gray";
             }
         });
 
-        const overlay = document.getElementById('win-overlay');
-        const status = document.getElementById('win-status');
-        overlay.style.display = 'flex';
-
-        if(totalWon > 0) {
-            status.innerText = "WON " + totalWon + " ETB";
-            status.style.color = "var(--rasta-gold)";
+        if(totalWin > 0) {
+            user.balance += totalWin;
+            document.getElementById('win-status').innerText = "TOTAL WIN\n" + totalWin.toFixed(2) + " ETB";
             document.getElementById('snd-win').play();
-            user.balance += totalWon;
         } else {
-            status.innerText = "TRY AGAIN";
-            status.style.color = "white";
+            document.getElementById('win-status').innerText = "NO LUCK THIS TIME";
+            document.getElementById('win-status').style.color = "white";
         }
 
+        document.getElementById('win-overlay').style.display = 'flex';
         updateUI();
         saveToDB();
 
         setTimeout(() => {
-            overlay.style.display = 'none';
-            resetTable();
+            document.getElementById('win-overlay').style.display = 'none';
+            resetRound();
         }, 5000);
     }
 
-    function resetTable() {
+    function resetRound() {
         tickets = [];
         drawing = false;
         document.querySelectorAll('.num').forEach(n => n.classList.remove('hit', 'match', 'selected'));
