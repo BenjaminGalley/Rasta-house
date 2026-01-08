@@ -3,127 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RASTA REVELATION | SLOT</title>
+    <title>RASTA REVELATION | 5x4 PRO</title>
     <link href="https://fonts.googleapis.com/css2?family=Goldman&display=swap" rel="stylesheet">
     <style>
         :root { 
             --gold: #FFD100; --green: #008542; --red: #E71D36; 
-            --dark: #0a0a0a; 
+            --dark: #000000; 
         }
         
         body { 
-            background: var(--dark); color: white; font-family: 'Goldman', cursive; 
-            margin: 0; text-align: center; overflow: hidden; display: flex; flex-direction: column; height: 100vh;
+            background: var(--dark);
+            background-image: url('asset/background.fine.jpg');
+            background-size: cover;
+            background-position: center;
+            color: white; 
+            font-family: 'Goldman', cursive; 
+            margin: 0; 
+            text-align: center; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh;
         }
 
         /* --- HEADER --- */
         .header { 
-            padding: 15px; background: #000; border-bottom: 3px solid var(--gold); 
-            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 15px; 
+            background: rgba(0,0,0,0.7); 
+            border-bottom: 2px solid var(--gold); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            z-index: 10;
         }
         .balance-box { 
-            background: linear-gradient(to right, var(--green), #004d26);
-            padding: 8px 18px; border-radius: 20px; border: 1px solid var(--gold); font-weight: 900;
-            min-width: 120px;
+            background: rgba(0, 133, 66, 0.8);
+            padding: 5px 15px; 
+            border-radius: 10px; 
+            border: 1px solid var(--gold); 
+            font-weight: 900;
+            color: var(--gold);
         }
 
-        /* --- SLOT MACHINE --- */
-        .machine-container {
-            margin: 20px auto; width: 92%; max-width: 380px;
-            background: #1a1a1a; padding: 15px; border: 5px solid #333;
-            border-radius: 25px; box-shadow: 0 0 40px rgba(0,0,0,0.8);
-            position: relative; flex: 1; display: flex; flex-direction: column; justify-content: center;
-        }
-        
-        .win-glow { animation: gold-glow 0.5s infinite alternate; }
-        @keyframes gold-glow { 
-            from { box-shadow: 0 0 10px var(--gold); border-color: var(--gold); } 
-            to { box-shadow: 0 0 40px var(--gold); border-color: white; } 
+        /* --- 5x4 SLOT GRID --- */
+        .slot-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
         }
 
-        .reels-window {
-            display: flex; justify-content: center; gap: 10px;
-            background: #000; padding: 10px; border-radius: 15px;
-            height: 120px; overflow: hidden; border: 3px solid #222;
+        .grid-container {
+            display: flex;
+            gap: 5px;
+            background: rgba(0, 0, 0, 0.5); /* Transparent to let background show */
+            padding: 10px;
+            border-radius: 10px;
+            border: 3px solid rgba(255, 209, 0, 0.3);
+            overflow: hidden;
+            width: 95%;
+            max-width: 500px;
+            height: 400px; /* Fixed height for 4 rows */
             position: relative;
         }
 
-        /* Center Win Line Indicator */
-        .reels-window::after {
-            content: ""; position: absolute; top: 50%; left: 0; width: 100%; height: 2px;
-            background: rgba(255, 209, 0, 0.3); transform: translateY(-50%); z-index: 5;
-        }
-
         .reel {
-            width: 100px; position: relative;
-            transition: transform 3s cubic-bezier(0.15, 0, 0.15, 1);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transform: translateY(0);
         }
 
         .symbol {
-            width: 100px; height: 120px;
-            display: flex; align-items: center; justify-content: center;
+            width: 100%;
+            height: 100px; /* 400px container / 4 rows = 100px */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
-        
+
         .symbol img {
-            width: 85%; height: 85%; object-fit: contain;
+            width: 90%;
+            height: 90%;
+            object-fit: contain;
+            /* No background on images allows the "floating" effect */
         }
 
         /* --- CONTROLS --- */
-        .status-msg { height: 40px; color: var(--gold); font-weight: bold; margin: 15px 0; font-size: 1.2rem; text-transform: uppercase; }
+        .control-panel {
+            background: rgba(0,0,0,0.85);
+            padding: 15px 10px;
+            border-top: 3px solid var(--green);
+        }
 
-        .bet-bar {
-            display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 25px;
+        .status-msg { 
+            color: var(--gold); 
+            font-size: 1rem; 
+            margin-bottom: 10px; 
+            text-transform: uppercase; 
+            height: 20px;
         }
-        .step-btn {
-            width: 55px; height: 55px; border-radius: 50%; border: 3px solid var(--gold);
-            background: #222; color: var(--gold); font-size: 1.8rem; font-weight: bold; cursor: pointer;
+
+        .ui-row {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
         }
-        .step-btn:active { transform: scale(0.9); background: var(--gold); color: #000; }
-        
+
+        .bet-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-circle {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+            background: #111;
+            color: var(--gold);
+            font-weight: bold;
+            cursor: pointer;
+        }
+
         .bet-display {
-            background: #000; border: 2px solid #444; border-radius: 12px;
-            padding: 5px 20px; min-width: 90px;
+            text-align: center;
+            min-width: 60px;
         }
-        .bet-display span { display: block; font-size: 0.7rem; color: #888; }
-        .bet-display b { font-size: 1.6rem; color: var(--gold); }
+
+        .bet-display span { font-size: 0.6rem; color: #ccc; display: block; }
+        .bet-display b { font-size: 1.2rem; color: var(--gold); }
 
         .spin-btn {
-            width: 85%; padding: 20px; border-radius: 50px; border: none; margin-bottom: 30px;
-            background: linear-gradient(var(--green), #004d26); color: white;
-            font-size: 1.8rem; font-weight: 900; cursor: pointer;
-            box-shadow: 0 6px 0 #002e17; text-shadow: 2px 2px #000;
+            background: linear-gradient(var(--green), #004d26);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 30px;
+            border: none;
+            font-family: 'Goldman';
+            font-size: 1.4rem;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #002e17;
+            cursor: pointer;
         }
-        .spin-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #002e17; }
-        .spin-btn:disabled { background: #444; box-shadow: 0 2px 0 #222; filter: grayscale(1); }
+
+        .spin-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #002e17; }
+        .spin-btn:disabled { filter: grayscale(1); opacity: 0.5; }
+
+        /* Animation Classes */
+        .spinning {
+            transition: transform 2.5s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+        }
+
+        .win-flash {
+            animation: flash 0.5s infinite;
+        }
+        @keyframes flash {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div onclick="location.href='index.html'" style="cursor:pointer; font-size: 1.5rem;">🏠</div>
-    <div class="balance-box" id="userBalance">LOADING...</div>
-    <div onclick="toggleMusic()" id="speaker" style="cursor:pointer; font-size: 1.5rem;">🔈</div>
+    <div onclick="location.href='index.html'" style="cursor:pointer;">🏠</div>
+    <div class="balance-box" id="userBalance">0.00 ETB</div>
+    <div onclick="toggleMusic()" id="speaker" style="cursor:pointer;">🔈</div>
 </div>
 
-<div class="machine-container" id="machine">
-    <div class="status-msg" id="msg">RASTA REVELATION</div>
-    <div class="reels-window">
+<div class="slot-wrapper">
+    <div class="grid-container" id="grid">
         <div class="reel" id="reel0"></div>
         <div class="reel" id="reel1"></div>
         <div class="reel" id="reel2"></div>
+        <div class="reel" id="reel3"></div>
+        <div class="reel" id="reel4"></div>
     </div>
 </div>
 
-<div class="bet-bar">
-    <button class="step-btn" onclick="changeBet(-2)">-</button>
-    <div class="bet-display">
-        <span>BET BIRR</span>
-        <b id="betAmt">2</b>
-    </div>
-    <button class="step-btn" onclick="changeBet(2)">+</button>
-</div>
+<div class="control-panel">
+    <div class="status-msg" id="msg">READY TO ROLL</div>
+    <div class="ui-row">
+        <div class="bet-controls">
+            <button class="btn-circle" onclick="changeBet(-4)">-</button>
+            <div class="bet-display">
+                <span>BET</span>
+                <b id="betAmt">4</b>
+            </div>
+            <button class="btn-circle" onclick="changeBet(4)">+</button>
+        </div>
 
-<button class="spin-btn" id="spinBtn" onclick="spin()">REVEAL</button>
+        <button class="spin-btn" id="spinBtn" onclick="spin()">SPIN</button>
+
+        <div class="bet-display">
+            <span>WIN</span>
+            <b id="lastWin">0</b>
+        </div>
+    </div>
+</div>
 
 <audio id="bgMusic" loop>
     <source src="https://www.free-stock-music.com/music/alexander-nakarada-be-jammin.mp3" type="audio/mpeg">
@@ -131,116 +213,138 @@
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
-    let user = JSON.parse(localStorage.getItem('rasta_user')) || { balance: 0, phone: "000" };
-    let currentBet = 2;
+    let user = JSON.parse(localStorage.getItem('rasta_user')) || { balance: 1000, phone: "000" };
+    let currentBet = 4;
     let isSpinning = false;
 
-    // INDIVIDUAL ASSETS: Point to separate files to stop image cutting/distortion
-    const icons = [
-        { img: 'asset/sym1.png', mult: 100 }, // Jackpot/Haile
-        { img: 'asset/sym2.png', mult: 50 },  // King
-        { img: 'asset/sym3.png', mult: 20 },  // Lion
-        { img: 'asset/sym4.png', mult: 10 },  // Herb
-        { img: 'asset/sym5.png', mult: 5 },   // Leaf
-        { img: 'asset/sym6.png', mult: 2 }    // Vibe
+    // ASSET DEFINITIONS
+    const symbols = [
+        { id: 'king', img: 'asset/king.jpg', weight: 5, mult: 50 },      // Rare
+        { id: 'bob', img: 'asset/bob.jpg', weight: 10, mult: 20 },
+        { id: 'wild', img: 'asset/rasta-wild.jpg', weight: 12, mult: 15 },
+        { id: 'lion', img: 'asset/lion.king.jpg', weight: 15, mult: 10 },
+        { id: 'blunt', img: 'asset/blunt.jpg', weight: 20, mult: 5 },
+        { id: 'tree', img: 'asset/tree.jpg', weight: 25, mult: 3 },
+        { id: 'leaf', img: 'asset/mar.jpg', weight: 30, mult: 2 }        // Common
     ];
 
-    async function init() {
+    // Build Weight Table for RTP control
+    let weightTable = [];
+    symbols.forEach((s, index) => {
+        for(let i=0; i<s.weight; i++) weightTable.push(index);
+    });
+
+    function init() {
         updateUI();
-        syncBalance(); // Deep Sync balance from server
-        for(let i=0; i<3; i++) { populateReel(i); }
+        syncBalance();
+        for(let i=0; i<5; i++) {
+            populateReel(i, true);
+        }
     }
 
-    async function syncBalance() {
-        try {
-            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&t=${Date.now()}`);
-            const data = await res.json();
-            if(data && data.balance !== undefined) {
-                user.balance = parseFloat(data.balance);
-                updateUI();
-            }
-        } catch(e) { console.warn("Balance sync delayed"); }
-    }
-
-    function populateReel(reelIdx) {
+    function populateReel(reelIdx, initial = false) {
         const reel = document.getElementById('reel' + reelIdx);
         reel.innerHTML = '';
-        // Create 30 symbols for a longer, smoother spin
-        for(let i=0; i<30; i++) {
+        // Create 20 symbols for the slide effect
+        for(let i=0; i<20; i++) {
             const sym = document.createElement('div');
             sym.className = 'symbol';
-            const randomIcon = icons[Math.floor(Math.random() * icons.length)];
-            sym.innerHTML = `<img src="${randomIcon.img}" onerror="this.src='https://img.icons8.com/color/96/clover.png'">`;
+            const randomIdx = weightTable[Math.floor(Math.random() * weightTable.length)];
+            const data = symbols[randomIdx];
+            sym.innerHTML = `<img src="${data.img}" alt="${data.id}">`;
             reel.appendChild(sym);
         }
     }
 
     function changeBet(val) {
         if(isSpinning) return;
-        currentBet = Math.max(2, currentBet + val);
+        currentBet = Math.max(4, currentBet + val);
         document.getElementById('betAmt').innerText = currentBet;
     }
 
     async function spin() {
-        if(isSpinning || user.balance < currentBet) return alert("Check Balance!");
+        if(isSpinning || user.balance < currentBet) return;
 
         isSpinning = true;
         user.balance -= currentBet;
         updateUI();
         
         document.getElementById('spinBtn').disabled = true;
-        document.getElementById('msg').innerText = "VIBRATING...";
-        document.getElementById('machine').classList.remove('win-glow');
+        document.getElementById('msg').innerText = "SHUFFLING...";
+        document.getElementById('lastWin').innerText = "0";
 
-        const results = [
-            Math.floor(Math.random() * icons.length),
-            Math.floor(Math.random() * icons.length),
-            Math.floor(Math.random() * icons.length)
-        ];
+        const reelResults = [];
 
-        for(let i=0; i<3; i++) {
+        for(let i=0; i<5; i++) {
             const reel = document.getElementById('reel' + i);
-            // Set the very last symbol to the result before spinning
-            const lastSymImg = reel.lastElementChild.querySelector('img');
-            lastSymImg.src = icons[results[i]].img;
+            
+            // Determine result for this reel (4 symbols visible)
+            const resultIndices = [];
+            for(let r=0; r<4; r++) {
+                resultIndices.push(weightTable[Math.floor(Math.random() * weightTable.length)]);
+            }
+            reelResults.push(resultIndices);
 
+            // Inject results into the top 4 positions of the reel strip
+            const strip = reel.children;
+            for(let r=0; r<4; r++) {
+                strip[r].querySelector('img').src = symbols[resultIndices[r]].img;
+            }
+
+            // Standard Slide Downwards Animation
             reel.style.transition = 'none';
-            reel.style.transform = 'translateY(0)';
-            void reel.offsetWidth; // Force reflow
-            reel.style.transition = `transform ${2 + (i * 0.5)}s cubic-bezier(0.45, 0.05, 0.55, 0.95)`;
-            reel.style.transform = `translateY(-${29 * 120}px)`; // Slide to the last symbol
+            reel.style.transform = `translateY(-1600px)`; // Start from top
+            void reel.offsetWidth; 
+            reel.style.transition = `transform ${2 + (i * 0.2)}s cubic-bezier(0.1, 0, 0.1, 1)`;
+            reel.style.transform = `translateY(0px)`; // Slide down to show index 0-3
         }
 
         setTimeout(() => {
-            checkWin(results);
+            calculateWin(reelResults);
             isSpinning = false;
             document.getElementById('spinBtn').disabled = false;
-        }, 3200);
+        }, 3000);
     }
 
-    function checkWin(res) {
-        let winAmt = 0;
-        const msgEl = document.getElementById('msg');
+    function calculateWin(results) {
+        // Simple Payline Logic (Middle Row - Index 1)
+        let win = 0;
+        const midRow = [results[0][1], results[1][1], results[2][1], results[3][1], results[4][1]];
+        
+        // Check for 3, 4, or 5 matches starting from left
+        let matchCount = 1;
+        let matchIconIdx = midRow[0];
 
-        if(res[0] === res[1] && res[1] === res[2]) {
-            winAmt = currentBet * icons[res[0]].mult;
-            msgEl.innerText = "✨ BIG WIN: " + winAmt + " ETB ✨";
-            document.getElementById('machine').classList.add('win-glow');
-        } else if(res[0] === res[1] || res[1] === res[2] || res[0] === res[2]) {
-            winAmt = currentBet * 1.5;
-            msgEl.innerText = "NICE VIBE: " + winAmt + " ETB";
-        } else {
-            msgEl.innerText = "TRY AGAIN";
+        for(let i=1; i<5; i++) {
+            if(midRow[i] === matchIconIdx) matchCount++;
+            else break;
         }
 
-        user.balance += winAmt;
-        updateUI();
-        saveAndSync();
+        if(matchCount >= 3) {
+            const multiplier = symbols[matchIconIdx].mult * (matchCount - 2);
+            win = currentBet * multiplier;
+            document.getElementById('msg').innerText = `REVELATION! +${win} ETB`;
+            document.getElementById('lastWin').innerText = win;
+            user.balance += win;
+            updateUI();
+            saveAndSync();
+        } else {
+            document.getElementById('msg').innerText = "TRY AGAIN";
+            saveAndSync();
+        }
     }
 
     function updateUI() {
         document.getElementById('userBalance').innerText = parseFloat(user.balance).toFixed(2) + " ETB";
         localStorage.setItem('rasta_user', JSON.stringify(user));
+    }
+
+    async function syncBalance() {
+        try {
+            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}`);
+            const data = await res.json();
+            if(data.balance) { user.balance = data.balance; updateUI(); }
+        } catch(e) { console.log("Offline mode"); }
     }
 
     function saveAndSync() {
