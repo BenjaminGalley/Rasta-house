@@ -60,7 +60,7 @@
             box-shadow: 0 0 15px rgba(0, 133, 66, 0.5); font-size: 0.9rem;
         }
 
-        /* --- MAIN HERO BANNER (The House Pic) --- */
+        /* --- MAIN HERO BANNER --- */
         .banner { 
             height: 240px; 
             background: linear-gradient(to bottom, rgba(0,0,0,0.2), #0a0a0a), url('asset/asset.bg.jpg');
@@ -139,14 +139,24 @@
         }
         .game-title-text { font-size: 0.75rem; font-weight: bold; letter-spacing: 1px; }
 
-        /* Special Overlays */
-        .keno-logo-overlay {
+        /* --- GAME LOGO OVERLAYS --- */
+        .special-logo {
             position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
-            background: var(--rasta-red); border: 3px solid var(--rasta-gold);
+            border: 3px solid var(--rasta-gold);
             color: white; border-radius: 50%; width: 75px; height: 75px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             font-weight: 900; box-shadow: 0 0 20px rgba(0,0,0,0.8); z-index: 4;
+            text-align: center;
         }
+
+        .keno-logo { background: var(--rasta-red); }
+        .wheel-logo { 
+            background: conic-gradient(red, yellow, green, red, yellow, green); 
+            animation: spin 5s linear infinite;
+        }
+        @keyframes spin { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+        .scratch-logo { background: #444; border-radius: 10px; width: 80px; height: 50px; font-size: 0.7rem; }
 
         /* --- VISITOR GATE (Login Screen) --- */
         #visitor-gate {
@@ -242,7 +252,7 @@
         <div class="game-card" onclick="location.href='fast-keno-80.html'">
             <div class="game-tag" style="background:var(--rasta-green);">FAST</div>
             <img src="asset/mar.jpg">
-            <div class="keno-logo-overlay">
+            <div class="special-logo keno-logo">
                 <span style="font-size:0.7rem;">KENO</span>
                 <span style="font-size:1.8rem; line-height:1;">80</span>
             </div>
@@ -251,19 +261,41 @@
             </div>
         </div>
 
-        <div class="game-card" onclick="location.href='fast-keno.html'">
-            <div class="game-tag" style="background:var(--rasta-green);">LIVE</div>
-            <img src="asset/asset.tiles.jpg">
-            <div class="game-footer">
-                <div class="game-title-text">FAST KENO ORIGINAL</div>
-            </div>
-        </div>
-
         <div class="game-card" onclick="location.href='wheel.html'">
             <div class="game-tag" style="background:var(--rasta-red);">Big Win</div>
             <img src="asset/king.jpg">
+            <div class="special-logo wheel-logo">
+                <span style="font-size:0.6rem; color:black;">WHEEL</span>
+            </div>
             <div class="game-footer">
                 <div class="game-title-text">RASTA WHEEL</div>
+            </div>
+        </div>
+
+        <div class="game-card" onclick="location.href='fruit.bounce.html'">
+            <div class="game-tag" style="background:orange;">NEW</div>
+            <img src="asset/asset.tiles.jpg">
+            <div class="game-footer">
+                <div class="game-title-text">FRUIT BOUNCE</div>
+            </div>
+        </div>
+
+        <div class="game-card" onclick="location.href='ben.html'">
+            <div class="game-tag" style="background:#00ff00; color:black;">BEN 10</div>
+            <img src="asset/safari.jpeg">
+            <div class="game-footer">
+                <div class="game-title-text">OMNITRIX LUCK</div>
+            </div>
+        </div>
+
+        <div class="game-card" onclick="location.href='scratch.html'">
+            <div class="game-tag">INSTANT</div>
+            <img src="asset/asset.three.jpg">
+            <div class="special-logo scratch-logo">
+                <span>SCRATCH</span>
+            </div>
+            <div class="game-footer">
+                <div class="game-title-text">SCRATCH & WIN</div>
             </div>
         </div>
 
@@ -288,14 +320,6 @@
             <img src="asset/rasta.two.jpg">
             <div class="game-footer">
                 <div class="game-title-text">RASTA CRASH</div>
-            </div>
-        </div>
-
-        <div class="game-card" onclick="location.href='scratch.html'">
-            <div class="game-tag">INSTANT</div>
-            <img src="asset/asset.three.jpg">
-            <div class="game-footer">
-                <div class="game-title-text">SCRATCH & WIN</div>
             </div>
         </div>
     </div>
@@ -331,7 +355,6 @@
         const phone = user.phone || user.phoneNumber;
 
         try {
-            // Add timestamp to prevent caching
             const res = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}&t=${Date.now()}`);
             const data = await res.json();
             if(data && data.balance !== undefined) {
@@ -339,36 +362,34 @@
                 localStorage.setItem('rasta_user', JSON.stringify(user));
                 document.getElementById('userBal').innerText = user.balance.toFixed(2);
             }
-        } catch(e) { console.warn("Balance sync pending...", e); }
+        } catch(e) { console.warn("Syncing..."); }
     }
 
     window.onload = () => {
         const userData = localStorage.getItem('rasta_user');
         
-        // 1. Check Login Status
         if(!userData) { 
             document.getElementById('visitor-gate').style.display = 'flex';
             document.getElementById('lobby-view').style.display = 'none';
         } else {
-            // 2. Show Lobby
             document.getElementById('visitor-gate').style.display = 'none';
             document.getElementById('lobby-view').style.display = 'block';
             
             const user = JSON.parse(userData);
-            
-            // 3. Populate Data
             document.getElementById('userBal').innerText = parseFloat(user.balance || 0).toFixed(2);
-            // Updated Player Name display logic for banner
             const playerName = (user.name || "RASTA PLAYER").toUpperCase();
             document.getElementById('welcomeUser').innerText = "RESPECT, " + playerName;
             document.getElementById('sideUserPhone').innerText = "ID: " + (user.phone || user.phoneNumber);
             
-            // 4. Start Syncs
+            // Initial sync
             syncBalance();
             
-            // 5. Generate Random Winners for Ticker
+            // Background sync every 10 seconds to ensure system "knows" when returning from games
+            setInterval(syncBalance, 10000);
+            
+            // Winner Ticker Logic
             const names = ["Abebe", "Selam", "Dawit", "Hanna", "Mulugeta", "Aster", "Yared", "Tsion", "Kassa", "Elias"];
-            const games = ["Trip Revelation", "Fast Keno 80", "Safari Simba", "Multi Hot", "Rasta Wheel"];
+            const games = ["Trip Revelation", "Fruit Bounce", "Safari Simba", "Multi Hot", "Rasta Wheel"];
             let tickerText = "";
             for(let i=0; i<15; i++) {
                 const name = names[Math.floor(Math.random()*names.length)];
@@ -376,7 +397,7 @@
                 const win = (Math.random()*2500 + 150).toFixed(0);
                 tickerText += ` • ${name} won ${win} ETB on ${game}! `;
             }
-            document.getElementById('winnerTicker').innerText = tickerText + tickerText; // Duplicate for smooth scroll
+            document.getElementById('winnerTicker').innerText = tickerText + tickerText;
         }
     };
 </script>
