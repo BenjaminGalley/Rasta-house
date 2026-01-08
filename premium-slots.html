@@ -3,252 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RASTA LION PREMIUM</title>
+    <title>MULTI HOT 5 | RASTA HOUSE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Goldman&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #FFD100; --green: #008542; --red: #E71D36; --dark: #0a0a0a; }
-        
-        body { 
-            background: #000; color: white; font-family: 'Segoe UI', Arial, sans-serif; 
-            text-align: center; margin: 0; overflow: hidden;
-        }
-        
-        .header { 
-            padding: 15px; background: #111; border-bottom: 3px solid var(--gold); 
-            display: flex; justify-content: space-between; align-items: center; 
-        }
-        
-        .bal-box { 
-            background: linear-gradient(to right, var(--green), #004d26); 
-            padding: 8px 18px; border-radius: 20px; border: 1px solid var(--gold); font-weight: 900; 
+        :root {
+            --rasta-gold: #FFD100;
+            --neon-green: #00ff66;
+            --deep-green: #051a0c;
         }
 
-        .slot-container { 
-            margin: 20px auto; width: 92%; max-width: 360px; background: #1a1a1a; 
-            padding: 15px; border: 5px solid #333; border-radius: 25px;
-            box-shadow: 0 0 40px rgba(0,0,0,0.8); position: relative;
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--deep-green) url('asset/safari.jpeg'); /* Using your green clover background */
+            background-size: cover;
+            background-position: center;
+            font-family: 'Goldman', sans-serif;
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        /* Feature Modes Glow */
-        .free-spin-mode { border-color: var(--red) !important; animation: feature-glow 0.8s infinite alternate; }
-        @keyframes feature-glow { 
-            from { box-shadow: 0 0 10px var(--red); } 
-            to { box-shadow: 0 0 30px var(--red); } 
+        /* --- HEADER --- */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: rgba(0,0,0,0.85);
+            border-bottom: 2px solid var(--rasta-gold);
         }
 
-        .reels-window { 
-            display: flex; justify-content: space-around; gap: 8px; 
-            background: #000; padding: 10px; border-radius: 15px; 
-            height: 100px; overflow: hidden; border: 2px solid #222; 
+        .balance-display {
+            background: linear-gradient(to right, #008542, #004d26);
+            padding: 5px 15px;
+            border-radius: 20px;
+            border: 1px solid var(--rasta-gold);
+            font-weight: bold;
+        }
+
+        /* --- SMARTSOFT STYLE LAYOUT --- */
+        .main-layout {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-grow: 1;
+            padding: 10px;
+        }
+
+        /* Multipliers (No Black Box - Industry Standard) */
+        .multiplier-column {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .m-badge {
+            width: 70px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.4rem;
+            font-weight: 900;
+            border-radius: 10px;
+            background: rgba(0, 40, 20, 0.5); /* Transparent to let clovers show */
+            border: 1px solid rgba(0, 255, 102, 0.2);
+            color: rgba(255, 255, 255, 0.3);
+            transition: 0.3s ease;
+        }
+
+        .m-badge.active {
+            background: rgba(0, 255, 102, 0.15);
+            border: 2px solid var(--neon-green);
+            color: var(--neon-green);
+            box-shadow: 0 0 20px var(--neon-green), inset 0 0 10px var(--neon-green);
+            transform: scale(1.1);
+            text-shadow: 0 0 10px var(--neon-green);
+        }
+
+        /* Slot Window */
+        .slot-frame {
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid var(--rasta-gold);
+            border-radius: 15px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding: 12px;
+            width: 260px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.6);
         }
 
         .reel {
-            width: 90px; position: relative;
-            transition: transform 2.5s cubic-bezier(0.1, 0, 0.1, 1);
+            background: rgba(255, 255, 255, 0.03);
+            height: 220px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
         }
 
-        .symbol {
-            width: 90px; height: 100px;
-            background-image: url('asset/asset.nine.jpg');
-            background-size: 300% 300%; /* Perfect 3x3 mapping */
-            background-repeat: no-repeat;
+        .symbol { font-size: 2.2rem; }
+
+        /* --- BOTTOM CONTROLS --- */
+        .controls {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px 10px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 3px solid var(--rasta-gold);
         }
 
-        /* --- CONTROLS --- */
-        #msg { height: 35px; color: var(--gold); font-weight: bold; margin: 15px 0; font-size: 1rem; text-transform: uppercase; }
+        .spin-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fff, var(--rasta-gold));
+            border: none;
+            font-weight: 900;
+            box-shadow: 0 0 20px var(--rasta-gold);
+            cursor: pointer;
+            transition: 0.2s;
+        }
 
-        .bet-bar {
-            display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px;
-        }
-        .step-btn {
-            width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--gold);
-            background: #222; color: var(--gold); font-size: 1.5rem; font-weight: bold; cursor: pointer;
-        }
-        .step-btn:active { transform: scale(0.9); background: var(--gold); color: #000; }
-        
-        .bet-display {
-            background: #000; border: 2px solid #444; border-radius: 10px;
-            padding: 5px 15px; min-width: 80px;
-        }
-        .bet-display span { display: block; font-size: 0.7rem; color: #888; }
-        .bet-display b { font-size: 1.4rem; color: var(--gold); }
+        .spin-btn:active { transform: scale(0.9); }
+        .spin-btn:disabled { filter: grayscale(1); opacity: 0.5; }
 
-        .btn-spin { 
-            width: 85%; padding: 18px; border-radius: 50px; border: none;
-            background: linear-gradient(var(--green), #004d26); color: white;
-            font-size: 1.6rem; font-weight: 900; cursor: pointer;
-            box-shadow: 0 6px 0 #002e17; text-shadow: 2px 2px #000;
+        .stat-pill {
+            text-align: center;
+            background: #111;
+            padding: 8px 15px;
+            border-radius: 15px;
+            border: 1px solid #333;
+            min-width: 80px;
         }
-        .btn-spin:active { transform: translateY(4px); box-shadow: 0 2px 0 #002e17; }
-        .btn-spin:disabled { background: #444; box-shadow: 0 2px 0 #222; filter: grayscale(1); }
-
-        .fs-status { color: var(--red); font-weight: bold; font-size: 0.9rem; margin-top: 10px; display: none; }
+        .stat-pill small { display: block; font-size: 0.6rem; color: #888; }
+        .stat-pill span { color: var(--rasta-gold); font-weight: bold; font-size: 1.1rem; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div onclick="location.href='index.html'" style="cursor:pointer; font-size: 1.5rem;">🏠</div>
-    <div class="bal-box" id="balDisplay">0.00 ETB</div>
-    <div onclick="toggleMusic()" id="speaker" style="cursor:pointer; font-size: 1.2rem;">🔈</div>
-</div>
+    <header class="game-header">
+        <button onclick="location.href='index.html'" style="background:none; border:none; color:white; font-size:1.5rem;">✕</button>
+        <div style="text-align: center;">
+            <div style="color:var(--rasta-gold); font-weight:900; font-size:1.1rem;">MULTI HOT 5</div>
+            <div style="font-size:0.5rem; color:var(--neon-green); letter-spacing: 2px;">WILD EDITION</div>
+        </div>
+        <div class="balance-display" id="headerBal">0.00</div>
+    </header>
 
-<div class="slot-container" id="machine">
-    <div id="msg">RASTA LION PREMIUM</div>
-    <div class="reels-window">
-        <div class="reel" id="reel0"></div>
-        <div class="reel" id="reel1"></div>
-        <div class="reel" id="reel2"></div>
+    <div class="main-layout">
+        <div class="multiplier-column">
+            <div class="m-badge">1x</div>
+            <div class="m-badge active">2x</div>
+            <div class="m-badge">4x</div>
+        </div>
+
+        <div class="slot-frame">
+            <div class="reel">
+                <div class="symbol">77</div>
+                <div class="symbol">🍋</div>
+                <div class="symbol">🍒</div>
+            </div>
+            <div class="reel">
+                <div class="symbol">🍒</div>
+                <div class="symbol">77</div>
+                <div class="symbol">🍇</div>
+            </div>
+            <div class="reel">
+                <div class="symbol">🍊</div>
+                <div class="symbol">🍉</div>
+                <div class="symbol">77</div>
+            </div>
+        </div>
     </div>
-    <div id="fsIndicator" class="fs-status">FREE SPINS REMAINING: <span id="fsLeft">0</span></div>
-</div>
 
-<div class="bet-bar">
-    <button class="step-btn" onclick="changeBet(-2)">-</button>
-    <div class="bet-display">
-        <span>BET BIRR</span>
-        <b id="betAmt">2</b>
+    <div class="controls">
+        <div class="stat-pill">
+            <small>BET</small>
+            <span>5.00</span>
+        </div>
+
+        <button class="spin-btn" id="spinBtn" onclick="runSpin()">SPIN</button>
+
+        <div class="stat-pill">
+            <small>WIN</small>
+            <span id="winDisplay">0.00</span>
+        </div>
     </div>
-    <button class="step-btn" onclick="changeBet(2)">+</button>
-</div>
 
-<button class="btn-spin" onclick="handleSpin()" id="spinBtn">SPIN REELS</button>
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
+        let userData = JSON.parse(localStorage.getItem('rasta_user'));
 
-<audio id="bgMusic" loop>
-    <source src="https://www.free-stock-music.com/music/alexander-nakarada-be-jammin.mp3" type="audio/mpeg">
-</audio>
-
-<script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
-    let user = JSON.parse(localStorage.getItem('rasta_user')) || { balance: 0, phone: "000" };
-    let freeSpins = 0;
-    let currentBet = 2;
-    let isSpinning = false;
-
-    // Correct Sprite Mapping for asset.nine.jpg (3x3 grid)
-    const icons = [
-        { name: 'Lion', x: 0, y: 50, mult: 50 }, 
-        { name: 'Crown', x: 100, y: 0, mult: 20 },
-        { name: 'Chest', x: 50, y: 50, mult: 10 },
-        { name: 'Portal', x: 100, y: 50, mult: 5 }, // Scatter
-        { name: 'Leaf', x: 50, y: 0, mult: 2 }
-    ];
-
-    function init() {
-        document.getElementById('balDisplay').innerText = parseFloat(user.balance).toFixed(2) + " ETB";
-        for(let i=0; i<3; i++) populateReel(i);
-    }
-
-    function populateReel(idx) {
-        const reel = document.getElementById('reel' + idx);
-        reel.innerHTML = '';
-        for(let i=0; i<20; i++) {
-            const sym = document.createElement('div');
-            sym.className = 'symbol';
-            const randomIcon = icons[Math.floor(Math.random() * icons.length)];
-            sym.style.backgroundPosition = `${randomIcon.x}% ${randomIcon.y}%`;
-            reel.appendChild(sym);
-        }
-    }
-
-    function changeBet(val) {
-        if(isSpinning || freeSpins > 0) return;
-        currentBet = Math.max(2, currentBet + val);
-        document.getElementById('betAmt').innerText = currentBet;
-    }
-
-    function toggleMusic() {
-        const m = document.getElementById('bgMusic');
-        const s = document.getElementById('speaker');
-        if(m.paused) { m.play(); s.innerText = "🔊"; }
-        else { m.pause(); s.innerText = "🔈"; }
-    }
-
-    async function handleSpin() {
-        if (isSpinning) return;
-        
-        if (freeSpins === 0) {
-            if (user.balance < currentBet) return alert("Low Balance!");
-            user.balance -= currentBet;
-        } else {
-            freeSpins--;
+        function init() {
+            if(!userData) window.location.href = 'index.html';
+            document.getElementById('headerBal').innerText = parseFloat(userData.balance).toFixed(2);
         }
 
-        isSpinning = true;
-        updateUI();
-        document.getElementById('spinBtn').disabled = true;
-        document.getElementById('msg').innerText = freeSpins > 0 ? "FREE SPINNING!" : "SPINNING...";
-
-        // Roll Animation
-        for(let i=0; i<3; i++) {
-            const reel = document.getElementById('reel' + i);
-            reel.style.transition = 'none';
-            reel.style.transform = 'translateY(0)';
-            void reel.offsetWidth;
-            reel.style.transition = `transform ${2 + (i * 0.5)}s cubic-bezier(0.1, 0, 0.1, 1)`;
-            reel.style.transform = 'translateY(-1800px)';
-        }
-
-        const results = [
-            Math.floor(Math.random() * icons.length),
-            Math.floor(Math.random() * icons.length),
-            Math.floor(Math.random() * icons.length)
-        ];
-
-        setTimeout(() => {
-            for(let i=0; i<3; i++) {
-                const reel = document.getElementById('reel' + i);
-                reel.lastElementChild.style.backgroundPosition = `${icons[results[i]].x}% ${icons[results[i]].y}%`;
+        function runSpin() {
+            if(userData.balance < 5) {
+                alert("Insufficient Balance!");
+                return;
             }
-            checkWin(results);
-        }, 3000);
-    }
 
-    function checkWin(res) {
-        let win = 0;
-        let scatterCount = res.filter(i => icons[i].name === 'Portal').length;
+            // Update balance
+            userData.balance -= 5;
+            document.getElementById('headerBal').innerText = userData.balance.toFixed(2);
+            localStorage.setItem('rasta_user', JSON.stringify(userData));
 
-        if (scatterCount >= 2) {
-            freeSpins += 5;
-            document.getElementById('msg').innerText = "FEATURE! +5 FREE SPINS";
+            const btn = document.getElementById('spinBtn');
+            btn.disabled = true;
+
+            // Sync with Sheets
+            fetch(`${SCRIPT_URL}?action=login&phone=${userData.phone}&updateBal=${userData.balance}`);
+
+            setTimeout(() => {
+                btn.disabled = false;
+                document.getElementById('winDisplay').innerText = "0.00";
+            }, 1000);
         }
 
-        if (res[0] === res[1] && res[1] === res[2]) {
-            win = currentBet * icons[res[0]].mult;
-            document.getElementById('msg').innerText = "MEGA WIN: " + win + " ETB!";
-        } else if (res[0] === res[1] || res[1] === res[2] || res[0] === res[2]) {
-            win = currentBet * 1.5;
-            document.getElementById('msg').innerText = "NICE WIN: " + win + " ETB";
-        } else if (scatterCount < 2) {
-            document.getElementById('msg').innerText = "TRY AGAIN";
-        }
-
-        user.balance += win;
-        isSpinning = false;
-        document.getElementById('spinBtn').disabled = false;
-        updateUI();
-        saveAndSync();
-    }
-
-    function updateUI() {
-        document.getElementById('balDisplay').innerText = parseFloat(user.balance).toFixed(2) + " ETB";
-        const fsBox = document.getElementById('fsIndicator');
-        const machine = document.getElementById('machine');
-        if(freeSpins > 0) {
-            fsBox.style.display = 'block';
-            document.getElementById('fsLeft').innerText = freeSpins;
-            machine.classList.add('free-spin-mode');
-        } else {
-            fsBox.style.display = 'none';
-            machine.classList.remove('free-spin-mode');
-        }
-    }
-
-    function saveAndSync() {
-        localStorage.setItem('rasta_user', JSON.stringify(user));
-        fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&updateBal=${user.balance}`);
-    }
-
-    window.onload = init;
-</script>
+        window.onload = init;
+    </script>
 </body>
 </html>
