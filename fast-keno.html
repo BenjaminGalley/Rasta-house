@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RASTA | Universal Fast Keno (Audio)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Goldman&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Goldman&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; --dark: #050505; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
@@ -19,44 +19,62 @@
         #timer { font-family: 'Goldman'; color: var(--rasta-red); font-size: 1.5rem; }
 
         .balance-pill { 
-            background: var(--rasta-green); padding: 5px 12px; border-radius: 20px; 
-            font-size: 0.8rem; font-weight: bold; border: 1px solid var(--rasta-gold);
+            background: #000; padding: 5px 15px; border-radius: 20px; 
+            font-size: 0.9rem; font-weight: 900; border: 2px solid var(--rasta-green); color: var(--rasta-green);
         }
 
         /* Layout */
-        .main-layout { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
-        .grid-container { flex: 1; padding: 10px; overflow-y: auto; display: flex; align-items: center; }
-        .keno-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; width: 100%; max-width: 500px; margin: auto; }
+        .main-layout { display: flex; flex-direction: column; flex: 1; overflow: hidden; position: relative; }
+        .grid-container { flex: 1; padding: 10px; overflow-y: auto; display: flex; align-items: flex-start; justify-content: center; }
+        .keno-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; width: 100%; max-width: 450px; }
         
         .num { 
-            background: #1a1a1a; border: 1px solid #333; padding: 12px 0; text-align: center; 
+            background: #1a1a1a; border: 1px solid #333; aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
             font-size: 0.8rem; font-weight: bold; border-radius: 4px; cursor: pointer; transition: 0.2s;
         }
         .num.selected { background: var(--rasta-gold); color: black; border-color: white; transform: scale(1.05); }
-        .num.draw-hit { background: var(--rasta-red); color: white; animation: pop 0.4s ease-out; box-shadow: 0 0 15px var(--rasta-red); z-index: 2; }
-        .num.match { background: var(--rasta-green) !important; color: white !important; box-shadow: 0 0 20px var(--rasta-green); }
+        .num.draw-hit { background: var(--rasta-red); color: white; animation: pop 0.5s ease-out; box-shadow: 0 0 15px var(--rasta-red); z-index: 2; }
+        .num.match { background: var(--rasta-green) !important; color: white !important; box-shadow: 0 0 20px var(--rasta-green); border: 2px solid white; }
 
         /* Ticket Tray */
-        .info-tray { background: #111; border-top: 1px solid #333; height: 160px; display: flex; flex-direction: column; }
+        .info-tray { background: #111; border-top: 1px solid #333; height: 130px; display: flex; flex-direction: column; }
         .ticket-scroll-container { display: flex; overflow-x: auto; gap: 10px; padding: 10px; flex: 1; }
         .ticket-card {
-            min-width: 130px; background: #000; border: 1px dashed var(--rasta-gold);
+            min-width: 140px; background: #000; border: 1px dashed var(--rasta-gold);
             padding: 8px; border-radius: 8px; flex-shrink: 0; font-size: 0.75rem;
         }
-        .ticket-card.winner { border-color: var(--rasta-green); background: rgba(0, 133, 66, 0.3); border-style: solid; transform: scale(1.05); transition: 0.3s; }
+        .ticket-card.winner { border-color: var(--rasta-green); background: rgba(0, 133, 66, 0.3); border-style: solid; }
 
         /* Controls */
-        .controls { background: #000; padding: 15px; border-top: 2px solid var(--rasta-gold); padding-bottom: env(safe-area-inset-bottom); }
+        .controls { background: #000; padding: 12px 15px; border-top: 2px solid var(--rasta-gold); z-index: 20; }
+        .stake-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .stake-ctrl { display: flex; align-items: center; gap: 8px; }
+        .btn-step { background: #222; color: var(--rasta-gold); border: 1px solid var(--rasta-gold); width: 40px; height: 40px; border-radius: 8px; font-size: 1.5rem; font-weight: bold; }
+        
         .play-btn { 
-            width: 100%; padding: 16px; background: var(--rasta-green); color: white; 
-            border: none; border-radius: 10px; font-weight: 800; font-size: 1.1rem; cursor: pointer;
+            width: 100%; padding: 15px; background: var(--rasta-green); color: white; 
+            border: none; border-radius: 10px; font-weight: 900; font-size: 1.2rem; cursor: pointer;
+            box-shadow: 0 4px 0 #005a2d;
         }
-        .play-btn:disabled { background: #333; color: #666; cursor: not-allowed; }
+        .play-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #005a2d; }
+        .play-btn:disabled { background: #333; color: #666; box-shadow: none; cursor: not-allowed; }
 
-        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.5); } 100% { transform: scale(1); } }
+        /* Win Overlay */
+        #win-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); display: none; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 1000;
+        }
+
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.6); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
+
+<div id="win-overlay">
+    <h1 id="win-status" style="font-size: 3rem; color: var(--rasta-gold); text-align: center;"></h1>
+    <p style="color: white; margin-top: 15px;">NEXT ROUND STARTING...</p>
+</div>
 
 <audio id="bg-music" loop><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg"></audio>
 <audio id="snd-tick"><source src="https://actions.google.com/sounds/v1/button/button_click.ogg" type="audio/ogg"></audio>
@@ -64,7 +82,7 @@
 <audio id="snd-win"><source src="https://actions.google.com/sounds/v1/foley/beating_prizes.ogg" type="audio/ogg"></audio>
 
 <div class="keno-header">
-    <button onclick="location.href='index.html'" style="background:none; color:white; border:1px solid #444; padding:5px 10px; border-radius:5px;">LOBBY</button>
+    <button onclick="location.href='index.html'" style="background:none; color:white; border:1px solid #444; padding:5px 12px; border-radius:5px; font-weight:bold;">LOBBY</button>
     <div class="timer-box"><div id="timer">00:60</div></div>
     <div class="balance-pill"><span id="top-bal">0.00</span> ETB</div>
 </div>
@@ -74,22 +92,22 @@
     
     <div class="info-tray">
         <div class="ticket-scroll-container" id="ticketScroll">
-            <div id="no-tickets" style="color:#444; padding:20px; font-size: 0.8rem;">No active bets for this round.</div>
+            <div id="no-tickets" style="color:#444; width:100%; text-align:center; padding-top:20px;">No active bets for this round.</div>
         </div>
-        <div style="padding: 5px 15px; font-size: 0.75rem; color: var(--rasta-gold); background: #000; display: flex; justify-content: space-between;">
-            <span>Potential Win: <span id="pot-win" style="color:white">0.00</span> ETB</span>
+        <div style="padding: 5px 15px; font-size: 0.75rem; color: var(--rasta-gold); background: #000; display: flex; justify-content: space-between; border-top: 1px solid #222;">
+            <span>POTENTIAL WIN: <span id="pot-win" style="color:white; font-weight:bold;">0.00</span> ETB</span>
             <span id="mute-btn" onclick="toggleMute()" style="cursor:pointer">🎵 MUSIC: OFF</span>
         </div>
     </div>
 </div>
 
 <div class="controls">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <span style="font-size: 0.9rem; font-weight: bold;">STAKE AMOUNT:</span>
-        <div style="display: flex; align-items: center; gap: 5px;">
-            <button onclick="adjustStake(-5)" style="background:#222; color:white; border:1px solid #444; width:30px; height:30px; border-radius:5px;">-</button>
-            <input type="number" id="betAmount" value="10" min="2" oninput="updatePotential()" style="width:60px; height:30px; background:#111; color:var(--rasta-gold); border:1px solid var(--rasta-gold); border-radius:5px; text-align:center; font-weight: bold;">
-            <button onclick="adjustStake(5)" style="background:#222; color:white; border:1px solid #444; width:30px; height:30px; border-radius:5px;">+</button>
+    <div class="stake-row">
+        <span style="font-weight: 900; font-size: 0.8rem; color: #888;">STAKE AMOUNT</span>
+        <div class="stake-ctrl">
+            <button class="btn-step" onclick="adjustStake(-5)">-</button>
+            <input type="number" id="betAmount" value="10" readonly style="width:70px; height:40px; background:#111; color:var(--rasta-gold); border:1px solid var(--rasta-gold); border-radius:8px; text-align:center; font-size:1.2rem; font-weight: 900;">
+            <button class="btn-step" onclick="adjustStake(5)">+</button>
         </div>
     </div>
     <button class="play-btn" id="playBtn" onclick="placeBet()">PLACE BET</button>
@@ -104,8 +122,7 @@
     let isMuted = true;
     let isDrawing = false;
 
-    // Standard Keno Payout Multipliers (simplified)
-    const payoutTable = { 2: 4, 3: 10, 4: 25, 5: 60, 6: 150, 7: 400, 8: 1000, 9: 2500, 10: 5000 };
+    const payoutTable = { 2: 5, 3: 15, 4: 50, 5: 150, 6: 500, 7: 1500, 8: 4000, 9: 10000, 10: 25000 };
 
     function playSound(id) { if(!isMuted) { const s = document.getElementById(id); s.currentTime = 0; s.play().catch(()=>{}); } }
 
@@ -116,13 +133,12 @@
         else { bg.pause(); document.getElementById('mute-btn').innerText = "🎵 MUSIC: OFF"; }
     }
 
-    // Initialize Grid
     const grid = document.getElementById('kenoGrid');
     for(let i=1; i<=80; i++) {
         const div = document.createElement('div');
         div.className = 'num'; div.innerText = i;
         div.onclick = () => {
-            if(isDrawing) return;
+            if(isDrawing || timeRemaining <= 5) return;
             playSound('snd-tick');
             if(selected.includes(i)) { 
                 selected = selected.filter(x => x !== i); 
@@ -138,19 +154,18 @@
 
     function adjustStake(amt) {
         let current = parseInt(document.getElementById('betAmount').value);
-        document.getElementById('betAmount').value = Math.max(2, current + amt);
+        let newVal = Math.max(5, current + amt);
+        document.getElementById('betAmount').value = newVal;
         updatePotential();
     }
 
     function updatePotential() {
         const bet = parseFloat(document.getElementById('betAmount').value) || 0;
         const mult = payoutTable[selected.length] || 0;
-        const pot = bet * mult;
-        document.getElementById('pot-win').innerText = pot.toFixed(2);
+        document.getElementById('pot-win').innerText = (bet * mult).toFixed(2);
         document.getElementById('top-bal').innerText = parseFloat(user.balance).toFixed(2);
     }
 
-    // Timer Logic
     setInterval(() => {
         if(isDrawing) return;
         timeRemaining--;
@@ -159,21 +174,27 @@
             timeRemaining = 60; 
         }
         document.getElementById('timer').innerText = `00:${timeRemaining < 10 ? '0'+timeRemaining : timeRemaining}`;
-        document.getElementById('playBtn').disabled = (timeRemaining <= 5);
-        if(timeRemaining <= 5) document.getElementById('playBtn').innerText = "LOCKING...";
-        else document.getElementById('playBtn').innerText = "PLACE BET";
+        
+        const btn = document.getElementById('playBtn');
+        if(timeRemaining <= 5) {
+            btn.disabled = true;
+            btn.innerText = "LOCKING...";
+        } else {
+            btn.disabled = (selected.length < 2);
+            btn.innerText = "PLACE BET";
+        }
     }, 1000);
 
     function placeBet() {
         const bet = parseFloat(document.getElementById('betAmount').value);
-        if(selected.length < 2) return alert("Select at least 2 numbers!");
-        if(bet > user.balance) return alert("Insufficient balance");
+        if(selected.length < 2) return alert("Select 2-10 numbers!");
+        if(bet > user.balance) return alert("Insufficient Balance!");
 
         user.balance -= bet; 
         updateUI();
         
         const t = { 
-            id: Math.floor(100 + Math.random() * 899), 
+            id: Math.floor(1000 + Math.random() * 8999), 
             nums: [...selected], 
             stake: bet, 
             potential: bet * (payoutTable[selected.length] || 0) 
@@ -182,20 +203,20 @@
         
         const card = document.createElement('div');
         card.className = 'ticket-card'; card.id = 't-'+t.id;
-        card.innerHTML = `<div style="color:var(--rasta-gold)">Ticket #${t.id}</div>
-                          <div style="margin:4px 0; word-break:break-all;">${t.nums.join(', ')}</div>
-                          <div style="font-weight:bold">Win: ${t.potential.toFixed(2)}</div>`;
+        card.innerHTML = `<div style="color:var(--rasta-gold); font-weight:bold;">ID: #${t.id}</div>
+                          <div style="margin:4px 0; font-weight:bold;">${t.nums.join(', ')}</div>
+                          <div style="color:var(--rasta-green)">WIN: ${t.potential.toFixed(2)}</div>`;
         
         document.getElementById('ticketScroll').appendChild(card);
         document.getElementById('no-tickets').style.display = 'none';
 
-        // Clear selection for next bet
         selected = []; 
         document.querySelectorAll('.num').forEach(d => d.classList.remove('selected'));
         updatePotential();
+        playSound('snd-pop');
     }
 
-    function runDraw() {
+    async function runDraw() {
         isDrawing = true;
         const draw = []; 
         while(draw.length < 20) { 
@@ -204,47 +225,56 @@
         }
         
         const divs = document.querySelectorAll('.num');
-        divs.forEach(d => d.classList.remove('draw-hit', 'match', 'selected'));
+        divs.forEach(d => d.classList.remove('draw-hit', 'match'));
 
-        draw.forEach((n, i) => {
-            setTimeout(() => {
-                const el = divs[n-1];
-                el.classList.add('draw-hit');
-                playSound('snd-pop');
-                
-                // Highlight matches in active tickets
-                activeTickets.forEach(t => {
-                    if(t.nums.includes(n)) {
-                        el.classList.add('match');
-                    }
-                });
+        for(let i=0; i<draw.length; i++) {
+            let n = draw[i];
+            await new Promise(r => setTimeout(r, 800)); // Draw Speed set to 0.8s
+            
+            const el = divs[n-1];
+            el.classList.add('draw-hit');
+            playSound('snd-pop');
+            
+            activeTickets.forEach(t => {
+                if(t.nums.includes(n)) {
+                    el.classList.add('match');
+                }
+            });
 
-                if(i === 19) setTimeout(() => checkResults(draw), 1000);
-            }, i * 300);
-        });
+            if(i === 19) setTimeout(() => checkResults(draw), 1500);
+        }
     }
 
     function checkResults(draw) {
         let sessionWin = 0;
         activeTickets.forEach(t => {
             const hits = t.nums.filter(n => draw.includes(n)).length;
-            // Win condition: All numbers must hit (Classic Keno style)
+            // Standard win: Match all selected numbers
             if(hits === t.nums.length) { 
-                const card = document.getElementById('t-'+t.id);
-                if(card) card.classList.add('winner');
+                document.getElementById('t-'+t.id).classList.add('winner');
                 sessionWin += t.potential;
             }
         });
 
+        const overlay = document.getElementById('win-overlay');
+        const status = document.getElementById('win-status');
+        overlay.style.display = 'flex';
+
         if(sessionWin > 0) {
             playSound('snd-win');
             user.balance += sessionWin;
-            updateUI();
-            alert(`RESPECT! You won ${sessionWin.toFixed(2)} ETB!`);
+            status.innerText = "WON " + sessionWin.toFixed(2) + " ETB";
+            status.style.color = "var(--rasta-gold)";
+        } else {
+            status.innerText = "NO WIN";
+            status.style.color = "white";
         }
         
+        updateUI();
+        
         setTimeout(() => { 
-            document.getElementById('ticketScroll').innerHTML = '<div id="no-tickets" style="color:#444; padding:20px; font-size: 0.8rem;">No active bets for this round.</div>';
+            overlay.style.display = 'none';
+            document.getElementById('ticketScroll').innerHTML = '<div id="no-tickets" style="color:#444; width:100%; text-align:center; padding-top:20px;">No active bets for this round.</div>';
             activeTickets = [];
             document.querySelectorAll('.num').forEach(d => d.classList.remove('draw-hit', 'match'));
             isDrawing = false;
@@ -258,21 +288,20 @@
             const data = await res.json();
             if(data && data.balance !== undefined) {
                 user.balance = parseFloat(data.balance);
-                updateUI();
+                updateUI(false); 
             }
-        } catch(e) { console.warn("Balance sync delayed"); }
+        } catch(e) {}
     }
 
-    function updateUI() { 
+    function updateUI(sendToDB = true) { 
         localStorage.setItem('rasta_user', JSON.stringify(user));
         document.getElementById('top-bal').innerText = parseFloat(user.balance).toFixed(2);
-        fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&updateBal=${user.balance}`).catch(e => {});
+        if(sendToDB) {
+            fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&updateBal=${user.balance}`).catch(e => {});
+        }
     }
 
-    window.onload = () => {
-        syncBalanceOnLoad();
-        updatePotential();
-    };
+    window.onload = syncBalanceOnLoad;
 </script>
 </body>
 </html>
