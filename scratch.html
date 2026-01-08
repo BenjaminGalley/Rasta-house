@@ -4,248 +4,141 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RASTA GOLD SCRATCH</title>
+    <link href="https://fonts.googleapis.com/css2?family=Goldman&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #FFD100; --green: #008542; --red: #E71D36; --dark: #0a0a0a; }
+        :root { --gold: #FFD100; --green: #008542; --dark: #051a0c; --neon: #00ff66; }
+        body { background: var(--dark); color: white; font-family: 'Goldman', sans-serif; text-align: center; margin: 0; overflow: hidden; touch-action: none; }
+        .header { padding: 15px; background: rgba(0,0,0,0.9); border-bottom: 3px solid var(--gold); display: flex; justify-content: space-between; align-items: center; }
+        .bal-display { background: linear-gradient(to right, var(--green), #004d26); padding: 8px 18px; border-radius: 20px; border: 1px solid var(--gold); font-weight: bold; min-width: 100px; }
         
-        body { 
-            background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; 
-            text-align: center; margin: 0; overflow: hidden; 
-        }
+        /* NO ASSET NEEDED - CSS GENESIS SYMBOLS */
+        .card-container { margin: 20px auto; width: 320px; height: 320px; position: relative; background: radial-gradient(circle, #1a3c1a, #051a0c); border-radius: 15px; border: 5px solid #333; box-shadow: 0 0 40px rgba(0,0,0,0.8); overflow: hidden; }
+        .prize-grid { display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); width: 100%; height: 100%; }
+        .prize-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.05); }
+        .sym-icon { font-size: 3rem; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); }
+        .sym-mult { font-size: 0.7rem; color: var(--gold); margin-top: 5px; opacity: 0.8; }
 
-        .header { 
-            padding: 15px; background: #000; border-bottom: 3px solid var(--gold); 
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .bal-display { 
-            background: linear-gradient(to right, var(--green), #004d26); 
-            padding: 8px 15px; border-radius: 20px; border: 1px solid var(--gold); font-weight: bold; 
-        }
+        canvas { position: absolute; top: 0; left: 0; cursor: pointer; z-index: 5; }
+        #msg { height: 35px; color: var(--gold); font-weight: bold; margin: 15px 0; text-transform: uppercase; font-size: 1.1rem; text-shadow: 0 0 10px rgba(255,209,0,0.4); }
 
-        /* --- SCRATCH CARD --- */
-        .card-container {
-            margin: 20px auto; width: 320px; position: relative;
-            background: #1a1a1a; padding: 10px; border-radius: 20px;
-            border: 4px solid #333; box-shadow: 0 0 30px rgba(0,0,0,0.5);
-        }
-        
-        .win-glow { animation: win-pulse 0.5s infinite alternate; }
-        @keyframes win-pulse { 
-            from { border-color: var(--gold); box-shadow: 0 0 10px var(--gold); } 
-            to { border-color: white; box-shadow: 0 0 30px var(--gold); } 
-        }
-
-        .prize-grid { 
-            display: grid; grid-template-columns: repeat(2, 1fr); 
-            grid-template-rows: repeat(2, 1fr); gap: 5px; 
-            width: 300px; height: 300px; background: #000;
-        }
-
-        .prize-cell { 
-            background-image: url('asset/asset.nine.jpg');
-            background-size: 300% 300%; /* Perfect 3x3 Sprite Mapping */
-            background-repeat: no-repeat;
-            background-color: #111;
-            border-radius: 10px;
-        }
-
-        canvas { 
-            position: absolute; top: 10px; left: 10px; 
-            cursor: crosshair; touch-action: none; border-radius: 10px;
-        }
-
-        /* --- CONTROLS --- */
-        #msg { height: 30px; color: var(--gold); font-weight: bold; margin: 15px 0; text-transform: uppercase; letter-spacing: 1px; }
-
-        .bet-bar {
-            display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px;
-        }
-        .step-btn {
-            width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--gold);
-            background: #222; color: var(--gold); font-size: 1.5rem; font-weight: bold;
-        }
-        .step-btn:active { background: var(--gold); color: black; }
-        
-        .bet-info { background: #000; padding: 5px 15px; border-radius: 10px; border: 1px solid #444; }
+        .controls { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.9); padding: 20px 0; border-top: 3px solid var(--gold); }
+        .bet-bar { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 15px; }
+        .step-btn { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--gold); background: #222; color: var(--gold); font-size: 1.5rem; font-weight: bold; cursor: pointer; }
+        .bet-info { background: #000; padding: 5px 25px; border-radius: 10px; border: 1px solid #444; }
         .bet-info small { display: block; font-size: 0.6rem; color: #888; }
-        .bet-info b { font-size: 1.2rem; color: var(--gold); }
-
-        .btn-buy { 
-            width: 85%; padding: 18px; background: linear-gradient(var(--green), #004d26); 
-            color: white; border: none; border-radius: 50px; font-weight: bold; font-size: 1.4rem; 
-            cursor: pointer; box-shadow: 0 6px 0 #002e17;
-        }
-        .btn-buy:active { transform: translateY(4px); box-shadow: 0 2px 0 #002e17; }
-        .btn-buy:disabled { background: #444; box-shadow: 0 2px 0 #222; opacity: 0.7; }
-
-        .audio-icon { cursor: pointer; font-size: 1.2rem; }
+        .bet-info b { font-size: 1.4rem; color: var(--gold); }
+        .btn-buy { width: 80%; padding: 15px; background: linear-gradient(var(--green), #004d26); color: white; border: none; border-radius: 50px; font-weight: 900; font-size: 1.4rem; cursor: pointer; box-shadow: 0 5px 0 #002e17; }
+        .btn-buy:disabled { filter: grayscale(1); opacity: 0.5; transform: none; box-shadow: none; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div onclick="location.href='index.html'" style="cursor:pointer">🏠</div>
-    <div class="bal-display" id="balDisplay">0.00 ETB</div>
-    <div class="audio-icon" onclick="toggleMusic()">🔊</div>
+    <div onclick="location.href='index.html'" style="cursor:pointer; font-size: 1.5rem;">✕</div>
+    <div class="bal-display" id="balDisplay">0.00</div>
+    <div id="status" style="font-size: 0.7rem; color: var(--neon);">CONNECTED</div>
 </div>
 
-<div class="card-container" id="cardBox">
-    <div class="prize-grid" id="prizeGrid">
-        <div class="prize-cell" id="p0"></div>
-        <div class="prize-cell" id="p1"></div>
-        <div class="prize-cell" id="p2"></div>
-        <div class="prize-cell" id="p3"></div>
+<div class="card-container">
+    <div class="prize-grid" id="grid">
+        <div class="prize-cell"><div class="sym-icon">🦁</div><div class="sym-mult">x50</div></div>
+        <div class="prize-cell"><div class="sym-icon">💎</div><div class="sym-mult">x20</div></div>
+        <div class="prize-cell"><div class="sym-icon">💰</div><div class="sym-mult">x10</div></div>
+        <div class="prize-cell"><div class="sym-icon">🍀</div><div class="sym-mult">x5</div></div>
     </div>
-    <canvas id="scratchCanvas" width="300" height="300"></canvas>
+    <canvas id="cvs" width="320" height="320"></canvas>
 </div>
 
-<div id="msg">GET 3 MATCHING TO WIN!</div>
+<div id="msg">BUY TICKET TO START</div>
 
-<div class="bet-bar">
-    <button class="step-btn" onclick="adjustBet(-2)">-</button>
-    <div class="bet-info">
-        <small>TICKET COST</small>
-        <b id="betDisplay">2</b>
+<div class="controls">
+    <div class="bet-bar">
+        <button class="step-btn" onclick="adj(-5)">-</button>
+        <div class="bet-info"><small>COST</small><b id="bet">5</b></div>
+        <button class="step-btn" onclick="adj(5)">+</button>
     </div>
-    <button class="step-btn" onclick="adjustBet(2)">+</button>
+    <button class="btn-buy" onclick="buy()" id="buyBtn">BUY TICKET</button>
 </div>
-
-<button class="btn-buy" onclick="buyCard()" id="buyBtn">BUY SCRATCH CARD</button>
-
-<audio id="bgMusic" loop>
-    <source src="https://www.free-stock-music.com/music/alexander-nakarada-be-jammin.mp3" type="audio/mpeg">
-</audio>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
-    let user = JSON.parse(localStorage.getItem('rasta_user')) || { balance: 0, phone: "000" };
-    let currentBet = 2;
-    let isScratched = false;
-    let gameActive = false;
-
-    const canvas = document.getElementById('scratchCanvas');
-    const ctx = canvas.getContext('2d');
-
-    // Sprite Mapping from asset.nine.jpg (3x3 grid)
-    const icons = [
-        { name: 'Lion', pos: '0% 50%', mult: 20 },
-        { name: 'Chest', pos: '50% 50%', mult: 10 },
-        { name: 'Crown', pos: '100% 0%', mult: 50 },
-        { name: 'Seven', pos: '0% 0%', mult: 5 }
-    ];
+    const SCRIPT = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
+    let user = JSON.parse(localStorage.getItem('rasta_user'));
+    let bet = 5;
+    let active = false;
+    const cvs = document.getElementById('cvs');
+    const ctx = cvs.getContext('2d');
+    const icons = [{i:'🦁', m:50}, {i:'💎', m:20}, {i:'💰', m:10}, {i:'🍀', m:5}];
 
     function init() {
-        document.getElementById('balDisplay').innerText = parseFloat(user.balance).toFixed(2) + " ETB";
-        resetCanvas();
+        if(!user) return window.location.href='index.html';
+        document.getElementById('balDisplay').innerText = parseFloat(user.balance).toFixed(2);
+        cover();
     }
 
-    function resetCanvas() {
+    function cover() {
         ctx.globalCompositeOperation = 'source-over';
-        // Create a gold scratch texture
-        const grad = ctx.createLinearGradient(0,0,300,300);
-        grad.addColorStop(0, '#C5A000');
-        grad.addColorStop(0.5, '#FFD100');
-        grad.addColorStop(1, '#8A6E00');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, 300, 300);
-        
-        // Add some "texture" dots
-        ctx.fillStyle = "rgba(255,255,255,0.2)";
-        for(let i=0; i<100; i++) {
-            ctx.fillRect(Math.random()*300, Math.random()*300, 2, 2);
-        }
-        ctx.globalCompositeOperation = 'destination-out';
+        let g = ctx.createLinearGradient(0,0,320,320);
+        g.addColorStop(0, '#8A6E00'); g.addColorStop(0.5, '#FFD100'); g.addColorStop(1, '#C5A000');
+        ctx.fillStyle = g; ctx.fillRect(0,0,320,320);
+        ctx.fillStyle = "rgba(0,0,0,0.2)"; ctx.font = "20px Goldman"; ctx.textAlign="center";
+        ctx.fillText("RASTA GOLD", 160, 160);
     }
 
-    function adjustBet(amt) {
-        if(gameActive) return;
-        currentBet = Math.max(2, currentBet + amt);
-        document.getElementById('betDisplay').innerText = currentBet;
-    }
+    function adj(v) { if(!active) { bet = Math.max(5, bet + v); document.getElementById('bet').innerText = bet; } }
 
-    function buyCard() {
-        if (user.balance < currentBet) return alert("Insufficient Balance");
-        
-        user.balance -= currentBet;
-        updateUI();
-        gameActive = true;
-        isScratched = false;
+    function buy() {
+        if(user.balance < bet) return alert("Low Balance");
+        user.balance -= bet;
+        sync();
+        active = true;
         document.getElementById('buyBtn').disabled = true;
-        document.getElementById('cardBox').classList.remove('win-glow');
-        document.getElementById('msg').innerText = "SCRATCH THE GOLD!";
-        resetCanvas();
-
-        // Generate Results
-        const results = [];
-        for(let i=0; i<4; i++) {
-            const idx = Math.floor(Math.random() * icons.length);
-            results.push(idx);
-            document.getElementById('p'+i).style.backgroundPosition = icons[idx].pos;
-        }
-
-        // Win Logic (If any icon appears 3 or more times)
-        let winAmt = 0;
-        const counts = {};
-        results.forEach(idx => counts[idx] = (counts[idx] || 0) + 1);
+        document.getElementById('msg').innerText = "SCRATCH NOW!";
         
-        for(let idx in counts) {
-            if(counts[idx] >= 3) {
-                winAmt = currentBet * icons[idx].mult;
-            }
-        }
+        const results = Array.from({length:4}, () => icons[Math.floor(Math.random()*icons.length)]);
+        const grid = document.getElementById('grid');
+        grid.innerHTML = results.map(r => `<div class="prize-cell"><div class="sym-icon">${r.i}</div><div class="sym-mult">x${r.m}</div></div>`).join('');
+        
+        // Win Logic
+        let win = 0;
+        const counts = {};
+        results.forEach(r => { counts[r.i] = (counts[r.i] || 0) + 1; if(counts[r.i] >= 3) win = bet * r.m; });
+        cvs.win = win;
+    }
 
-        // Detect if scratched enough
-        const checkScratch = setInterval(() => {
-            if(isScratched) {
-                clearInterval(checkScratch);
-                finalizeGame(winAmt);
-            }
+    function scratch(e) {
+        if(!active) return;
+        const r = cvs.getBoundingClientRect();
+        const x = (e.clientX || e.touches[0].clientX) - r.left;
+        const y = (e.clientY || e.touches[0].clientY) - r.top;
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath(); ctx.arc(x, y, 30, 0, Math.PI*2); ctx.fill();
+        
+        // Percent Check
+        const d = ctx.getImageData(0,0,320,320).data;
+        let c = 0; for(let i=3; i<d.length; i+=4) if(d[i]===0) c++;
+        if((c/(320*320)) > 0.45) finish();
+    }
+
+    function finish() {
+        active = false;
+        cvs.style.opacity = "0";
+        setTimeout(() => {
+            if(cvs.win > 0) { user.balance += cvs.win; document.getElementById('msg').innerText = "WIN: "+cvs.win+" ETB"; }
+            else { document.getElementById('msg').innerText = "TRY AGAIN"; }
+            sync();
+            document.getElementById('buyBtn').disabled = false;
+            cover(); cvs.style.opacity = "1";
         }, 500);
     }
 
-    function finalizeGame(win) {
-        if(win > 0) {
-            user.balance += win;
-            document.getElementById('msg').innerText = "WINNER: " + win + " ETB!";
-            document.getElementById('cardBox').classList.add('win-glow');
-        } else {
-            document.getElementById('msg').innerText = "NO LUCK THIS TIME";
-        }
-        updateUI();
-        saveAndSync();
-        gameActive = false;
-        document.getElementById('buyBtn').disabled = false;
-    }
-
-    // Scratching Input
-    function scratch(e) {
-        if(!gameActive) return;
-        const rect = canvas.getBoundingClientRect();
-        const x = (e.clientX || e.touches[0].clientX) - rect.left;
-        const y = (e.clientY || e.touches[0].clientY) - rect.top;
-        
-        ctx.beginPath();
-        ctx.arc(x, y, 25, 0, Math.PI * 2);
-        ctx.fill();
-        isScratched = true; // Simplified: First scratch starts the reveal
-    }
-
-    canvas.addEventListener('mousemove', (e) => { if(e.buttons == 1) scratch(e); });
-    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); scratch(e); });
-
-    function updateUI() {
-        document.getElementById('balDisplay').innerText = parseFloat(user.balance).toFixed(2) + " ETB";
-    }
-
-    function saveAndSync() {
+    function sync() {
+        document.getElementById('balDisplay').innerText = parseFloat(user.balance).toFixed(2);
         localStorage.setItem('rasta_user', JSON.stringify(user));
-        fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&updateBal=${user.balance}`);
+        fetch(`${SCRIPT}?action=login&phone=${user.phone}&updateBal=${user.balance}`);
     }
 
-    function toggleMusic() {
-        const m = document.getElementById('bgMusic');
-        m.paused ? m.play() : m.pause();
-    }
-
+    cvs.addEventListener('mousemove', (e) => { if(e.buttons===1) scratch(e); });
+    cvs.addEventListener('touchmove', (e) => { e.preventDefault(); scratch(e); });
     window.onload = init;
 </script>
 </body>
