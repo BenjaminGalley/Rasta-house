@@ -8,7 +8,15 @@
     <style>
         :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; --dark: #050505; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
-        body { background: var(--dark); color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        body { 
+            background: var(--dark); 
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            overflow: hidden; 
+        }
 
         /* Header */
         .keno-header {
@@ -24,9 +32,30 @@
         }
 
         /* Layout */
-        .main-layout { display: flex; flex-direction: column; flex: 1; overflow: hidden; position: relative; }
-        .grid-container { flex: 1; padding: 10px; overflow-y: auto; display: flex; align-items: flex-start; justify-content: center; }
-        .keno-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; width: 100%; max-width: 450px; }
+        .main-layout { 
+            display: flex; 
+            flex-direction: column; 
+            flex: 1; 
+            overflow: hidden; 
+            position: relative; 
+        }
+        
+        .grid-container { 
+            flex: 1; 
+            padding: 10px; 
+            overflow-y: auto; 
+            display: flex; 
+            align-items: flex-start; 
+            justify-content: center; 
+        }
+        
+        .keno-grid { 
+            display: grid; 
+            grid-template-columns: repeat(10, 1fr); 
+            gap: 4px; 
+            width: 100%; 
+            max-width: 450px; 
+        }
         
         .num { 
             background: #1a1a1a; border: 1px solid #333; aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
@@ -37,7 +66,14 @@
         .num.match { background: var(--rasta-green) !important; color: white !important; box-shadow: 0 0 20px var(--rasta-green); border: 2px solid white; }
 
         /* Ticket Tray */
-        .info-tray { background: #111; border-top: 1px solid #333; height: 130px; display: flex; flex-direction: column; }
+        .info-tray { 
+            background: #111; 
+            border-top: 1px solid #333; 
+            min-height: 100px; 
+            max-height: 120px;
+            display: flex; 
+            flex-direction: column; 
+        }
         .ticket-scroll-container { display: flex; overflow-x: auto; gap: 10px; padding: 10px; flex: 1; }
         .ticket-card {
             min-width: 140px; background: #000; border: 1px dashed var(--rasta-gold);
@@ -45,16 +81,22 @@
         }
         .ticket-card.winner { border-color: var(--rasta-green); background: rgba(0, 133, 66, 0.3); border-style: solid; }
 
-        /* Controls */
-        .controls { background: #000; padding: 12px 15px; border-top: 2px solid var(--rasta-gold); z-index: 20; }
+        /* Controls - Fixed to Bottom */
+        .controls { 
+            background: #000; 
+            padding: 12px 15px; 
+            border-top: 2px solid var(--rasta-gold); 
+            z-index: 20; 
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+        }
         .stake-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .stake-ctrl { display: flex; align-items: center; gap: 8px; }
-        .btn-step { background: #222; color: var(--rasta-gold); border: 1px solid var(--rasta-gold); width: 40px; height: 40px; border-radius: 8px; font-size: 1.5rem; font-weight: bold; }
+        .btn-step { background: #222; color: var(--rasta-gold); border: 1px solid var(--rasta-gold); width: 45px; height: 45px; border-radius: 8px; font-size: 1.5rem; font-weight: bold; }
         
         .play-btn { 
-            width: 100%; padding: 15px; background: var(--rasta-green); color: white; 
-            border: none; border-radius: 10px; font-weight: 900; font-size: 1.2rem; cursor: pointer;
-            box-shadow: 0 4px 0 #005a2d;
+            width: 100%; padding: 18px; background: var(--rasta-green); color: white; 
+            border: none; border-radius: 10px; font-weight: 900; font-size: 1.3rem; cursor: pointer;
+            box-shadow: 0 4px 0 #005a2d; text-transform: uppercase;
         }
         .play-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #005a2d; }
         .play-btn:disabled { background: #333; color: #666; box-shadow: none; cursor: not-allowed; }
@@ -62,7 +104,7 @@
         /* Win Overlay */
         #win-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); display: none; flex-direction: column;
+            background: rgba(0,0,0,0.9); display: none; flex-direction: column;
             align-items: center; justify-content: center; z-index: 1000;
         }
 
@@ -73,7 +115,7 @@
 
 <div id="win-overlay">
     <h1 id="win-status" style="font-size: 3rem; color: var(--rasta-gold); text-align: center;"></h1>
-    <p style="color: white; margin-top: 15px;">NEXT ROUND STARTING...</p>
+    <p style="color: white; margin-top: 15px; letter-spacing: 2px;">NEXT ROUND STARTING...</p>
 </div>
 
 <audio id="bg-music" loop><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg"></audio>
@@ -88,11 +130,13 @@
 </div>
 
 <div class="main-layout">
-    <div class="grid-container"><div class="keno-grid" id="kenoGrid"></div></div>
+    <div class="grid-container">
+        <div class="keno-grid" id="kenoGrid"></div>
+    </div>
     
     <div class="info-tray">
         <div class="ticket-scroll-container" id="ticketScroll">
-            <div id="no-tickets" style="color:#444; width:100%; text-align:center; padding-top:20px;">No active bets for this round.</div>
+            <div id="no-tickets" style="color:#444; width:100%; text-align:center; padding-top:20px;">No active tickets.</div>
         </div>
         <div style="padding: 5px 15px; font-size: 0.75rem; color: var(--rasta-gold); background: #000; display: flex; justify-content: space-between; border-top: 1px solid #222;">
             <span>POTENTIAL WIN: <span id="pot-win" style="color:white; font-weight:bold;">0.00</span> ETB</span>
@@ -103,11 +147,11 @@
 
 <div class="controls">
     <div class="stake-row">
-        <span style="font-weight: 900; font-size: 0.8rem; color: #888;">STAKE AMOUNT</span>
+        <span style="font-weight: 900; font-size: 0.8rem; color: #888;">STAKE AMOUNT (MIN 2)</span>
         <div class="stake-ctrl">
-            <button class="btn-step" onclick="adjustStake(-5)">-</button>
-            <input type="number" id="betAmount" value="10" readonly style="width:70px; height:40px; background:#111; color:var(--rasta-gold); border:1px solid var(--rasta-gold); border-radius:8px; text-align:center; font-size:1.2rem; font-weight: 900;">
-            <button class="btn-step" onclick="adjustStake(5)">+</button>
+            <button class="btn-step" onclick="adjustStake(-2)">-</button>
+            <input type="number" id="betAmount" value="2" readonly style="width:80px; height:45px; background:#111; color:var(--rasta-gold); border:1px solid var(--rasta-gold); border-radius:8px; text-align:center; font-size:1.4rem; font-weight: 900;">
+            <button class="btn-step" onclick="adjustStake(2)">+</button>
         </div>
     </div>
     <button class="play-btn" id="playBtn" onclick="placeBet()">PLACE BET</button>
@@ -122,6 +166,7 @@
     let isMuted = true;
     let isDrawing = false;
 
+    // Payout logic
     const payoutTable = { 2: 5, 3: 15, 4: 50, 5: 150, 6: 500, 7: 1500, 8: 4000, 9: 10000, 10: 25000 };
 
     function playSound(id) { if(!isMuted) { const s = document.getElementById(id); s.currentTime = 0; s.play().catch(()=>{}); } }
@@ -133,6 +178,7 @@
         else { bg.pause(); document.getElementById('mute-btn').innerText = "🎵 MUSIC: OFF"; }
     }
 
+    // Initialize Grid
     const grid = document.getElementById('kenoGrid');
     for(let i=1; i<=80; i++) {
         const div = document.createElement('div');
@@ -154,7 +200,7 @@
 
     function adjustStake(amt) {
         let current = parseInt(document.getElementById('betAmount').value);
-        let newVal = Math.max(5, current + amt);
+        let newVal = Math.max(2, current + amt); // Minimum 2 Birr
         document.getElementById('betAmount').value = newVal;
         updatePotential();
     }
@@ -166,6 +212,7 @@
         document.getElementById('top-bal').innerText = parseFloat(user.balance).toFixed(2);
     }
 
+    // Game Loop
     setInterval(() => {
         if(isDrawing) return;
         timeRemaining--;
@@ -179,15 +226,17 @@
         if(timeRemaining <= 5) {
             btn.disabled = true;
             btn.innerText = "LOCKING...";
+            btn.style.background = "#555";
         } else {
             btn.disabled = (selected.length < 2);
             btn.innerText = "PLACE BET";
+            btn.style.background = "var(--rasta-green)";
         }
     }, 1000);
 
     function placeBet() {
         const bet = parseFloat(document.getElementById('betAmount').value);
-        if(selected.length < 2) return alert("Select 2-10 numbers!");
+        if(selected.length < 2) return alert("Select at least 2 numbers!");
         if(bet > user.balance) return alert("Insufficient Balance!");
 
         user.balance -= bet; 
@@ -204,12 +253,13 @@
         const card = document.createElement('div');
         card.className = 'ticket-card'; card.id = 't-'+t.id;
         card.innerHTML = `<div style="color:var(--rasta-gold); font-weight:bold;">ID: #${t.id}</div>
-                          <div style="margin:4px 0; font-weight:bold;">${t.nums.join(', ')}</div>
-                          <div style="color:var(--rasta-green)">WIN: ${t.potential.toFixed(2)}</div>`;
+                          <div style="margin:4px 0; font-weight:bold; letter-spacing:1px;">${t.nums.join(', ')}</div>
+                          <div style="color:var(--rasta-green); font-weight:900;">POT: ${t.potential.toFixed(2)}</div>`;
         
         document.getElementById('ticketScroll').appendChild(card);
         document.getElementById('no-tickets').style.display = 'none';
 
+        // Clear selection after betting
         selected = []; 
         document.querySelectorAll('.num').forEach(d => d.classList.remove('selected'));
         updatePotential();
@@ -229,7 +279,7 @@
 
         for(let i=0; i<draw.length; i++) {
             let n = draw[i];
-            await new Promise(r => setTimeout(r, 800)); // Draw Speed set to 0.8s
+            await new Promise(r => setTimeout(r, 600)); // Slightly faster draw speed
             
             const el = divs[n-1];
             el.classList.add('draw-hit');
@@ -249,7 +299,7 @@
         let sessionWin = 0;
         activeTickets.forEach(t => {
             const hits = t.nums.filter(n => draw.includes(n)).length;
-            // Standard win: Match all selected numbers
+            // Standard Keno Win: Must match ALL numbers picked for this version
             if(hits === t.nums.length) { 
                 document.getElementById('t-'+t.id).classList.add('winner');
                 sessionWin += t.potential;
@@ -274,7 +324,7 @@
         
         setTimeout(() => { 
             overlay.style.display = 'none';
-            document.getElementById('ticketScroll').innerHTML = '<div id="no-tickets" style="color:#444; width:100%; text-align:center; padding-top:20px;">No active bets for this round.</div>';
+            document.getElementById('ticketScroll').innerHTML = '<div id="no-tickets" style="color:#444; width:100%; text-align:center; padding-top:20px;">No active tickets.</div>';
             activeTickets = [];
             document.querySelectorAll('.num').forEach(d => d.classList.remove('draw-hit', 'match'));
             isDrawing = false;
