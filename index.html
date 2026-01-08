@@ -24,7 +24,7 @@
             overflow-x: hidden; 
         }
         
-        /* --- SIDE MENU --- */
+        /* --- SIDE MENU STYLES --- */
         .sidebar {
             position: fixed; top: 0; left: -300px; width: 280px; height: 100%;
             background: #111; z-index: 2000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -46,7 +46,7 @@
             background: rgba(0,0,0,0.8); display: none; z-index: 1500; backdrop-filter: blur(4px);
         }
 
-        /* --- LOBBY STYLES --- */
+        /* --- LOBBY HEADER --- */
         header { 
             background: rgba(17, 17, 17, 0.95); padding: 15px 20px; display: flex; justify-content: space-between; 
             align-items: center; border-bottom: 2px solid var(--rasta-gold); position: sticky; top: 0; z-index: 1000;
@@ -60,31 +60,70 @@
             box-shadow: 0 0 15px rgba(0, 133, 66, 0.5); font-size: 0.9rem;
         }
 
-        /* LIVE JACKPOT BANNER */
+        /* --- MAIN HERO BANNER (The House Pic) --- */
         .banner { 
-            height: 200px; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.9)), url('asset/background.fine.jpg');
-            background-size: cover; background-position: center; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border-bottom: 4px solid var(--rasta-green); position: relative;
+            height: 240px; 
+            background: linear-gradient(to bottom, rgba(0,0,0,0.2), #0a0a0a), url('asset/asset.bg.jpg');
+            background-size: cover; 
+            background-position: center top; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: flex-end;
+            padding-bottom: 20px;
+            border-bottom: 4px solid var(--rasta-green); 
+            position: relative;
+            text-align: center;
         }
-        .jackpot-box {
-            background: rgba(0,0,0,0.85); padding: 15px 30px; border-radius: 15px; border: 2px solid var(--rasta-gold);
-            text-align: center; box-shadow: 0 0 20px var(--rasta-red); animation: pulse 2s infinite;
+        
+        .welcome-text-group {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 15px;
+            border: 1px solid var(--rasta-gold);
+            backdrop-filter: blur(5px);
+            margin-bottom: 10px;
+            width: 80%;
         }
-        @keyframes pulse { 0% { box-shadow: 0 0 5px var(--rasta-red); transform: scale(1); } 50% { box-shadow: 0 0 25px var(--rasta-red); transform: scale(1.02); } 100% { box-shadow: 0 0 5px var(--rasta-red); transform: scale(1); } }
 
-        /* WINNER TICKER */
-        .ticker { background: #111; padding: 10px; font-size: 0.8rem; color: var(--rasta-gold); border-bottom: 1px solid #222; overflow: hidden; white-space: nowrap; }
+        .welcome-title {
+            color: var(--rasta-gold);
+            font-size: 1.2rem;
+            font-weight: 900;
+            margin: 0;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+            letter-spacing: 1px;
+        }
+
+        .welcome-motto {
+            color: var(--rasta-green);
+            font-size: 0.8rem;
+            letter-spacing: 3px;
+            margin: 5px 0;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .player-name-display {
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            text-shadow: 0 1px 3px black;
+        }
+
+        /* --- WINNER TICKER --- */
+        .ticker { background: #111; padding: 8px; font-size: 0.75rem; color: var(--rasta-gold); border-bottom: 1px solid #222; overflow: hidden; white-space: nowrap; }
         .ticker-text { display: inline-block; animation: scroll 30s linear infinite; }
         @keyframes scroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
 
-        /* IMPROVED GAME GRID */
+        /* --- GAME GRID --- */
         .game-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; }
         .game-card { 
             background: #1a1a1a; border-radius: 20px; overflow: hidden; 
             border: 1px solid #2a2a2a; position: relative; aspect-ratio: 1/1.2; cursor: pointer;
             transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: var(--card-shadow);
         }
-        .game-card img { width: 100%; height: 78%; object-fit: cover; transition: 0.5s; filter: brightness(0.85); }
+        .game-card img { width: 100%; height: 78%; object-fit: cover; transition: 0.5s; filter: brightness(0.9); }
         .game-card:hover img { transform: scale(1.1); filter: brightness(1.1); }
         .game-card:active { transform: scale(0.94); }
         
@@ -100,7 +139,7 @@
         }
         .game-title-text { font-size: 0.75rem; font-weight: bold; letter-spacing: 1px; }
 
-        /* Special Logo Style for Keno 80 */
+        /* Special Overlays */
         .keno-logo-overlay {
             position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
             background: var(--rasta-red); border: 3px solid var(--rasta-gold);
@@ -109,7 +148,7 @@
             font-weight: 900; box-shadow: 0 0 20px rgba(0,0,0,0.8); z-index: 4;
         }
 
-        /* --- VISITOR GATE --- */
+        /* --- VISITOR GATE (Login Screen) --- */
         #visitor-gate {
             height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center;
             background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('asset/background.fine.jpg');
@@ -124,6 +163,7 @@
         .btn-reg { border: 2px solid var(--rasta-gold); color: var(--rasta-gold); background: rgba(0,0,0,0.6); }
         .btn-gate:active { transform: translateY(4px); box-shadow: none; }
 
+        /* --- BOTTOM NAV --- */
         .bottom-nav { 
             position: fixed; bottom: 0; width: 100%; height: 80px; background: #000; 
             display: flex; justify-content: space-around; align-items: center; border-top: 3px solid var(--rasta-gold);
@@ -175,12 +215,11 @@
     </div>
 
     <div class="banner">
-        <div class="jackpot-box">
-            <div style="color:white; font-size:0.75rem; text-transform:uppercase; letter-spacing:2px;">Grand Rasta Jackpot</div>
-            <div style="color:var(--rasta-gold); font-size:2.2rem; font-weight:bold;" id="jackpotAmt">24,580.00</div>
-            <div style="color:var(--rasta-green); font-size:0.7rem; font-weight:bold;">LIVE ETB</div>
+        <div class="welcome-text-group">
+            <h3 class="welcome-title">WELCOME RASTA HOUSE</h3>
+            <div class="welcome-motto">ONE LOVE • ONE HEART</div>
+            <div id="welcomeUser" class="player-name-display">LOADING PLAYER...</div>
         </div>
-        <p id="welcomeUser" style="color:white; margin:15px 0 0 0; font-size:0.95rem; font-weight:bold; text-shadow: 0 2px 4px #000;"></p>
     </div>
 
     <div class="game-grid">
@@ -212,7 +251,15 @@
             </div>
         </div>
 
-        <div class="game-card" onclick="location.href='rasta-wheel.html'">
+        <div class="game-card" onclick="location.href='fast-keno.html'">
+            <div class="game-tag" style="background:var(--rasta-green);">LIVE</div>
+            <img src="asset/asset.tiles.jpg">
+            <div class="game-footer">
+                <div class="game-title-text">FAST KENO ORIGINAL</div>
+            </div>
+        </div>
+
+        <div class="game-card" onclick="location.href='wheel.html'">
             <div class="game-tag" style="background:var(--rasta-red);">Big Win</div>
             <img src="asset/king.jpg">
             <div class="game-footer">
@@ -220,19 +267,35 @@
             </div>
         </div>
 
-        <div class="game-card" onclick="location.href='multi-hot-5.html'">
-            <div class="game-tag" style="background:var(--rasta-red);">NEW</div>
-            <img src="asset/tree.jpg">
+        <div class="game-card" onclick="location.href='premium-slots.html'">
+            <div class="game-tag" style="background:var(--rasta-red);">HOT</div>
+            <img src="asset/multilogo.jpeg">
             <div class="game-footer">
                 <div class="game-title-text">MULTI HOT 5</div>
             </div>
         </div>
 
         <div class="game-card" onclick="location.href='safari-simba.html'">
-            <div class="game-tag">HOT</div>
-            <img src="asset/lion.king.jpg">
+            <div class="game-tag">WILD</div>
+            <img src="asset/safari.jpeg">
             <div class="game-footer">
                 <div class="game-title-text">SAFARI SIMBA</div>
+            </div>
+        </div>
+
+        <div class="game-card" onclick="location.href='crash.html'">
+            <div class="game-tag" style="background:purple;">X1000</div>
+            <img src="asset/rasta.two.jpg">
+            <div class="game-footer">
+                <div class="game-title-text">RASTA CRASH</div>
+            </div>
+        </div>
+
+        <div class="game-card" onclick="location.href='scratch.html'">
+            <div class="game-tag">INSTANT</div>
+            <img src="asset/asset.three.jpg">
+            <div class="game-footer">
+                <div class="game-title-text">SCRATCH & WIN</div>
             </div>
         </div>
     </div>
@@ -268,6 +331,7 @@
         const phone = user.phone || user.phoneNumber;
 
         try {
+            // Add timestamp to prevent caching
             const res = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}&t=${Date.now()}`);
             const data = await res.json();
             if(data && data.balance !== undefined) {
@@ -275,41 +339,44 @@
                 localStorage.setItem('rasta_user', JSON.stringify(user));
                 document.getElementById('userBal').innerText = user.balance.toFixed(2);
             }
-        } catch(e) { console.warn("Balance sync pending..."); }
-    }
-
-    function updateJackpot() {
-        const jack = document.getElementById('jackpotAmt');
-        let current = parseFloat(jack.innerText.replace(',', ''));
-        current += Math.random() * 0.8;
-        jack.innerText = current.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        } catch(e) { console.warn("Balance sync pending...", e); }
     }
 
     window.onload = () => {
         const userData = localStorage.getItem('rasta_user');
+        
+        // 1. Check Login Status
         if(!userData) { 
             document.getElementById('visitor-gate').style.display = 'flex';
+            document.getElementById('lobby-view').style.display = 'none';
         } else {
+            // 2. Show Lobby
+            document.getElementById('visitor-gate').style.display = 'none';
             document.getElementById('lobby-view').style.display = 'block';
+            
             const user = JSON.parse(userData);
             
+            // 3. Populate Data
             document.getElementById('userBal').innerText = parseFloat(user.balance || 0).toFixed(2);
-            document.getElementById('welcomeUser').innerText = "RESPECT, " + (user.name || "PLAYER").toUpperCase();
+            // Updated Player Name display logic for banner
+            const playerName = (user.name || "RASTA PLAYER").toUpperCase();
+            document.getElementById('welcomeUser').innerText = "RESPECT, " + playerName;
             document.getElementById('sideUserPhone').innerText = "ID: " + (user.phone || user.phoneNumber);
             
+            // 4. Start Syncs
             syncBalance();
-            setInterval(updateJackpot, 2500);
             
-            const names = ["Abebe", "Selam", "Dawit", "Hanna", "Mulugeta", "Aster", "Yared", "Tsion", "Kassa"];
+            // 5. Generate Random Winners for Ticker
+            const names = ["Abebe", "Selam", "Dawit", "Hanna", "Mulugeta", "Aster", "Yared", "Tsion", "Kassa", "Elias"];
             const games = ["Trip Revelation", "Fast Keno 80", "Safari Simba", "Multi Hot", "Rasta Wheel"];
             let tickerText = "";
-            for(let i=0; i<12; i++) {
+            for(let i=0; i<15; i++) {
                 const name = names[Math.floor(Math.random()*names.length)];
                 const game = games[Math.floor(Math.random()*games.length)];
                 const win = (Math.random()*2500 + 150).toFixed(0);
                 tickerText += ` • ${name} won ${win} ETB on ${game}! `;
             }
-            document.getElementById('winnerTicker').innerText = tickerText + tickerText;
+            document.getElementById('winnerTicker').innerText = tickerText + tickerText; // Duplicate for smooth scroll
         }
     };
 </script>
