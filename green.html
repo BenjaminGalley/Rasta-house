@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>THE GREEN | PRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Goldman&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --gold: #FFD700; 
+            --bright-green: #2ebd47;
+            --dark-bg: #011a06;
+            --neon-win: #00ff41;
+        }
+
+        body {
+            margin: 0; background: var(--dark-bg); color: white;
+            font-family: 'Montserrat', sans-serif;
+            display: flex; flex-direction: column; align-items: center; 
+            height: 100vh; overflow: hidden;
+            background: radial-gradient(circle, #0a4f15, #011a06);
+        }
+
+        /* --- TOP NAV --- */
+        .top-bar {
+            width: 100%; padding: 10px 20px; display: flex; justify-content: space-between;
+            align-items: center; background: rgba(0,0,0,0.8); border-bottom: 2px solid var(--gold);
+            box-sizing: border-box; z-index: 10;
+        }
+
+        .logo { font-family: 'Goldman'; color: var(--gold); font-size: 1.2rem; letter-spacing: 2px; }
+
+        /* --- GAME TABLE --- */
+        .stage {
+            flex: 1; display: flex; align-items: center; justify-content: center; width: 100%;
+        }
+
+        .slot-machine {
+            width: 350px; height: 320px;
+            background: url("data:image/svg+xml,%3Csvg width='1000' height='900' viewBox='0 0 1000 900' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3CradialGradient id='f' cx='50%25' cy='50%25' r='70%25'%3E%3Cstop offset='0%25' style='stop-color:%230f5e28' /%3E%3Cstop offset='100%25' style='stop-color:%23022b0a' /%3E%3C/radialGradient%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23bf953f' /%3E%3Cstop offset='50%25' style='stop-color:%23b38728' /%3E%3Cstop offset='100%25' style='stop-color:%23aa771c' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1000' height='900' fill='url(%23f)' /%3E%3Crect x='330' y='20' width='12' height='860' fill='url(%23g)' rx='6' /%3E%3Crect x='658' y='20' width='12' height='860' fill='url(%23g)' rx='6' /%3E%3Crect width='1000' height='900' fill='none' stroke='url(%23g)' stroke-width='30' rx='25' /%3E%3C/svg%3E") no-repeat center;
+            background-size: 100% 100%;
+            display: flex; padding: 25px; box-sizing: border-box; gap: 10px; position: relative;
+        }
+
+        .reel-window { flex: 1; height: 100%; overflow: hidden; position: relative; border-radius: 10px; background: rgba(0,0,0,0.1); }
+        .reel-strip { position: absolute; width: 100%; top: 0; will-change: transform; }
+        
+        .symbol { width: 100%; height: 90px; display: flex; align-items: center; justify-content: center; }
+        .symbol img { width: 75px; height: 75px; object-fit: contain; filter: drop-shadow(0 5px 8px rgba(0,0,0,0.5)); }
+
+        /* --- DASHBOARD CONTROLS --- */
+        .dashboard {
+            width: 100%; background: linear-gradient(to top, #000, #051a08); 
+            border-top: 3px solid var(--gold); padding: 15px 0 35px;
+            display: flex; flex-direction: column; align-items: center; gap: 15px;
+        }
+
+        .live-stats {
+            display: flex; justify-content: space-around; width: 95%; max-width: 450px;
+            background: rgba(255,255,255,0.05); padding: 10px; border-radius: 15px; border: 1px solid #222;
+        }
+
+        .stat-item { text-align: center; }
+        .stat-label { font-size: 0.65rem; color: #888; text-transform: uppercase; display: block; margin-bottom: 4px; }
+        .stat-val { font-size: 1.1rem; font-weight: 900; color: #fff; }
+        .stat-val.gold { color: var(--gold); }
+        .stat-val.neon { color: var(--neon-win); text-shadow: 0 0 10px rgba(0,255,65,0.4); }
+
+        .interaction-row {
+            display: flex; align-items: center; gap: 25px; width: 90%; justify-content: center;
+        }
+
+        .bet-stepper {
+            display: flex; align-items: center; background: #000; border: 2px solid #333; border-radius: 50px; padding: 4px;
+        }
+
+        .btn-round {
+            width: 40px; height: 40px; border-radius: 50%; border: none;
+            background: var(--gold); color: #000; font-size: 1.5rem; font-weight: 900; cursor: pointer;
+        }
+
+        .spin-trigger {
+            width: 110px; height: 110px; border-radius: 50%;
+            background: radial-gradient(circle, #34e05b, #0b4f18);
+            border: 5px solid #fff; color: white; font-weight: 900; font-size: 1.4rem;
+            cursor: pointer; box-shadow: 0 8px 0 #022b0a, 0 0 30px rgba(46,189,71,0.3);
+            transition: all 0.1s; font-family: 'Goldman';
+        }
+
+        .spin-trigger:active:not(:disabled) { transform: translateY(6px); box-shadow: 0 2px 0 #022b0a; }
+        .spin-trigger:disabled { filter: grayscale(1); opacity: 0.5; }
+
+        /* Animations */
+        @keyframes winGlow {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(1.8) drop-shadow(0 0 15px var(--neon-win)); }
+            100% { filter: brightness(1); }
+        }
+        .winner-reel { animation: winGlow 0.5s ease infinite; }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div onclick="location.href='index.html'" style="cursor:pointer; font-size:1.5rem;">🏠</div>
+        <div class="logo">THE GREEN</div>
+        <div id="statusLight" style="width:12px; height:12px; background:var(--bright-green); border-radius:50%; box-shadow: 0 0 10px var(--bright-green);"></div>
+    </div>
+
+    <div class="stage">
+        <div class="slot-machine" id="machineFrame">
+            <div class="reel-window"><div class="reel-strip" id="r0"></div></div>
+            <div class="reel-window"><div class="reel-strip" id="r1"></div></div>
+            <div class="reel-window"><div class="reel-strip" id="r2"></div></div>
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <div class="live-stats">
+            <div class="stat-item">
+                <span class="stat-label">Your Balance</span>
+                <span class="stat-val gold" id="uiBal">0.00</span>
+            </div>
+            <div class="stat-item" style="border-left: 1px solid #333; border-right: 1px solid #333; padding: 0 15px;">
+                <span class="stat-label">Current Bet</span>
+                <span class="stat-val" id="uiBet">2.00</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Last Win</span>
+                <span class="stat-val neon" id="uiWin">0.00</span>
+            </div>
+        </div>
+
+        <div class="interaction-row">
+            <div class="bet-stepper">
+                <button class="btn-round" onclick="adjustBet(-2)">-</button>
+                <div style="width: 60px; text-align: center; font-weight: 900; font-size: 1.2rem;" id="betMid">2</div>
+                <button class="btn-round" onclick="adjustBet(2)">+</button>
+            </div>
+
+            <button class="spin-trigger" id="spinBtn" onclick="executeSpin()">SPIN</button>
+        </div>
+    </div>
+
+<script>
+    const CLOUD_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
+    
+    // Updated Assets
+    const PAYTABLE = [
+        { id: 'wild',  src: 'asset/wwild1.png',   x: 100 }, 
+        { id: 'usd',   src: 'asset/usd.png',     x: 50 },
+        { id: 'bell',  src: 'asset/bely1.png',   x: 30 },
+        { id: 'coi',   src: 'asset/coi.png',     x: 20 },
+        { id: 'gre',   src: 'asset/gre.png',     x: 15 },
+        { id: 'straw', src: 'asset/strawberry.png', x: 10 },
+        { id: 'lem',   src: 'asset/lemlem.png',   x: 5 },
+        { id: 'otang', src: 'asset/otang.png',    x: 2 }
+    ];
+
+    let state = {
+        user: JSON.parse(localStorage.getItem('rasta_user')) || { balance: 500, phone: '000' },
+        bet: 2,
+        spinning: false
+    };
+
+    function init() {
+        refreshUI();
+        // Pre-build reels
+        for(let i=0; i<3; i++) {
+            const strip = document.getElementById(`r${i}`);
+            let content = '';
+            for(let j=0; j<60; j++) {
+                const item = PAYTABLE[Math.floor(Math.random() * PAYTABLE.length)];
+                content += `<div class="symbol"><img src="${item.src}"></div>`;
+            }
+            strip.innerHTML = content;
+        }
+    }
+
+    function adjustBet(amt) {
+        if(state.spinning) return;
+        state.bet = Math.max(2, state.bet + amt);
+        refreshUI();
+    }
+
+    async function executeSpin() {
+        if(state.spinning || state.user.balance < state.bet) {
+            if(state.user.balance < state.bet) alert("Insufficient Balance");
+            return;
+        }
+
+        state.spinning = true;
+        state.user.balance -= state.bet;
+        refreshUI();
+        syncCloud(state.user.balance);
+
+        const btn = document.getElementById('spinBtn');
+        const frame = document.getElementById('machineFrame');
+        btn.disabled = true;
+        frame.classList.remove('winner-reel');
+        document.getElementById('uiWin').innerText = "0.00";
+
+        const results = [
+            Math.floor(Math.random() * PAYTABLE.length),
+            Math.floor(Math.random() * PAYTABLE.length),
+            Math.floor(Math.random() * PAYTABLE.length)
+        ];
+
+        const animations = [];
+        for(let i=0; i<3; i++) {
+            const strip = document.getElementById(`r${i}`);
+            const symbolHeight = 90;
+            const stopPos = -((40 + results[i]) * symbolHeight);
+
+            strip.style.transition = 'none';
+            strip.style.transform = 'translateY(0)';
+            strip.offsetHeight; 
+
+            animations.push(new Promise(resolve => {
+                setTimeout(() => {
+                    strip.style.transition = `transform ${2 + i*0.7}s cubic-bezier(0.1, 0, 0.1, 1)`;
+                    strip.style.transform = `translateY(${stopPos}px)`;
+                    setTimeout(resolve, 2000 + i*700);
+                }, 50);
+            }));
+        }
+
+        await Promise.all(animations);
+        finalizeWin(results);
+    }
+
+    function finalizeWin(indices) {
+        const s1 = PAYTABLE[indices[0]], s2 = PAYTABLE[indices[1]], s3 = PAYTABLE[indices[2]];
+        let win = 0;
+
+        // Winning Logic
+        if(s1.id === s2.id && s2.id === s3.id) {
+            win = state.bet * s1.x;
+        } 
+        // Wild Logic (Wild acts as a joker for 2-matches)
+        else if ((s1.id === s2.id && s3.id === 'wild') || 
+                 (s1.id === s3.id && s2.id === 'wild') || 
+                 (s2.id === s3.id && s1.id === 'wild')) {
+            const baseItem = (s1.id !== 'wild') ? s1 : s2;
+            win = state.bet * (baseItem.x / 2);
+        }
+
+        if(win > 0) {
+            state.user.balance += win;
+            document.getElementById('uiWin').innerText = win.toFixed(2);
+            document.getElementById('machineFrame').classList.add('winner-reel');
+            syncCloud(state.user.balance);
+        }
+
+        state.spinning = false;
+        document.getElementById('spinBtn').disabled = false;
+        refreshUI();
+    }
+
+    function refreshUI() {
+        document.getElementById('uiBal').innerText = state.user.balance.toFixed(2);
+        document.getElementById('uiBet').innerText = state.bet.toFixed(2);
+        document.getElementById('betMid').innerText = state.bet;
+        localStorage.setItem('rasta_user', JSON.stringify(state.user));
+    }
+
+    function syncCloud(bal) {
+        fetch(`${CLOUD_URL}?action=updateBalance&phone=${state.user.phone}&balance=${bal}`);
+    }
+
+    window.onload = init;
+</script>
+</body>
+</html>
