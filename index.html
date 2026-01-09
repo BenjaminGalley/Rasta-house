@@ -123,6 +123,14 @@
             border: 1px solid #2a2a2a; position: relative; aspect-ratio: 1/1.2; cursor: pointer;
             transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: var(--card-shadow);
         }
+        
+        /* Make the First Game (Fruit Bounce) large and centered */
+        .game-card.featured {
+            grid-column: span 2;
+            aspect-ratio: 2 / 1.1;
+            border: 2px solid var(--rasta-gold);
+        }
+
         .game-card img { width: 100%; height: 78%; object-fit: cover; transition: 0.5s; filter: brightness(0.9); }
         .game-card:hover img { transform: scale(1.1); filter: brightness(1.1); }
         .game-card:active { transform: scale(0.94); }
@@ -233,6 +241,14 @@
     </div>
 
     <div class="game-grid">
+        <div class="game-card featured" onclick="location.href='fruit.html'">
+            <div class="game-tag" style="background:var(--rasta-gold); color:black; font-size:0.8rem;">NEW FEATURED</div>
+            <img src="asset/asset.tiles.jpg">
+            <div class="game-footer">
+                <div class="game-title-text" style="font-size:0.9rem;">FRUIT BOUNCE</div>
+            </div>
+        </div>
+
         <div class="game-card" onclick="location.href='trip.html'">
             <div class="game-tag" style="background:var(--rasta-gold); color:black;">ULTRA</div>
             <img src="asset/background.fine.jpg">
@@ -269,14 +285,6 @@
             </div>
             <div class="game-footer">
                 <div class="game-title-text">RASTA WHEEL</div>
-            </div>
-        </div>
-
-        <div class="game-card" onclick="location.href='fruit.html'">
-            <div class="game-tag" style="background:orange;">NEW</div>
-            <img src="asset/asset.tiles.jpg">
-            <div class="game-footer">
-                <div class="game-title-text">FRUIT BOUNCE</div>
             </div>
         </div>
 
@@ -383,7 +391,7 @@
             // Initial sync
             syncBalance();
             
-            // Background sync every 10 seconds to ensure system "knows" when returning from games
+            // Background sync every 10 seconds
             setInterval(syncBalance, 10000);
             
             // Winner Ticker Logic
