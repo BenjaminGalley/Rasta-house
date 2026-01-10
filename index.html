@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RASTA HOUSE | LOBBY - WIN BIG</title>
-    <link href="https://fonts.googleapis.com/css2?family=Goldman&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Goldman&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { 
             --rasta-green: #008542; 
@@ -177,7 +177,7 @@
         /* --- VISITOR GATE --- */
         #visitor-gate {
             height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center;
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('asset/background.fine.jpg');
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('asset/asset.bg.jpg');
             background-size: cover; background-position: center; text-align: center;
         }
         .gate-logo { width: 130px; height: 130px; margin-bottom: 25px; border: 4px solid var(--rasta-gold); border-radius: 50%; box-shadow: 0 0 30px var(--rasta-gold); }
@@ -185,8 +185,8 @@
             display: block; width: 250px; padding: 20px; margin: 15px 0; border-radius: 45px; 
             text-decoration: none; font-weight: 900; font-size: 1.3rem; text-align: center; transition: 0.3s;
         }
-        .btn-login { background: var(--rasta-green); color: white; box-shadow: 0 6px 0 #004d26; }
-        .btn-reg { border: 2px solid var(--rasta-gold); color: var(--rasta-gold); background: rgba(0,0,0,0.6); }
+        .btn-login-gate { background: var(--rasta-green); color: white; box-shadow: 0 6px 0 #004d26; }
+        .btn-reg-gate { border: 2px solid var(--rasta-gold); color: var(--rasta-gold); background: rgba(0,0,0,0.6); }
         .btn-gate:active { transform: translateY(4px); box-shadow: none; }
 
         /* --- BOTTOM NAV --- */
@@ -207,6 +207,7 @@
     <div class="sidebar-header">
         <img src="asset/king.jpg" style="width:80px; border-radius:50%; border:3px solid var(--rasta-gold); margin-bottom:10px;">
         <h2 style="color:var(--rasta-gold); margin:0; letter-spacing:1px; font-size: 1.4rem;">RASTA HOUSE</h2>
+        <p id="sideUserID" style="color:var(--rasta-green); font-weight:bold; font-size:0.9rem; margin-top:5px;"></p>
         <p id="sideUserPhone" style="color:#888; font-size:0.85rem; margin:8px 0 0;"></p>
     </div>
     <div class="sidebar-menu">
@@ -224,8 +225,8 @@
     <h1 style="color:var(--rasta-gold); font-size: 2.8rem; margin: 0; letter-spacing: 3px;">RASTA HOUSE</h1>
     <p style="color:var(--rasta-green); font-weight:bold; letter-spacing:5px; margin: 5px 0 40px;">ONE LOVE • WIN BIG</p>
     <div class="gate-buttons">
-        <a href="login.html" class="btn-gate btn-login">LOGIN</a>
-        <a href="register.html" class="btn-gate btn-reg">REGISTER</a>
+        <a href="login.html" class="btn-gate btn-login-gate">LOGIN</a>
+        <a href="register.html" class="btn-gate btn-reg-gate">REGISTER</a>
     </div>
 </div>
 
@@ -245,6 +246,7 @@
             <h3 class="welcome-title">WELCOME RASTA HOUSE</h3>
             <div class="welcome-motto">ONE LOVE • ONE HEART</div>
             <div id="welcomeUser" class="player-name-display">LOADING PLAYER...</div>
+            <div id="welcomeID" style="color:var(--rasta-gold); font-size:0.75rem; margin-top:2px;">RH-XXXX</div>
         </div>
     </div>
 
@@ -347,13 +349,13 @@
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ78n_8B2VpNsxJKWagXOTRifs4tRYjfyq8OuQ_vKUe-MUN8iTguZYe4Q2muxAInhJtA/exec";
 
     function toggleMenu() {
         const sidebar = document.getElementById('mainSidebar');
         const overlay = document.getElementById('menuOverlay');
-        sidebar.classList.toggle('active');
-        overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+        const isActive = sidebar.classList.toggle('active');
+        overlay.style.display = isActive ? 'block' : 'none';
     }
 
     function handleLogout() {
@@ -367,28 +369,26 @@
         const userData = localStorage.getItem('rasta_user');
         if(!userData) return;
         const user = JSON.parse(userData);
-        const phone = user.phone || user.phoneNumber;
+        const phone = (user.phone || "").replace(/^0+/, '');
 
         try {
-            // Added cache buster &phone to ensure it's not fetching old data
-            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${phone}&t=${Date.now()}`);
+            const res = await fetch(`${SCRIPT_URL}?action=getBalance&phone=${phone}&t=${Date.now()}`);
             const data = await res.json();
             
             if(data && data.balance !== undefined) {
                 const newBal = parseFloat(data.balance);
                 const oldBal = parseFloat(user.balance || 0);
                 
-                // Trigger visual "Green" update if money increased
-                if (newBal > oldBal) {
+                if (newBal !== oldBal) {
                     const container = document.getElementById('balContainer');
                     container.classList.remove('update-flash');
-                    void container.offsetWidth; // trigger reflow
+                    void container.offsetWidth; 
                     container.classList.add('update-flash');
+                    
+                    user.balance = newBal;
+                    localStorage.setItem('rasta_user', JSON.stringify(user));
+                    document.getElementById('userBal').innerText = newBal.toFixed(2);
                 }
-
-                user.balance = newBal;
-                localStorage.setItem('rasta_user', JSON.stringify(user));
-                document.getElementById('userBal').innerText = user.balance.toFixed(2);
             }
         } catch(e) { console.warn("Syncing..."); }
     }
@@ -400,30 +400,28 @@
             document.getElementById('visitor-gate').style.display = 'flex';
             document.getElementById('lobby-view').style.display = 'none';
         } else {
+            const user = JSON.parse(userData);
             document.getElementById('visitor-gate').style.display = 'none';
             document.getElementById('lobby-view').style.display = 'block';
             
-            const user = JSON.parse(userData);
             document.getElementById('userBal').innerText = parseFloat(user.balance || 0).toFixed(2);
-            const playerName = (user.name || "RASTA PLAYER").toUpperCase();
-            document.getElementById('welcomeUser').innerText = "RESPECT, " + playerName;
-            document.getElementById('sideUserPhone').innerText = "ID: " + (user.phone || user.phoneNumber);
+            document.getElementById('welcomeUser').innerText = "RESPECT, " + (user.name || "PLAYER").toUpperCase();
+            document.getElementById('welcomeID').innerText = user.id || "RH-READY";
+            document.getElementById('sideUserID').innerText = user.id || "RH-ID";
+            document.getElementById('sideUserPhone').innerText = "PH: " + (user.phone || "");
             
-            // Initial sync
             syncBalance();
+            setInterval(syncBalance, 8000);
             
-            // Faster sync (every 7 seconds) to catch manual sheet approvals
-            setInterval(syncBalance, 7000);
-            
-            // Winner Ticker Logic
-            const names = ["Abebe", "Selam", "Dawit", "Hanna", "Mulugeta", "Aster", "Yared", "Tsion", "Kassa", "Elias"];
+            // Winner Ticker Generator
+            const names = ["Abebe", "Selam", "Dawit", "Hanna", "Mulu", "Aster", "Yared", "Tsion", "Kassa", "Elias"];
             const games = ["Trip Revelation", "Fruit Bounce", "Safari Simba", "Multi Hot", "Rasta Wheel"];
             let tickerText = "";
             for(let i=0; i<15; i++) {
-                const name = names[Math.floor(Math.random()*names.length)];
-                const game = games[Math.floor(Math.random()*games.length)];
-                const win = (Math.random()*2500 + 150).toFixed(0);
-                tickerText += ` • ${name} won ${win} ETB on ${game}! `;
+                const n = names[Math.floor(Math.random()*names.length)];
+                const g = games[Math.floor(Math.random()*games.length)];
+                const w = (Math.random()*2500 + 150).toFixed(0);
+                tickerText += ` • ${n} won ${w} ETB on ${g}! `;
             }
             document.getElementById('winnerTicker').innerText = tickerText + tickerText;
         }
