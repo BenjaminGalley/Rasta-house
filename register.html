@@ -79,8 +79,8 @@
     </div>
 
 <script>
-    // THE MASTER SCRIPT URL
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyctgyddXtB4E4GjNlm5dygmh-RI960Fa8qqa4rY7WarCZAZ0wb8VNQXtzulFh7dvAm/exec";
+    // UPDATED MASTER SCRIPT URL
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ78n_8B2VpNsxJKWagXOTRifs4tRYjfyq8OuQ_vKUe-MUN8iTguZYe4Q2muxAInhJtA/exec";
 
     function togglePassword() {
         const passInput = document.getElementById('regPass');
@@ -98,30 +98,32 @@
             return;
         }
 
-        // Clean phone for Google Sheet consistency (removes leading 0)
+        // Clean phone for Google Sheet consistency (strips leading 0)
         const cleanPhone = phoneInput.replace(/^0+/, '');
 
         btn.innerText = "PROCESSING...";
         btn.disabled = true;
 
         try {
-            // STEP 1: Call 'register' action
+            // STEP 1: Submit Registration
             const regUrl = `${SCRIPT_URL}?action=register&phone=${encodeURIComponent(cleanPhone)}&name=${encodeURIComponent(nameInput)}&pass=${encodeURIComponent(passInput)}`;
             
             const response = await fetch(regUrl);
             const result = await response.text();
             
             if (result === "EXISTS") {
-                alert("This phone number is already registered! / ይህ ስልክ ቀድሞ ተመዝግቧል");
+                alert("This phone number is already registered!");
                 btn.innerText = "CREATE ACCOUNT";
                 btn.disabled = false;
             } else if (result === "SUCCESS") {
-                // STEP 2: Registration worked, now fetch the user data to log them in automatically
+                // STEP 2: Automatic Login to fetch User ID and Balance
                 const loginUrl = `${SCRIPT_URL}?action=login&phone=${encodeURIComponent(cleanPhone)}`;
                 const loginRes = await fetch(loginUrl);
                 const userData = await loginRes.json();
                 
+                // Store full profile locally (including the new Unique ID)
                 localStorage.setItem('rasta_user', JSON.stringify(userData));
+                
                 alert("Welcome to Rasta House, " + nameInput + "!");
                 window.location.href = "index.html";
             } else {
@@ -132,7 +134,7 @@
             
         } catch (error) {
             console.error("Register Error:", error);
-            alert("Connection Error. Please try again.");
+            alert("Connection Error. Please check your internet.");
             btn.innerText = "CREATE ACCOUNT";
             btn.disabled = false;
         }
