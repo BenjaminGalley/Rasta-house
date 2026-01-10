@@ -27,7 +27,6 @@
         }
         input:focus { border-color: var(--rasta-gold); outline: none; }
 
-        /* Password Eye Style */
         .eye-icon {
             position: absolute; right: 15px; top: 35px; color: var(--rasta-gold);
             cursor: pointer; font-size: 1.2rem; user-select: none;
@@ -73,8 +72,8 @@
 </div>
 
 <script>
-    // YOUR DEPLOYED MASTER SCRIPT URL
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyctgyddXtB4E4GjNlm5dygmh-RI960Fa8qqa4rY7WarCZAZ0wb8VNQXtzulFh7dvAm/exec";
+    // UPDATED MASTER SCRIPT URL
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ78n_8B2VpNsxJKWagXOTRifs4tRYjfyq8OuQ_vKUe-MUN8iTguZYe4Q2muxAInhJtA/exec";
 
     function togglePass() {
         const p = document.getElementById('loginPass');
@@ -99,32 +98,29 @@
             return;
         }
 
-        // Clean phone for matching (remove leading 0)
+        // Simba Technique: Clean phone for matching (remove leading 0)
         const cleanPhone = phoneInput.replace(/^0+/, '');
 
         btn.disabled = true;
         msg.innerText = "Verifying Credentials...";
 
         try {
-            // Step 1: Fetch the user data by phone
+            // Fetch the user data from Rasta Man Script
             const url = `${SCRIPT_URL}?action=login&phone=${encodeURIComponent(cleanPhone)}&t=${Date.now()}`;
             const response = await fetch(url);
             const userData = await response.json();
 
             if (userData && userData.status === "success") {
-                // IMPORTANT: The script needs to return the password from the sheet to check it here
-                // We access userData.password (ensure your Google Script includes this in the login response)
-                
-                // For now, we allow login if user exists. 
-                // To make it 100% secure, we check the password here:
+                // Check if the provided password matches the one stored in the sheet
                 if (userData.password && userData.password.toString() !== passInput) {
                     alert("Incorrect Password! / የተሳሳተ የይለፍ ቃል");
                     resetBtn(btn, msg);
                     return;
                 }
 
-                // Save user to LocalStorage
+                // SUCCESS: Save user to LocalStorage (Includes Name, Balance, and RH-ID)
                 localStorage.setItem('rasta_user', JSON.stringify(userData));
+                
                 msg.style.color = "#00FF88";
                 msg.innerText = "Welcome back, " + (userData.name || "Player") + "!";
                 
@@ -137,7 +133,7 @@
             }
         } catch (error) {
             console.error(error);
-            alert("Connection Error. Please try again.");
+            alert("Connection Error. Please check your network.");
             resetBtn(btn, msg);
         }
     }
