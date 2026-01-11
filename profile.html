@@ -3,248 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RASTA HOUSE | WALLET & PROFILE</title>
+    <title>RASTA HOUSE | WALLET</title>
+    <link href="https://fonts.googleapis.com/css2?family=Goldman&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --rasta-green: #008542; 
-            --rasta-gold: #FFD100; 
-            --rasta-red: #E71D36; 
-            --dark-surface: #111111;
-        }
+        :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; --dark: #0a0a0a; }
+        body { background: var(--dark); color: white; font-family: 'Goldman', sans-serif; margin: 0; padding-bottom: 80px; }
+        header { background: #111; padding: 15px; border-bottom: 2px solid var(--rasta-gold); display: flex; align-items: center; }
+        .back-btn { background: none; border: none; color: var(--rasta-gold); font-size: 1.5rem; cursor: pointer; margin-right: 15px; }
         
-        body { 
-            background: #000; 
-            color: white; 
-            font-family: 'Segoe UI', Roboto, sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
+        .container { padding: 20px; }
+        .balance-card { 
+            background: linear-gradient(135deg, #1a1a1a, #000); padding: 30px; border-radius: 20px; 
+            border: 1px solid var(--rasta-green); text-align: center; margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-
-        .profile-header {
-            width: 100%;
-            background: var(--dark-surface);
-            padding: 30px 20px;
-            text-align: center;
-            border-bottom: 2px solid var(--rasta-gold);
-            box-sizing: border-box;
-        }
-
-        .user-avatar {
-            width: 80px;
-            height: 80px;
-            background: var(--rasta-gold);
-            border-radius: 50%;
-            margin: 0 auto 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            color: black;
-            font-weight: bold;
-            box-shadow: 0 0 15px rgba(255, 209, 0, 0.3);
-        }
-
-        .balance-card {
-            background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
-            width: 90%;
-            max-width: 400px;
-            margin: -25px auto 20px;
-            padding: 20px;
-            border-radius: 20px;
-            border: 1px solid #333;
-            text-align: center;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-            cursor: pointer;
-            transition: 0.3s;
-            box-sizing: border-box;
-        }
-        .balance-card:active { transform: scale(0.95); }
-
-        .balance-label { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
-        .balance-amount { font-size: 2.5rem; font-weight: bold; color: var(--rasta-green); margin: 5px 0; }
-        .refresh-status { font-size: 0.7rem; color: #666; margin-top: 5px; }
-
-        .container { width: 90%; max-width: 400px; padding-bottom: 100px; }
+        .balance-amount { font-size: 2.5rem; color: var(--rasta-gold); margin: 10px 0; }
         
-        .action-tabs { 
-            display: flex; 
-            background: var(--dark-surface); 
-            border-radius: 12px; 
-            padding: 5px; 
-            margin-bottom: 20px; 
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .action-btn { 
+            padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; 
+            font-family: 'Goldman'; font-size: 1rem; transition: 0.3s;
         }
-        
-        .tab { 
-            flex: 1; 
-            padding: 12px; 
-            text-align: center; 
-            border-radius: 10px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            color: #666; 
-            transition: 0.3s;
-        }
-        
-        .tab.active { background: var(--rasta-gold); color: black; }
+        .btn-dep { background: var(--rasta-green); color: white; }
+        .btn-wit { background: var(--rasta-red); color: white; }
 
-        .form-group { 
-            background: var(--dark-surface); 
-            padding: 20px; 
-            border-radius: 20px; 
-            border: 1px solid #222; 
-            margin-bottom: 20px; 
-        }
+        .form-box { background: #1a1a1a; padding: 20px; border-radius: 15px; border: 1px solid #333; display: none; }
+        .form-box.active { display: block; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        .instr {
-            font-size: 0.8rem;
-            color: #ccc;
-            line-height: 1.6;
-            background: #000;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            border-left: 4px solid var(--rasta-green);
-        }
-
-        label { display: block; margin-bottom: 8px; font-size: 0.8rem; color: var(--rasta-gold); text-transform: uppercase; }
-        
+        label { display: block; margin-bottom: 8px; color: #aaa; font-size: 0.9rem; }
         input, select { 
-            width: 100%; 
-            padding: 15px; 
-            background: #000; 
-            border: 1px solid #333; 
-            color: white; 
-            border-radius: 12px; 
-            margin-bottom: 15px; 
-            box-sizing: border-box;
-            font-size: 1rem;
+            width: 100%; padding: 12px; background: #000; border: 1px solid #444; 
+            color: white; border-radius: 8px; margin-bottom: 20px; box-sizing: border-box; font-family: sans-serif;
         }
-
-        input:focus { border-color: var(--rasta-green); outline: none; }
-
-        .btn-main { 
-            width: 100%; 
-            padding: 18px; 
-            border: none; 
-            border-radius: 12px; 
-            font-size: 1.1rem; 
-            font-weight: bold; 
-            cursor: pointer; 
-            transition: 0.2s;
+        .submit-btn { 
+            width: 100%; padding: 15px; background: var(--rasta-gold); color: black; 
+            border: none; border-radius: 8px; font-weight: 900; cursor: pointer;
         }
+        .bank-info { background: #222; padding: 15px; border-radius: 10px; border-left: 4px solid var(--rasta-gold); margin-bottom: 20px; font-size: 0.85rem; }
 
-        .btn-deposit { background: var(--rasta-green); color: white; box-shadow: 0 4px 0 #004d26; }
-        .btn-withdraw { background: var(--rasta-red); color: white; box-shadow: 0 4px 0 #8a1121; }
-        .btn-logout { background: transparent; border: 1px solid var(--rasta-red); color: var(--rasta-red); margin-top: 20px; }
-
-        .nav-placeholder { height: 80px; }
+        .bottom-nav { 
+            position: fixed; bottom: 0; width: 100%; height: 70px; background: #000; 
+            display: flex; justify-content: space-around; align-items: center; border-top: 2px solid var(--rasta-gold);
+        }
+        .nav-item { text-decoration: none; color: #666; font-size: 0.7rem; text-align: center; }
+        .nav-item.active { color: var(--rasta-gold); }
     </style>
 </head>
 <body>
 
-    <div class="profile-header">
-        <div class="user-avatar" id="avatarLetter">R</div>
-        <h3 id="displayUserName" style="margin:0;">Rasta Player</h3>
-        <p id="displayUserPhone" style="margin:5px 0 0; font-size:0.8rem; color:#666;"></p>
+<header>
+    <button class="back-btn" onclick="location.href='index.html'">←</button>
+    <div style="font-weight: bold;">MY WALLET</div>
+</header>
+
+<div class="container">
+    <div class="balance-card">
+        <div style="color: var(--rasta-green); font-size: 0.8rem;">CURRENT BALANCE</div>
+        <div class="balance-amount"><span id="displayBal">0.00</span> <small style="font-size: 1rem;">ETB</small></div>
+        <div id="playerID" style="color: #666; font-size: 0.8rem;">ID: RH-LOADING</div>
     </div>
 
-    <div class="balance-card" onclick="syncNow()">
-        <div class="balance-label">Verified Balance / የተረጋገጠ ሂሳብ</div>
-        <div class="balance-amount"><span id="userBal">0.00</span> <small style="font-size:1rem">ETB</small></div>
-        <div class="refresh-status" id="syncStatus">Tap to Refresh / ለማደስ ይንኩ</div>
+    <div class="action-grid">
+        <button class="action-btn btn-dep" onclick="showForm('deposit')">DEPOSIT</button>
+        <button class="action-btn btn-wit" onclick="showForm('withdraw')">WITHDRAW</button>
     </div>
 
-    <div class="container">
-        <div class="action-tabs">
-            <div class="tab active" id="tabDep" onclick="toggleView('deposit')">DEPOSIT / ገቢ</div>
-            <div class="tab" id="tabWit" onclick="toggleView('withdraw')">WITHDRAW / ወጪ</div>
+    <div id="depositForm" class="form-box">
+        <h3 style="color:var(--rasta-green); margin-top:0;">Deposit Funds</h3>
+        <div class="bank-info">
+            <strong>CBE (Commercial Bank):</strong><br>
+            Account: 1000123456789<br>
+            Name: RASTA ENTERTAINMENT
         </div>
-
-        <div id="depView">
-            <div class="form-group">
-                <div class="instr">
-                    <strong>1. Send payment to / ክፍያ ይላኩ:</strong><br>
-                    • Telebirr: <strong>0988733637</strong><br>
-                    • CBE Birr: <strong>0911045825</strong><br>
-                    <strong>2. Submit details below / ከታች መረጃ ይሙሉ::</strong>
-                </div>
-
-                <label>PAYMENT METHOD / የክፍያ ዘዴ</label>
-                <select id="depMethod">
-                    <option value="Telebirr">Telebirr</option>
-                    <option value="CBE Birr">CBE Birr</option>
-                </select>
-
-                <label>AMOUNT (MIN 100 ETB) / መጠን</label>
-                <input type="number" id="depAmount" placeholder="100 - 10,000" min="100">
-
-                <label>SENDER FULL NAME / የላኪው ሙሉ ስም</label>
-                <input type="text" id="senderName" placeholder="Name on receipt">
-
-                <label>SENDER PHONE / የላኪው ስልክ</label>
-                <input type="text" id="senderPhone" placeholder="09...">
-
-                <button class="btn-main btn-deposit" id="btnDep" onclick="handleTransaction('deposit')">SUBMIT DEPOSIT / ገቢ አድርግ</button>
-            </div>
-        </div>
-
-        <div id="witView" style="display:none;">
-            <div class="form-group">
-                <div class="instr">
-                    Instant deduction from balance. Admin will pay you shortly. / ወጪ ወዲያውኑ ከሂሳብዎ ይቀነሳል::
-                </div>
-
-                <label>RECEIVE METHOD / መቀበያ ዘዴ</label>
-                <select id="witMethod">
-                    <option value="Telebirr">Telebirr</option>
-                    <option value="CBE Birr">CBE Birr</option>
-                </select>
-
-                <label>AMOUNT (MIN 100 ETB) / መጠን</label>
-                <input type="number" id="witAmount" placeholder="100 - 10,000" min="100">
-
-                <label>RECEIVER FULL NAME / የተቀባይ ሙሉ ስም</label>
-                <input type="text" id="receiverName" placeholder="Full name for transfer">
-
-                <label>RECEIVER PHONE / የተቀባይ ስልክ</label>
-                <input type="text" id="receiverPhone" placeholder="09...">
-
-                <button class="btn-main btn-withdraw" id="btnWit" onclick="handleTransaction('withdraw')">INSTANT WITHDRAW / ወጪ አድርግ</button>
-            </div>
-        </div>
-
-        <button class="btn-main" style="background:#222; color:var(--rasta-gold); margin-top:10px;" onclick="location.href='index.html'">BACK TO LOBBY / ተመለስ</button>
-        <button class="btn-main btn-logout" onclick="logout()">LOGOUT / ውጣ</button>
-        <div class="nav-placeholder"></div>
+        <label>Transfer Method</label>
+        <select id="depMethod">
+            <option value="CBE">CBE (Bank Transfer)</option>
+            <option value="Telebirr">Telebirr</option>
+        </select>
+        <label>Amount (ETB)</label>
+        <input type="number" id="depAmount" placeholder="Min: 50 ETB">
+        <label>Sender Full Name (On Receipt)</label>
+        <input type="text" id="depSenderName" placeholder="Enter name">
+        <label>Sender Phone Number</label>
+        <input type="tel" id="depPhone" placeholder="09...">
+        <button class="submit-btn" onclick="handleTransaction('Deposit')">SEND REQUEST</button>
     </div>
+
+    <div id="withdrawForm" class="form-box">
+        <h3 style="color:var(--rasta-red); margin-top:0;">Withdraw Funds</h3>
+        <label>Withdrawal Method</label>
+        <select id="witMethod">
+            <option value="CBE">CBE (Bank Transfer)</option>
+            <option value="Telebirr">Telebirr</option>
+        </select>
+        <label>Amount to Withdraw</label>
+        <input type="number" id="witAmount" placeholder="Min: 100 ETB">
+        <label>Your Account Number / Phone</label>
+        <input type="text" id="witAccount" placeholder="Where should we send it?">
+        <button class="submit-btn" style="background:var(--rasta-red); color:white;" onclick="handleTransaction('Withdraw')">REQUEST CASHOUT</button>
+    </div>
+</div>
+
+<nav class="bottom-nav">
+    <a href="index.html" class="nav-item">🏠<br>HOME</a>
+    <a href="profile.html" class="nav-item active">💰<br>WALLET</a>
+    <a href="support.html" class="nav-item">🎧<br>SUPPORT</a>
+</nav>
 
 <script>
-    // UPDATED TO MATCH YOUR CURRENT MASTER DEPLOYMENT
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ78n_8B2VpNsXJKWagXOTRifs4tRYjfyq8OuQ_vKUe-MUN8iTguZYe4Q2muxAlnhJtA/exec";
-    
-    let user = JSON.parse(localStorage.getItem('rasta_user'));
+    let currentUser = JSON.parse(localStorage.getItem('rasta_user'));
 
-    if(!user) { location.href = 'index.html'; }
+    if(!currentUser) { location.href = 'index.html'; }
 
-    function updateUI() {
-        document.getElementById('userBal').innerText = parseFloat(user.balance || 0).toFixed(2);
-        document.getElementById('displayUserName').innerText = user.name || "Rasta Player";
-        const phoneToShow = user.phone || user.phoneNumber || "";
-        document.getElementById('displayUserPhone').innerText = phoneToShow;
-        document.getElementById('avatarLetter').innerText = (user.name || "R").charAt(0).toUpperCase();
+    // This makes the buttons work!
+    function showForm(type) {
+        document.getElementById('depositForm').classList.remove('active');
+        document.getElementById('withdrawForm').classList.remove('active');
+        if(type === 'deposit') document.getElementById('depositForm').classList.add('active');
+        if(type === 'withdraw') document.getElementById('withdrawForm').classList.add('active');
     }
-    updateUI();
 
-    async function syncNow() {
-        const status = document.getElementById('syncStatus');
-        status.innerText = "Syncing... / በማደስ ላይ...";
-        const phoneToSync = user.phone || user.phoneNumber;
-        
+    async function handleTransaction(type) {
+        const amount = type === 'Deposit' ? document.getElementById('depAmount').value : document.getElementById('witAmount').value;
+        const method = type === 'Deposit' ? document.getElementById('depMethod').value : document.getElementById('witMethod').value;
+        const sender = type === 'Deposit' ? document.getElementById('depSenderName').value : 'N/A';
+        const phoneField = type === 'Deposit' ? document.getElementById('depPhone').value : document.getElementById('witAccount').value;
+
+        if(!amount || amount < 50) { alert("Please enter a valid amount."); return; }
+
+        const btn = event.target;
+        btn.innerText = "PROCESSING...";
+        btn.disabled = true;
+
+        const detailString = `Method: ${method} | Sender: ${sender} | Info: ${phoneField}`;
+
         try {
-            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${phoneToSync}&t=${Date.now()}`);
-            const data = await res.json();
-            
-            if(data && data.status === "success") {
+            const res = await fetch(SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({
+                    action: "transaction",
+                    phone: currentUser.phone.replace(/^0+/, ''),
+                    name: currentUser.name,
+                    type: type,
+                    amount: amount,
+                    details: detailString
+                })
+            });
+
+            alert("Request Sent! Please wait for approval.");
+            location.reload();
+        } catch(e) {
+            alert("Error sending request. Check connection.");
+            btn.innerText = "TRY AGAIN";
+            btn.disabled = false;
+        }
+    }
+
+    window.onload = () => {
+        document.getElementById('displayBal').innerText = parseFloat(currentUser.balance || 0).toFixed(2);
+        document.getElementById('playerID').innerText = "ID: " + (currentUser.id || "RH-USER");
+        
+        // Auto-open form if coming from Home buttons
+        const params = new URLSearchParams(window.location.search);
+        if(params.get('view')) showForm(params.get('view'));
+    };
+</script>
+</body>
+</html>
