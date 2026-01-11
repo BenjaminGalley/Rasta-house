@@ -62,7 +62,6 @@
             transition: transform 0.3s ease;
         }
 
-        /* Animation when balance updates */
         @keyframes balancePop {
             0% { transform: scale(1); box-shadow: 0 0 15px var(--rasta-green); }
             50% { transform: scale(1.2); box-shadow: 0 0 30px var(--rasta-gold); }
@@ -253,8 +252,7 @@
     <div class="game-grid">
         <div class="game-card featured" onclick="location.href='fruit.html'">
             <div class="game-tag" style="background:var(--rasta-gold); color:black; font-size:0.8rem;">NEW FEATURED</div>
-            <img src="asset/asset.tiles.jpg">
-            <div class="game-footer">
+            <img src="asset/fruit-master.png"> <div class="game-footer">
                 <div class="game-title-text" style="font-size:0.9rem;">FRUIT BOUNCE</div>
             </div>
         </div>
@@ -272,6 +270,22 @@
             <img src="asset/bob.jpg">
             <div class="game-footer">
                 <div class="game-title-text">RASTA REVELATION</div>
+            </div>
+        </div>
+
+        <div class="game-card" onclick="location.href='zion-slots.html'">
+            <div class="game-tag" style="background:var(--rasta-green);">SLOTS</div>
+            <img src="asset/zion.jpg">
+            <div class="game-footer">
+                <div class="game-title-text">ZION SLOTS</div>
+            </div>
+        </div>
+
+        <div class="game-card" onclick="location.href='lion-judah.html'">
+            <div class="game-tag" style="background:var(--rasta-gold); color:black;">ROYAL</div>
+            <img src="asset/lion.jpg">
+            <div class="game-footer">
+                <div class="game-title-text">LION OF JUDAH</div>
             </div>
         </div>
 
@@ -295,6 +309,22 @@
             </div>
             <div class="game-footer">
                 <div class="game-title-text">RASTA WHEEL</div>
+            </div>
+        </div>
+
+        <div class="game-card" onclick="location.href='african-gold.html'">
+            <div class="game-tag" style="background:var(--rasta-gold); color:black;">GOLD</div>
+            <img src="asset/gold.jpg">
+            <div class="game-footer">
+                <div class="game-title-text">AFRICAN GOLD</div>
+            </div>
+        </div>
+
+        <div class="game-card" onclick="location.href='emperor-reels.html'">
+            <div class="game-tag" style="background:var(--rasta-red);">VIP</div>
+            <img src="asset/emperor.jpg">
+            <div class="game-footer">
+                <div class="game-title-text">EMPEROR'S REELS</div>
             </div>
         </div>
 
@@ -349,7 +379,8 @@
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ78n_8B2VpNsxJKWagXOTRifs4tRYjfyq8OuQ_vKUe-MUN8iTguZYe4Q2muxAInhJtA/exec";
+    // FIXED URL: Using lowercase 'l' for alnhJtA
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ78n_8B2VpNsXJKWagXOTRifs4tRYjfyq8OuQ_vKUe-MUN8iTguZYe4Q2muxAlnhJtA/exec";
 
     function toggleMenu() {
         const sidebar = document.getElementById('mainSidebar');
@@ -379,7 +410,7 @@
                 const newBal = parseFloat(data.balance);
                 const oldBal = parseFloat(user.balance || 0);
                 
-                if (newBal !== oldBal) {
+                if (Math.abs(newBal - oldBal) > 0.01) {
                     const container = document.getElementById('balContainer');
                     container.classList.remove('update-flash');
                     void container.offsetWidth; 
@@ -413,13 +444,12 @@
             syncBalance();
             setInterval(syncBalance, 8000);
             
-            // Winner Ticker Generator
             const names = ["Abebe", "Selam", "Dawit", "Hanna", "Mulu", "Aster", "Yared", "Tsion", "Kassa", "Elias"];
-            const games = ["Trip Revelation", "Fruit Bounce", "Safari Simba", "Multi Hot", "Rasta Wheel"];
+            const gamesList = ["Trip Revelation", "Fruit Bounce", "Safari Simba", "Multi Hot", "Rasta Wheel", "Zion Slots"];
             let tickerText = "";
             for(let i=0; i<15; i++) {
                 const n = names[Math.floor(Math.random()*names.length)];
-                const g = games[Math.floor(Math.random()*games.length)];
+                const g = gamesList[Math.floor(Math.random()*gamesList.length)];
                 const w = (Math.random()*2500 + 150).toFixed(0);
                 tickerText += ` • ${n} won ${w} ETB on ${g}! `;
             }
