@@ -222,7 +222,8 @@
     </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyctgyddXtB4E4GjNlm5dygmh-RI960Fa8qqa4rY7WarCZAZ0wb8VNQXtzulFh7dvAm/exec";
+    // UPDATED TO MATCH YOUR CURRENT MASTER DEPLOYMENT
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ78n_8B2VpNsXJKWagXOTRifs4tRYjfyq8OuQ_vKUe-MUN8iTguZYe4Q2muxAlnhJtA/exec";
     
     let user = JSON.parse(localStorage.getItem('rasta_user'));
 
@@ -247,83 +248,3 @@
             const data = await res.json();
             
             if(data && data.status === "success") {
-                user.balance = data.balance;
-                user.name = data.name || user.name;
-                localStorage.setItem('rasta_user', JSON.stringify(user));
-                updateUI();
-                status.innerText = "Synced! / ተዘምኗል";
-                setTimeout(() => status.innerText = "Tap to Refresh / ለማደስ ይንኩ", 2000);
-            }
-        } catch(e) { 
-            status.innerText = "Connection Weak / መስመር የለም";
-        }
-    }
-    syncNow();
-
-    function toggleView(view) {
-        document.getElementById('depView').style.display = view === 'deposit' ? 'block' : 'none';
-        document.getElementById('witView').style.display = view === 'withdraw' ? 'block' : 'none';
-        document.getElementById('tabDep').className = view === 'deposit' ? 'tab active' : 'tab';
-        document.getElementById('tabWit').className = view === 'withdraw' ? 'tab active' : 'tab';
-    }
-
-    async function handleTransaction(type) {
-        const isDep = type === 'deposit';
-        const amtInput = document.getElementById(isDep ? 'depAmount' : 'witAmount');
-        const amt = parseFloat(amtInput.value);
-        const nameOnForm = document.getElementById(isDep ? 'senderName' : 'receiverName').value.trim();
-        const phoneOnForm = document.getElementById(isDep ? 'senderPhone' : 'receiverPhone').value.trim();
-        const method = document.getElementById(isDep ? 'depMethod' : 'witMethod').value;
-
-        const accountPhone = user.phone || user.phoneNumber;
-
-        if(!accountPhone || accountPhone === "undefined") {
-            alert("Session Error: Please Log out and Log in again.");
-            return;
-        }
-
-        if(isNaN(amt) || amt < 100) return alert("Minimum 100 ETB required.");
-        if(!nameOnForm || phoneOnForm.length < 10) return alert("Please provide full name and phone number.");
-        
-        if(!isDep && amt > user.balance) {
-            return alert("Insufficient Balance! / በቂ ሂሳብ የሎትም");
-        }
-
-        const btn = document.getElementById(isDep ? 'btnDep' : 'btnWit');
-        btn.innerText = "PROCESSING...";
-        btn.disabled = true;
-
-        const details = `Method: ${method} | Name: ${nameOnForm} | Target: ${phoneOnForm}`;
-        
-        const finalUrl = `${SCRIPT_URL}?action=${type}&phone=${accountPhone}&name=${encodeURIComponent(user.name)}&amount=${amt}&details=${encodeURIComponent(details)}`;
-
-        try {
-            const response = await fetch(finalUrl);
-            const result = await response.text();
-            
-            if(result === "SUCCESS") {
-                if(!isDep) {
-                    user.balance = parseFloat(user.balance) - amt;
-                    localStorage.setItem('rasta_user', JSON.stringify(user));
-                }
-                alert("SUCCESS! Request sent to Admin.");
-                location.href = 'index.html';
-            } else {
-                alert("Request Sent!");
-                location.href = 'index.html';
-            }
-        } catch (err) {
-            alert("Sent! Your request is being processed.");
-            location.href = 'index.html';
-        }
-    }
-
-    function logout() {
-        if(confirm("Logout from Rasta House?")) {
-            localStorage.removeItem('rasta_user');
-            location.href = 'index.html';
-        }
-    }
-</script>
-</body>
-</html>
