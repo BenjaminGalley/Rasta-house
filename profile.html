@@ -6,45 +6,139 @@
     <title>RASTA HOUSE | WALLET</title>
     <link href="https://fonts.googleapis.com/css2?family=Goldman&display=swap" rel="stylesheet">
     <style>
-        :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; --dark: #0a0a0a; }
-        body { background: var(--dark); color: white; font-family: 'Goldman', sans-serif; margin: 0; padding-bottom: 80px; }
-        header { background: #111; padding: 15px; border-bottom: 2px solid var(--rasta-gold); display: flex; align-items: center; }
-        .back-btn { background: none; border: none; color: var(--rasta-gold); font-size: 1.5rem; cursor: pointer; margin-right: 15px; }
+        :root { 
+            --rasta-green: #008542; 
+            --rasta-gold: #FFD100; 
+            --rasta-red: #E71D36; 
+            --dark: #0a0a0a; 
+        }
+        body { 
+            background: var(--dark); 
+            color: white; 
+            font-family: 'Goldman', sans-serif; 
+            margin: 0; 
+            padding-bottom: 80px; 
+        }
+        
+        /* HEADER */
+        header { 
+            background: #111; 
+            padding: 15px; 
+            border-bottom: 2px solid var(--rasta-gold); 
+            display: flex; 
+            align-items: center; 
+        }
+        .back-btn { 
+            background: none; 
+            border: none; 
+            color: var(--rasta-gold); 
+            font-size: 1.5rem; 
+            cursor: pointer; 
+            margin-right: 15px; 
+        }
         
         .container { padding: 20px; }
+        
+        /* BALANCE CARD */
         .balance-card { 
-            background: linear-gradient(135deg, #1a1a1a, #000); padding: 30px; border-radius: 20px; 
-            border: 1px solid var(--rasta-green); text-align: center; margin-bottom: 20px;
+            background: linear-gradient(135deg, #1a1a1a, #000); 
+            padding: 30px; 
+            border-radius: 20px; 
+            border: 1px solid var(--rasta-green); 
+            text-align: center; 
+            margin-bottom: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .balance-amount { font-size: 2.5rem; color: var(--rasta-gold); margin: 10px 0; }
+        .balance-amount { 
+            font-size: 2.5rem; 
+            color: var(--rasta-gold); 
+            margin: 10px 0; 
+        }
         
-        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        /* ACTION BUTTONS GRID */
+        .action-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+            margin-bottom: 30px; 
+        }
         .action-btn { 
-            padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; 
-            font-family: 'Goldman'; font-size: 1rem; transition: 0.3s;
+            padding: 15px; 
+            border-radius: 12px; 
+            border: none; 
+            font-weight: bold; 
+            cursor: pointer; 
+            font-family: 'Goldman'; 
+            font-size: 1rem; 
+            transition: 0.3s;
         }
         .btn-dep { background: var(--rasta-green); color: white; }
         .btn-wit { background: var(--rasta-red); color: white; }
+        .action-btn:active { transform: scale(0.95); }
 
-        .form-box { background: #1a1a1a; padding: 20px; border-radius: 15px; border: 1px solid #333; display: none; }
-        .form-box.active { display: block; animation: slideUp 0.3s ease; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        /* FORMS (Hidden by default) */
+        .form-box { 
+            background: #1a1a1a; 
+            padding: 20px; 
+            border-radius: 15px; 
+            border: 1px solid #333; 
+            display: none; /* Crucial: Hidden until button clicked */
+            margin-bottom: 20px;
+        }
+        
+        /* This class makes it visible */
+        .form-box.active { 
+            display: block; 
+            animation: slideUp 0.3s ease; 
+        }
+        
+        @keyframes slideUp { 
+            from { transform: translateY(20px); opacity: 0; } 
+            to { transform: translateY(0); opacity: 1; } 
+        }
 
         label { display: block; margin-bottom: 8px; color: #aaa; font-size: 0.9rem; }
+        
         input, select { 
-            width: 100%; padding: 12px; background: #000; border: 1px solid #444; 
-            color: white; border-radius: 8px; margin-bottom: 20px; box-sizing: border-box; font-family: sans-serif;
+            width: 100%; 
+            padding: 12px; 
+            background: #000; 
+            border: 1px solid #444; 
+            color: white; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            box-sizing: border-box; 
+            font-family: sans-serif;
+            font-size: 1rem;
         }
+        
         .submit-btn { 
-            width: 100%; padding: 15px; background: var(--rasta-gold); color: black; 
-            border: none; border-radius: 8px; font-weight: 900; cursor: pointer;
+            width: 100%; 
+            padding: 15px; 
+            background: var(--rasta-gold); 
+            color: black; 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: 900; 
+            cursor: pointer;
+            font-size: 1rem;
         }
-        .bank-info { background: #222; padding: 15px; border-radius: 10px; border-left: 4px solid var(--rasta-gold); margin-bottom: 20px; font-size: 0.85rem; }
+        
+        .bank-info { 
+            background: #222; 
+            padding: 15px; 
+            border-radius: 10px; 
+            border-left: 4px solid var(--rasta-gold); 
+            margin-bottom: 20px; 
+            font-size: 0.85rem; 
+            line-height: 1.5;
+        }
 
+        /* BOTTOM NAV */
         .bottom-nav { 
             position: fixed; bottom: 0; width: 100%; height: 70px; background: #000; 
             display: flex; justify-content: space-around; align-items: center; border-top: 2px solid var(--rasta-gold);
+            z-index: 1000;
         }
         .nav-item { text-decoration: none; color: #666; font-size: 0.7rem; text-align: center; }
         .nav-item.active { color: var(--rasta-gold); }
@@ -61,7 +155,7 @@
     <div class="balance-card">
         <div style="color: var(--rasta-green); font-size: 0.8rem;">CURRENT BALANCE</div>
         <div class="balance-amount"><span id="displayBal">0.00</span> <small style="font-size: 1rem;">ETB</small></div>
-        <div id="playerID" style="color: #666; font-size: 0.8rem;">ID: RH-LOADING</div>
+        <div id="playerID" style="color: #666; font-size: 0.8rem;">ID: LOADING...</div>
     </div>
 
     <div class="action-grid">
@@ -71,36 +165,46 @@
 
     <div id="depositForm" class="form-box">
         <h3 style="color:var(--rasta-green); margin-top:0;">Deposit Funds</h3>
+        
         <div class="bank-info">
             <strong>CBE (Commercial Bank):</strong><br>
             Account: 1000123456789<br>
             Name: RASTA ENTERTAINMENT
         </div>
+        
         <label>Transfer Method</label>
         <select id="depMethod">
             <option value="CBE">CBE (Bank Transfer)</option>
             <option value="Telebirr">Telebirr</option>
         </select>
+        
         <label>Amount (ETB)</label>
         <input type="number" id="depAmount" placeholder="Min: 50 ETB">
-        <label>Sender Full Name (On Receipt)</label>
-        <input type="text" id="depSenderName" placeholder="Enter name">
+        
+        <label>Sender Full Name</label>
+        <input type="text" id="depSenderName" placeholder="Enter name on receipt">
+        
         <label>Sender Phone Number</label>
         <input type="tel" id="depPhone" placeholder="09...">
+        
         <button class="submit-btn" onclick="handleTransaction('Deposit')">SEND REQUEST</button>
     </div>
 
     <div id="withdrawForm" class="form-box">
         <h3 style="color:var(--rasta-red); margin-top:0;">Withdraw Funds</h3>
+        
         <label>Withdrawal Method</label>
         <select id="witMethod">
             <option value="CBE">CBE (Bank Transfer)</option>
             <option value="Telebirr">Telebirr</option>
         </select>
+        
         <label>Amount to Withdraw</label>
         <input type="number" id="witAmount" placeholder="Min: 100 ETB">
+        
         <label>Your Account Number / Phone</label>
         <input type="text" id="witAccount" placeholder="Where should we send it?">
+        
         <button class="submit-btn" style="background:var(--rasta-red); color:white;" onclick="handleTransaction('Withdraw')">REQUEST CASHOUT</button>
     </div>
 </div>
@@ -112,32 +216,70 @@
 </nav>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ78n_8B2VpNsXJKWagXOTRifs4tRYjfyq8OuQ_vKUe-MUN8iTguZYe4Q2muxAlnhJtA/exec";
+    // CORRECT URL (Lowercase 'l' in AlnhJtA)
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ78n_8B2VpNsxJKWagXOTRifs4tRYjfyq8OuQ_vKUe-MUN8iTguZYe4Q2muxAlnhJtA/exec";
+    
     let currentUser = JSON.parse(localStorage.getItem('rasta_user'));
 
-    if(!currentUser) { location.href = 'index.html'; }
-
-    // This makes the buttons work!
-    function showForm(type) {
-        document.getElementById('depositForm').classList.remove('active');
-        document.getElementById('withdrawForm').classList.remove('active');
-        if(type === 'deposit') document.getElementById('depositForm').classList.add('active');
-        if(type === 'withdraw') document.getElementById('withdrawForm').classList.add('active');
+    // Security check - redirect if not logged in
+    if(!currentUser) { 
+        window.location.href = 'index.html'; 
     }
 
+    // FUNCTION 1: Show the correct form when button is clicked
+    function showForm(type) {
+        // Hide both forms first
+        document.getElementById('depositForm').classList.remove('active');
+        document.getElementById('withdrawForm').classList.remove('active');
+        
+        // Show the requested form
+        if(type === 'deposit') {
+            document.getElementById('depositForm').classList.add('active');
+        }
+        if(type === 'withdraw') {
+            document.getElementById('withdrawForm').classList.add('active');
+        }
+    }
+
+    // FUNCTION 2: Handle the transaction logic
     async function handleTransaction(type) {
+        // Gather data based on type
         const amount = type === 'Deposit' ? document.getElementById('depAmount').value : document.getElementById('witAmount').value;
         const method = type === 'Deposit' ? document.getElementById('depMethod').value : document.getElementById('witMethod').value;
-        const sender = type === 'Deposit' ? document.getElementById('depSenderName').value : 'N/A';
-        const phoneField = type === 'Deposit' ? document.getElementById('depPhone').value : document.getElementById('witAccount').value;
+        
+        // Specific fields for Deposit vs Withdraw
+        let senderName = "N/A";
+        let contactInfo = "";
 
-        if(!amount || amount < 50) { alert("Please enter a valid amount."); return; }
+        if (type === 'Deposit') {
+            senderName = document.getElementById('depSenderName').value;
+            contactInfo = document.getElementById('depPhone').value;
+            
+            if(!senderName || !contactInfo) {
+                alert("Please fill in Sender Name and Phone Number.");
+                return;
+            }
+        } else {
+            // Withdraw
+            contactInfo = document.getElementById('witAccount').value; // Destination account
+            if(!contactInfo) {
+                alert("Please enter your account number.");
+                return;
+            }
+        }
+
+        if(!amount || amount < 50) { 
+            alert("Please enter a valid amount (Min 50)."); 
+            return; 
+        }
 
         const btn = event.target;
+        const originalText = btn.innerText;
         btn.innerText = "PROCESSING...";
         btn.disabled = true;
 
-        const detailString = `Method: ${method} | Sender: ${sender} | Info: ${phoneField}`;
+        // Combine details for the Google Sheet
+        const detailString = `Method: ${method} | Name: ${senderName} | Info: ${contactInfo}`;
 
         try {
             const res = await fetch(SCRIPT_URL, {
@@ -154,22 +296,30 @@
                 })
             });
 
-            alert("Request Sent! Please wait for approval.");
+            alert(type + " Request Sent! Check Telegram for status.");
             location.reload();
+            
         } catch(e) {
-            alert("Error sending request. Check connection.");
-            btn.innerText = "TRY AGAIN";
+            console.error(e);
+            alert("Connection Error. Please try again.");
+            btn.innerText = originalText;
             btn.disabled = false;
         }
     }
 
+    // ON LOAD: Display User Info and Check URL for shortcuts
     window.onload = () => {
-        document.getElementById('displayBal').innerText = parseFloat(currentUser.balance || 0).toFixed(2);
-        document.getElementById('playerID').innerText = "ID: " + (currentUser.id || "RH-USER");
+        if(currentUser) {
+            document.getElementById('displayBal').innerText = parseFloat(currentUser.balance || 0).toFixed(2);
+            document.getElementById('playerID').innerText = "ID: " + (currentUser.id || "RH-USER");
+        }
         
-        // Auto-open form if coming from Home buttons
+        // If URL has ?view=deposit, open deposit form automatically
         const params = new URLSearchParams(window.location.search);
-        if(params.get('view')) showForm(params.get('view'));
+        const view = params.get('view');
+        if(view) {
+            showForm(view);
+        }
     };
 </script>
 </body>
