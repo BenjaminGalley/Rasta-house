@@ -20,11 +20,8 @@
             padding-bottom: 80px; 
         }
         header { 
-            background: #111; 
-            padding: 15px; 
-            border-bottom: 2px solid var(--rasta-gold); 
-            display: flex; 
-            align-items: center; 
+            background: #111; padding: 15px; border-bottom: 2px solid var(--rasta-gold); 
+            display: flex; align-items: center; 
         }
         .back-btn { 
             background: none; border: none; color: var(--rasta-gold); 
@@ -106,7 +103,7 @@
             <option value="Telebirr">Telebirr</option>
         </select>
 
-        <div class="bank-info" id="bankDisplay">
+        <div class="bank-info">
             <span class="amharic">በዚህ ስልክ ያስገቡ (Deposit to):</span>
             <strong id="targetPhone" style="color:var(--rasta-gold); font-size:1.2rem;">0911045825</strong><br>
             <span id="targetName">Name: RASTA HOUSE</span>
@@ -152,20 +149,16 @@
     if(!currentUser) { location.href = 'index.html'; }
 
     function showForm(type) {
-        document.getElementById('depositForm').style.display = 'none';
-        document.getElementById('withdrawForm').style.display = 'none';
-        if(type === 'deposit') document.getElementById('depositForm').style.display = 'block';
-        if(type === 'withdraw') document.getElementById('withdrawForm').style.display = 'block';
+        document.getElementById('depositForm').classList.remove('active');
+        document.getElementById('withdrawForm').classList.remove('active');
+        if(type === 'deposit') document.getElementById('depositForm').classList.add('active');
+        if(type === 'withdraw') document.getElementById('withdrawForm').classList.add('active');
     }
 
     function updateDetails() {
         const method = document.getElementById('depMethod').value;
         const phone = document.getElementById('targetPhone');
-        if(method === 'CBE') {
-            phone.innerText = "0911045825";
-        } else {
-            phone.innerText = "0988733637";
-        }
+        phone.innerText = (method === 'CBE') ? "0911045825" : "0988733637";
     }
 
     async function handleTransaction(type) {
@@ -180,7 +173,8 @@
         btn.innerText = "SENDING...";
         btn.disabled = true;
 
-        const details = `Method: ${method} | Sender: ${sender} | Phone/Acc: ${contact}`;
+        // The "details" field combines Method, Sender Name, and Sender Phone for the sheet
+        const details = `Method: ${method} | Sender: ${sender} | Info: ${contact}`;
 
         try {
             await fetch(SCRIPT_URL, {
@@ -196,10 +190,10 @@
                     details: details
                 })
             });
-            alert("Sent! Please wait for approval.");
+            alert("Sent! Request is now appearing in the approval sheet.");
             location.reload();
         } catch(e) {
-            alert("Success! Request logged.");
+            alert("Request logged.");
             location.reload();
         }
     }
@@ -207,7 +201,6 @@
     window.onload = () => {
         document.getElementById('displayBal').innerText = parseFloat(currentUser.balance || 0).toFixed(2);
         document.getElementById('playerID').innerText = "ID: " + (currentUser.id || "RH-USER");
-        updateDetails();
     };
 </script>
 </body>
