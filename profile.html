@@ -99,10 +99,6 @@
         .bank-label { display: block; font-size: 0.8rem; color: #888; margin-bottom: 5px; }
         .bank-number { font-size: 1.4rem; color: white; letter-spacing: 1px; display: block; margin-bottom: 5px; }
         .bank-name { color: var(--rasta-gold); font-weight: bold; font-size: 0.9rem; }
-        .copy-btn {
-            position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
-            background: #333; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;
-        }
 
         .submit-btn { 
             width: 100%; padding: 18px; border: none; border-radius: 12px; 
@@ -112,9 +108,11 @@
         }
         .btn-green { background: var(--rasta-green); color: white; box-shadow: 0 4px 0 #004d26; }
         .btn-green:active { transform: translateY(4px); box-shadow: none; }
+        .btn-green:disabled { background: #444; box-shadow: none; opacity: 0.7; }
         
         .btn-red { background: var(--rasta-red); color: white; box-shadow: 0 4px 0 #900010; }
         .btn-red:active { transform: translateY(4px); box-shadow: none; }
+        .btn-red:disabled { background: #444; box-shadow: none; opacity: 0.7; }
 
         /* --- BOTTOM NAV --- */
         .bottom-nav { 
@@ -170,11 +168,11 @@
         <div style="border-top: 1px dashed #444; margin: 20px 0;"></div>
 
         <h4 style="color:var(--rasta-gold); margin-bottom: 15px;">SENDER DETAILS / የላኪ መረጃ</h4>
-        <p style="font-size:0.8rem; color:#888; margin-top:-10px; margin-bottom:15px;">Enter the phone number and name used to send the money.</p>
+        <p style="font-size:0.8rem; color:#888; margin-top:-10px; margin-bottom:15px;">Enter details used for the transfer.</p>
 
         <div class="input-group">
             <label>3. Sender Phone / የላኪ ስልክ ቁጥር</label>
-            <input type="tel" id="depSenderPhone" placeholder="09..." value="">
+            <input type="tel" id="depSenderPhone" placeholder="09...">
         </div>
 
         <div class="input-group">
@@ -182,7 +180,7 @@
             <input type="text" id="depSenderName" placeholder="Full Name on Receipt">
         </div>
 
-        <button class="submit-btn btn-green" onclick="handleTransaction('deposit')">CONFIRM DEPOSIT</button>
+        <button class="submit-btn btn-green" id="depBtn" onclick="handleTransaction('deposit')">CONFIRM DEPOSIT</button>
         
         <div class="helper-text">
             Balance updates automatically after admin approval.<br>
@@ -209,7 +207,7 @@
             <input type="text" id="witAccount" placeholder="Phone or Account Number">
         </div>
 
-        <button class="submit-btn btn-red" onclick="handleTransaction('withdraw')">REQUEST CASHOUT</button>
+        <button class="submit-btn btn-red" id="witBtn" onclick="handleTransaction('withdraw')">REQUEST CASHOUT</button>
 
         <div class="helper-text">
             Withdrawals are processed instantly 24/7.<br>
@@ -225,29 +223,40 @@
 </nav>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ78n_8B2VpNsxJKWagXOTRifs4tRYjfyq8OuQ_vKUe-MUN8iTguZYe4Q2muxAlnhJtA/exec";
+    /**
+     * RASTA HOUSE WALLET ENGINE v7.1
+     */
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ78n_8B2VpNsxJKWagXOTRifs4tRYjfyq8OuQ_vKUe-MUN8iTguZYe4Q2muxAInhJtA/exec";
     
     let currentUser = JSON.parse(localStorage.getItem('rasta_user'));
 
-    // If no user, kick back to lobby (index)
     if(!currentUser) { location.href = 'index.html'; }
 
-    // Init page
     window.onload = () => {
-        document.getElementById('displayBal').innerText = parseFloat(currentUser.balance || 0).toFixed(2);
-        document.getElementById('playerID').innerText = "ID: " + (currentUser.id || "RH-USER");
+        // Initial UI Load
+        updateDisplay();
         
-        // Auto-fill sender phone with registered phone if available
+        // Auto-fill sender phone
         if(currentUser.phone) {
             document.getElementById('depSenderPhone').value = currentUser.phone;
+            document.getElementById('witAccount').value = currentUser.phone;
         }
 
-        // Check URL params to see if we should open withdraw directly
+        // Handle URL Tab Routing
         const urlParams = new URLSearchParams(window.location.search);
         if(urlParams.get('view') === 'withdraw') {
             switchTab('withdraw');
         }
+
+        // Live Balance Sync
+        syncBalance();
+        setInterval(syncBalance, 10000);
     };
+
+    function updateDisplay() {
+        document.getElementById('displayBal').innerText = parseFloat(currentUser.balance || 0).toFixed(2);
+        document.getElementById('playerID').innerText = "ID: " + (currentUser.id || "RH-USER");
+    }
 
     function switchTab(tab) {
         document.getElementById('depositSection').classList.remove('active');
@@ -268,22 +277,34 @@
         const method = document.getElementById('depMethod').value;
         const phoneDisplay = document.getElementById('targetPhone');
         
-        // HARDCODED NUMBERS AS REQUESTED
+        // Preservation of your specific phone numbers
         if(method === 'CBE') {
             phoneDisplay.innerText = "0911045825";
-            phoneDisplay.style.color = "#E71D36"; // Red for CBE
+            phoneDisplay.style.color = "#E71D36";
         } else {
             phoneDisplay.innerText = "0988733637";
-            phoneDisplay.style.color = "#FFD100"; // Gold for Telebirr
+            phoneDisplay.style.color = "#FFD100";
         }
     }
 
+    async function syncBalance() {
+        const phone = (currentUser.phone || "").toString().replace(/^0+/, '');
+        try {
+            const res = await fetch(`${SCRIPT_URL}?action=getBalance&phone=${phone}&t=${Date.now()}`);
+            const data = await res.json();
+            if(data && data.balance !== undefined) {
+                currentUser.balance = parseFloat(data.balance);
+                localStorage.setItem('rasta_user', JSON.stringify(currentUser));
+                updateDisplay();
+            }
+        } catch(e) { console.warn("Balance Syncing..."); }
+    }
+
     async function handleTransaction(type) {
-        const btn = event.target;
+        const btn = type === 'deposit' ? document.getElementById('depBtn') : document.getElementById('witBtn');
         const originalText = btn.innerText;
         
-        // 1. GATHER DATA
-        let amount, method, details, senderInfo;
+        let amount, method, details;
 
         if (type === 'deposit') {
             amount = document.getElementById('depAmount').value;
@@ -293,50 +314,46 @@
 
             if(!amount || amount < 50) { alert("Minimum deposit is 50 ETB"); return; }
             if(!sName || !sPhone) { alert("Please enter Sender Name and Phone Number"); return; }
-            
-            // Format details for the Google Sheet
             details = `From: ${sName} (${sPhone}) via ${method}`;
-        
         } else {
-            // Withdraw Logic
             amount = document.getElementById('witAmount').value;
             method = document.getElementById('witMethod').value;
             const acc = document.getElementById('witAccount').value;
 
             if(!amount || amount < 100) { alert("Minimum withdraw is 100 ETB"); return; }
+            if(amount > currentUser.balance) { alert("Insufficient Balance!"); return; }
             if(!acc) { alert("Please enter receiving account"); return; }
-
             details = `To: ${acc} via ${method}`;
         }
 
-        // 2. UI FEEDBACK
+        // UI Lock
         btn.disabled = true;
-        btn.innerText = "PROCESSING...";
+        btn.innerText = "PLEASE WAIT...";
 
-        // 3. SEND TO GOOGLE SHEET
         try {
+            // Robust POST form-data format for Google Scripts
+            const formData = new URLSearchParams();
+            formData.append('action', type);
+            formData.append('phone', (currentUser.phone || "").toString().replace(/^0+/, ''));
+            formData.append('name', currentUser.name || "User");
+            formData.append('amount', amount);
+            formData.append('details', details);
+
             await fetch(SCRIPT_URL, {
                 method: "POST",
-                mode: "no-cors", // Important for Google Script
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: new URLSearchParams({
-                    action: type, // 'deposit' or 'withdraw'
-                    phone: currentUser.phone.replace(/^0+/, ''), // Remove leading zero for consistency
-                    name: currentUser.name || "Unknown",
-                    amount: amount,
-                    details: details, // This goes to the 'Details' column
-                    ref: details // Sending as ref too, just in case script uses old logic
-                })
+                mode: "no-cors",
+                headers: { "Content-Type": "application/x-form-urlencoded" },
+                body: formData
             });
 
+            // Success feedback
             setTimeout(() => {
-                alert(type === 'deposit' ? "Deposit Request Sent! Wait for approval." : "Cashout Request Sent!");
-                location.href = 'index.html'; // Return to lobby
-            }, 1000);
+                alert(type === 'deposit' ? "Success! Request sent to Admin for approval." : "Withdrawal Request Sent Successfully!");
+                location.href = 'index.html';
+            }, 1500);
 
         } catch (error) {
-            console.error(error);
-            alert("Connection error. Please check internet.");
+            alert("Network Busy. Try again in 1 minute.");
             btn.disabled = false;
             btn.innerText = originalText;
         }
