@@ -96,28 +96,17 @@
         }
 
         .welcome-title {
-            color: var(--rasta-gold);
-            font-size: 1.2rem;
-            font-weight: 900;
-            margin: 0;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.8);
-            letter-spacing: 1px;
+            color: var(--rasta-gold); font-size: 1.2rem; font-weight: 900; margin: 0;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.8); letter-spacing: 1px;
         }
 
         .welcome-motto {
-            color: var(--rasta-green);
-            font-size: 0.8rem;
-            letter-spacing: 3px;
-            margin: 5px 0;
-            font-weight: bold;
-            text-transform: uppercase;
+            color: var(--rasta-green); font-size: 0.8rem; letter-spacing: 3px; margin: 5px 0;
+            font-weight: bold; text-transform: uppercase;
         }
 
         .player-name-display {
-            color: white;
-            font-size: 1rem;
-            font-weight: bold;
-            text-shadow: 0 1px 3px black;
+            color: white; font-size: 1rem; font-weight: bold; text-shadow: 0 1px 3px black;
         }
 
         /* --- WINNER TICKER --- */
@@ -379,8 +368,8 @@
 </div>
 
 <script>
-    // FIXED URL: Using lowercase 'l' for alnhJtA
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ78n_8B2VpNsXJKWagXOTRifs4tRYjfyq8OuQ_vKUe-MUN8iTguZYe4Q2muxAlnhJtA/exec";
+    // YOUR MASTER SCRIPT URL
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ78n_8B2VpNsxJKWagXOTRifs4tRYjfyq8OuQ_vKUe-MUN8iTguZYe4Q2muxAlnhJtA/exec";
 
     function toggleMenu() {
         const sidebar = document.getElementById('mainSidebar');
@@ -444,6 +433,7 @@
             syncBalance();
             setInterval(syncBalance, 8000);
             
+            // Random Winners Ticker
             const names = ["Abebe", "Selam", "Dawit", "Hanna", "Mulu", "Aster", "Yared", "Tsion", "Kassa", "Elias"];
             const gamesList = ["Trip Revelation", "Fruit Bounce", "Safari Simba", "Multi Hot", "Rasta Wheel", "Zion Slots"];
             let tickerText = "";
