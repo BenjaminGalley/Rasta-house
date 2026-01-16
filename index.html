@@ -421,7 +421,7 @@
             
             const data = await response.json();
             
-            if(data && data.balance !== undefined) {
+            if(data && data.status === "success" && data.balance !== undefined) {
                 const liveBal = parseFloat(data.balance);
                 const localBal = parseFloat(user.balance || 0);
                 
