@@ -224,7 +224,7 @@
 
 <script>
     /**
-     * RASTA HOUSE WALLET ENGINE v7.1
+     * RASTA HOUSE WALLET ENGINE v7.2
      */
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ78n_8B2VpNsxJKWagXOTRifs4tRYjfyq8OuQ_vKUe-MUN8iTguZYe4Q2muxAInhJtA/exec";
     
@@ -233,22 +233,18 @@
     if(!currentUser) { location.href = 'index.html'; }
 
     window.onload = () => {
-        // Initial UI Load
         updateDisplay();
         
-        // Auto-fill sender phone
         if(currentUser.phone) {
             document.getElementById('depSenderPhone').value = currentUser.phone;
             document.getElementById('witAccount').value = currentUser.phone;
         }
 
-        // Handle URL Tab Routing
         const urlParams = new URLSearchParams(window.location.search);
         if(urlParams.get('view') === 'withdraw') {
             switchTab('withdraw');
         }
 
-        // Live Balance Sync
         syncBalance();
         setInterval(syncBalance, 10000);
     };
@@ -277,7 +273,6 @@
         const method = document.getElementById('depMethod').value;
         const phoneDisplay = document.getElementById('targetPhone');
         
-        // Preservation of your specific phone numbers
         if(method === 'CBE') {
             phoneDisplay.innerText = "0911045825";
             phoneDisplay.style.color = "#E71D36";
@@ -292,12 +287,12 @@
         try {
             const res = await fetch(`${SCRIPT_URL}?action=getBalance&phone=${phone}&t=${Date.now()}`);
             const data = await res.json();
-            if(data && data.balance !== undefined) {
+            if(data && data.status === "success" && data.balance !== undefined) {
                 currentUser.balance = parseFloat(data.balance);
                 localStorage.setItem('rasta_user', JSON.stringify(currentUser));
                 updateDisplay();
             }
-        } catch(e) { console.warn("Balance Syncing..."); }
+        } catch(e) { console.warn("Syncing..."); }
     }
 
     async function handleTransaction(type) {
@@ -326,12 +321,10 @@
             details = `To: ${acc} via ${method}`;
         }
 
-        // UI Lock
         btn.disabled = true;
-        btn.innerText = "PLEASE WAIT...";
+        btn.innerText = "PROCESSING...";
 
         try {
-            // Robust POST form-data format for Google Scripts
             const formData = new URLSearchParams();
             formData.append('action', type);
             formData.append('phone', (currentUser.phone || "").toString().replace(/^0+/, ''));
@@ -346,11 +339,11 @@
                 body: formData
             });
 
-            // Success feedback
+            // Since no-cors hides the response, we assume success if no network error occurred
             setTimeout(() => {
                 alert(type === 'deposit' ? "Success! Request sent to Admin for approval." : "Withdrawal Request Sent Successfully!");
                 location.href = 'index.html';
-            }, 1500);
+            }, 1000);
 
         } catch (error) {
             alert("Network Busy. Try again in 1 minute.");
