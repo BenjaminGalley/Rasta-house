@@ -3,159 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RASTA HOUSE | JOIN THE TRIBE</title>
+    <title>RASTA HOUSE | REGISTER</title>
     <style>
-        :root { --rasta-green: #008542; --rasta-gold: #FFD100; --rasta-red: #E71D36; }
+        :root { --rasta-green: #008542; --rasta-gold: #FFD100; --dark: #0a0a0a; }
         body { 
-            background: #000; color: white; font-family: 'Segoe UI', sans-serif; 
-            margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;
-            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)), url('asset/asset.bg.jpg'); background-size: cover;
+            background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; 
+            margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh;
+            background-image: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('asset/asset.bg.jpg');
+            background-size: cover;
         }
-        
         .reg-card { 
-            width: 85%; max-width: 350px; background: rgba(17, 17, 17, 0.95); 
-            padding: 30px; border-radius: 25px; border: 1px solid var(--rasta-gold); 
-            box-shadow: 0 0 25px rgba(255, 209, 0, 0.15); 
+            width: 90%; max-width: 360px; background: rgba(20, 20, 20, 0.95); 
+            padding: 30px; border-radius: 20px; border: 2px solid var(--rasta-gold); text-align: center;
         }
-        h2 { color: var(--rasta-gold); margin: 0; text-align: center; letter-spacing: 2px; font-size: 1.8rem; }
-        .sub-text { text-align:center; font-size: 0.75rem; color: var(--rasta-green); font-weight: bold; margin-bottom: 20px; letter-spacing: 1px; }
-        
-        .input-group { position: relative; width: 100%; }
-        label { display: block; margin: 15px 0 5px; font-size: 0.75rem; color: #888; text-transform: uppercase; font-weight: bold; }
-        
+        h2 { color: var(--rasta-gold); margin-bottom: 5px; letter-spacing: 2px; }
+        p { color: var(--rasta-green); font-size: 0.8rem; margin-bottom: 25px; font-weight: bold; }
+        .input-group { text-align: left; margin-bottom: 15px; }
+        label { display: block; font-size: 0.7rem; color: #888; margin-bottom: 5px; text-transform: uppercase; }
         input { 
             width: 100%; padding: 14px; background: #000; border: 1px solid #333; 
-            color: white; border-radius: 12px; box-sizing: border-box; font-size: 1rem; transition: 0.3s;
+            color: white; border-radius: 10px; box-sizing: border-box; font-size: 1rem;
         }
-        input:focus { border-color: var(--rasta-gold); outline: none; box-shadow: 0 0 8px rgba(255, 209, 0, 0.2); }
-        
-        .eye-toggle {
-            position: absolute; right: 15px; top: 42px; color: var(--rasta-gold);
-            cursor: pointer; font-size: 1.2rem; user-select: none;
-        }
-
+        input:focus { border-color: var(--rasta-gold); outline: none; }
         .btn-join { 
             width: 100%; padding: 16px; background: var(--rasta-green); color: white; 
             border: none; border-radius: 12px; font-weight: bold; font-size: 1.1rem; 
-            cursor: pointer; margin-top: 25px; box-shadow: 0 4px 0 #005a2d; transition: 0.2s;
+            cursor: pointer; margin-top: 20px; box-shadow: 0 4px 0 #005a2d;
         }
-        .btn-join:active { transform: translateY(2px); box-shadow: none; }
-        .btn-join:disabled { background: #444; box-shadow: none; cursor: not-allowed; }
-        
-        .terms { font-size: 0.65rem; color: #555; margin-top: 15px; line-height: 1.4; }
-        .footer-link { margin-top: 20px; font-size: 0.85rem; color: #888; text-align: center; }
-        .footer-link a { color: var(--rasta-gold); text-decoration: none; font-weight: bold; border-bottom: 1px solid var(--rasta-gold); }
+        .btn-join:disabled { opacity: 0.6; cursor: not-allowed; }
+        .footer-link { margin-top: 20px; font-size: 0.85rem; color: #888; }
+        a { color: var(--rasta-gold); text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="reg-card">
-        <h2>REGISTER</h2>
-        <p class="sub-text">JOIN THE TRIBE / አባል ይሁኑ</p>
+<div class="reg-card">
+    <h2>REGISTER</h2>
+    <p>JOIN THE TRIBE / አባል ይሁኑ</p>
 
-        <div class="input-group">
-            <label>Full Name / ሙሉ ስም</label>
-            <input type="text" id="regName" placeholder="e.g. Abebe Kebede">
-        </div>
-
-        <div class="input-group">
-            <label>Phone Number / ስልክ</label>
-            <input type="tel" id="regPhone" placeholder="09... or 07...">
-        </div>
-
-        <div class="input-group">
-            <label>Create Password / የይለፍ ቃል</label>
-            <input type="password" id="regPass" placeholder="Min. 4 characters">
-            <span class="eye-toggle" onclick="togglePassword()">👁️</span>
-        </div>
-
-        <button class="btn-join" id="submitBtn" onclick="handleRegister()">CREATE ACCOUNT (ክፈት)</button>
-
-        <p class="terms">By registering, you agree to Rasta House rules and confirm you are 18+ years old.</p>
-
-        <div class="footer-link">
-            Already have an account? <a href="login.html">Login Here</a>
-        </div>
+    <div class="input-group">
+        <label>Full Name / ሙሉ ስም</label>
+        <input type="text" id="regName" placeholder="Enter Name">
     </div>
 
+    <div class="input-group">
+        <label>Phone Number / ስልክ</label>
+        <input type="tel" id="regPhone" placeholder="09... or 07...">
+    </div>
+
+    <div class="input-group">
+        <label>Create Password / የይለፍ ቃል</label>
+        <input type="password" id="regPass" placeholder="Min. 4 characters">
+    </div>
+
+    <button class="btn-join" id="regBtn" onclick="handleRegister()">CREATE ACCOUNT (ክፈት)</button>
+
+    <div class="footer-link">
+        Already have an account? <a href="login.html">Login Here</a>
+    </div>
+</div>
+
 <script>
-    // ⚠️ REPLACE THIS WITH YOUR NEW DEPLOYMENT URL ⚠️
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ78n_8B2VpNsxJKWagXOTRifs4tRYjfyq8OuQ_vKUe-MUN8iTguZYe4Q2muxAInhJtA/exec";
 
-    function togglePassword() {
-        const passInput = document.getElementById('regPass');
-        passInput.type = passInput.type === "password" ? "text" : "password";
-    }
-
     async function handleRegister() {
-        const nameInput = document.getElementById('regName').value.trim();
-        const phoneInput = document.getElementById('regPhone').value.trim();
-        const passInput = document.getElementById('regPass').value.trim();
-        const btn = document.getElementById('submitBtn');
+        const name = document.getElementById('regName').value.trim();
+        const phone = document.getElementById('regPhone').value.trim();
+        const pass = document.getElementById('regPass').value.trim();
+        const btn = document.getElementById('regBtn');
 
-        if(!nameInput || !phoneInput || !passInput) {
-            alert("All fields are required!");
-            return;
-        }
+        if(!name || !phone || !pass) return alert("Please fill all fields!");
 
-        if(passInput.length < 4) {
-            alert("Password must be at least 4 characters!");
-            return;
-        }
+        // Clean phone (remove leading 0)
+        const cleanPhone = phone.replace(/^0+/, '');
 
-        // Clean phone (removes spaces and leading 0 for consistency)
-        const cleanPhone = phoneInput.replace(/\D/g, '').replace(/^0+/, '');
-
-        btn.innerText = "PROCESSING...";
         btn.disabled = true;
+        btn.innerText = "PROCESSING...";
 
         try {
-            // STEP 1: Send Registration Request
-            // Note: Changed 'pass' to 'password' to match the backend script perfectly
-            const regUrl = `${SCRIPT_URL}?action=register&phone=${encodeURIComponent(cleanPhone)}&name=${encodeURIComponent(nameInput)}&password=${encodeURIComponent(passInput)}`;
-            
-            const response = await fetch(regUrl);
-            const data = await response.json(); // Changed to JSON handler
-            
-            if (data.status === "error") {
-                // Handle "User already exists" or other errors
-                alert(data.message === "User already exists" ? "This phone is already registered!" : "Error: " + data.message);
-                resetBtn(btn);
-            } 
-            else if (data.status === "success") {
-                // STEP 2: Automatic Login Logic
-                // Since registration was successful, we can log them in immediately
-                const userData = {
-                    name: nameInput,
+            const url = `${SCRIPT_URL}?action=register&name=${encodeURIComponent(name)}&phone=${encodeURIComponent(cleanPhone)}&password=${encodeURIComponent(pass)}`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.status === "success") {
+                alert("Account Created Successfully!");
+                // Store user locally
+                localStorage.setItem('rasta_user', JSON.stringify({
+                    name: name,
                     phone: cleanPhone,
                     balance: 0,
-                    id: "NEW" // ID will update on next fresh login
-                };
-                
-                // Save to local storage
-                localStorage.setItem('rasta_user', JSON.stringify(userData));
-                
-                // Success Feedback
-                alert("Welcome to the Tribe, " + nameInput + "!");
+                    id: data.id
+                }));
                 window.location.href = "index.html";
-            } 
-            else {
-                alert("Unexpected response. Please try again.");
-                resetBtn(btn);
+            } else {
+                alert(data.message || "Registration Failed.");
+                btn.disabled = false;
+                btn.innerText = "CREATE ACCOUNT (ክፈት)";
             }
-            
         } catch (error) {
-            console.error("Register Error:", error);
-            alert("Connection Error. Please check your internet.");
-            resetBtn(btn);
+            alert("Network Error. Check your connection.");
+            btn.disabled = false;
+            btn.innerText = "CREATE ACCOUNT (ክፈት)";
         }
     }
-
-    function resetBtn(btn) {
-        btn.innerText = "CREATE ACCOUNT (ክፈት)";
-        btn.disabled = false;
-    }
 </script>
-
 </body>
 </html>
