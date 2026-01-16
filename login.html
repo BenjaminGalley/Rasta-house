@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RASTA HOUSE | LOGIN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --rasta-green: #008542; --rasta-gold: #FFD100; --dark: #050505; }
         body { 
@@ -72,7 +73,7 @@
 </div>
 
 <script>
-    // UPDATED MASTER SCRIPT URL
+    // ⚠️ IMPORTANT: REPLACE THIS URL WITH YOUR NEW DEPLOYMENT URL ⚠️
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ78n_8B2VpNsxJKWagXOTRifs4tRYjfyq8OuQ_vKUe-MUN8iTguZYe4Q2muxAInhJtA/exec";
 
     function togglePass() {
@@ -98,42 +99,38 @@
             return;
         }
 
-        // Simba Technique: Clean phone for matching (remove leading 0)
+        // Clean phone for matching (remove leading 0)
         const cleanPhone = phoneInput.replace(/^0+/, '');
 
         btn.disabled = true;
         msg.innerText = "Verifying Credentials...";
 
         try {
-            // Fetch the user data from Rasta Man Script
-            const url = `${SCRIPT_URL}?action=login&phone=${encodeURIComponent(cleanPhone)}&t=${Date.now()}`;
+            // Updated Logic: We send the password to the script for secure verification
+            const url = `${SCRIPT_URL}?action=login&phone=${encodeURIComponent(cleanPhone)}&password=${encodeURIComponent(passInput)}&t=${Date.now()}`;
+            
             const response = await fetch(url);
-            const userData = await response.json();
+            const data = await response.json();
 
-            if (userData && userData.status === "success") {
-                // Check if the provided password matches the one stored in the sheet
-                if (userData.password && userData.password.toString() !== passInput) {
-                    alert("Incorrect Password! / የተሳሳተ የይለፍ ቃል");
-                    resetBtn(btn, msg);
-                    return;
-                }
-
-                // SUCCESS: Save user to LocalStorage (Includes Name, Balance, and RH-ID)
-                localStorage.setItem('rasta_user', JSON.stringify(userData));
+            if (data.status === "success") {
+                // SUCCESS: Save user to LocalStorage
+                // The script now returns the safe user object (ID, Name, Balance)
+                localStorage.setItem('rasta_user', JSON.stringify(data.user));
                 
                 msg.style.color = "#00FF88";
-                msg.innerText = "Welcome back, " + (userData.name || "Player") + "!";
+                msg.innerText = "Welcome back, " + (data.user.name || "Player") + "!";
                 
                 setTimeout(() => {
                     window.location.href = 'index.html';
-                }, 1000);
+                }, 1500);
             } else {
-                alert("Account not found! Please register first.");
+                // FAILURE: Show error from script (e.g., "User not found" or "Wrong Password")
+                alert("Login Failed: " + (data.message || "Check your info"));
                 resetBtn(btn, msg);
             }
         } catch (error) {
             console.error(error);
-            alert("Connection Error. Please check your network.");
+            alert("Connection Error. Check internet or Script Deployment.");
             resetBtn(btn, msg);
         }
     }
@@ -141,6 +138,7 @@
     function resetBtn(btn, msg) {
         btn.disabled = false;
         msg.innerText = "";
+        msg.style.color = "var(--rasta-gold)";
     }
 </script>
 
