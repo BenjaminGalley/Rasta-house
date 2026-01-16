@@ -79,7 +79,7 @@
     </div>
 
 <script>
-    // UPDATED MASTER SCRIPT URL
+    // ⚠️ REPLACE THIS WITH YOUR NEW DEPLOYMENT URL ⚠️
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ78n_8B2VpNsxJKWagXOTRifs4tRYjfyq8OuQ_vKUe-MUN8iTguZYe4Q2muxAInhJtA/exec";
 
     function togglePassword() {
@@ -98,46 +98,62 @@
             return;
         }
 
-        // Clean phone for Google Sheet consistency (strips leading 0)
-        const cleanPhone = phoneInput.replace(/^0+/, '');
+        if(passInput.length < 4) {
+            alert("Password must be at least 4 characters!");
+            return;
+        }
+
+        // Clean phone (removes spaces and leading 0 for consistency)
+        const cleanPhone = phoneInput.replace(/\D/g, '').replace(/^0+/, '');
 
         btn.innerText = "PROCESSING...";
         btn.disabled = true;
 
         try {
-            // STEP 1: Submit Registration
-            const regUrl = `${SCRIPT_URL}?action=register&phone=${encodeURIComponent(cleanPhone)}&name=${encodeURIComponent(nameInput)}&pass=${encodeURIComponent(passInput)}`;
+            // STEP 1: Send Registration Request
+            // Note: Changed 'pass' to 'password' to match the backend script perfectly
+            const regUrl = `${SCRIPT_URL}?action=register&phone=${encodeURIComponent(cleanPhone)}&name=${encodeURIComponent(nameInput)}&password=${encodeURIComponent(passInput)}`;
             
             const response = await fetch(regUrl);
-            const result = await response.text();
+            const data = await response.json(); // Changed to JSON handler
             
-            if (result === "EXISTS") {
-                alert("This phone number is already registered!");
-                btn.innerText = "CREATE ACCOUNT";
-                btn.disabled = false;
-            } else if (result === "SUCCESS") {
-                // STEP 2: Automatic Login to fetch User ID and Balance
-                const loginUrl = `${SCRIPT_URL}?action=login&phone=${encodeURIComponent(cleanPhone)}`;
-                const loginRes = await fetch(loginUrl);
-                const userData = await loginRes.json();
+            if (data.status === "error") {
+                // Handle "User already exists" or other errors
+                alert(data.message === "User already exists" ? "This phone is already registered!" : "Error: " + data.message);
+                resetBtn(btn);
+            } 
+            else if (data.status === "success") {
+                // STEP 2: Automatic Login Logic
+                // Since registration was successful, we can log them in immediately
+                const userData = {
+                    name: nameInput,
+                    phone: cleanPhone,
+                    balance: 0,
+                    id: "NEW" // ID will update on next fresh login
+                };
                 
-                // Store full profile locally (including the new Unique ID)
+                // Save to local storage
                 localStorage.setItem('rasta_user', JSON.stringify(userData));
                 
-                alert("Welcome to Rasta House, " + nameInput + "!");
+                // Success Feedback
+                alert("Welcome to the Tribe, " + nameInput + "!");
                 window.location.href = "index.html";
-            } else {
-                alert("Registration Error. Please try again.");
-                btn.innerText = "CREATE ACCOUNT";
-                btn.disabled = false;
+            } 
+            else {
+                alert("Unexpected response. Please try again.");
+                resetBtn(btn);
             }
             
         } catch (error) {
             console.error("Register Error:", error);
             alert("Connection Error. Please check your internet.");
-            btn.innerText = "CREATE ACCOUNT";
-            btn.disabled = false;
+            resetBtn(btn);
         }
+    }
+
+    function resetBtn(btn) {
+        btn.innerText = "CREATE ACCOUNT (ክፈት)";
+        btn.disabled = false;
     }
 </script>
 
