@@ -2,65 +2,85 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RASTA HOUSE | LOGIN</title>
     <style>
-        :root { --rasta-green: #008542; --rasta-gold: #FFD100; --dark: #0a0a0a; }
+        :root { --rasta-green: #008542; --rasta-gold: #FFD100; --dark-bg: #0a0a0a; --card-bg: rgba(20, 20, 20, 0.98); }
+        
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body { 
-            background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; 
+            background: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; 
             margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh;
             background-image: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('asset/asset.bg.jpg');
             background-size: cover;
         }
+
         .login-card { 
-            width: 90%; max-width: 360px; background: rgba(20, 20, 20, 0.95); 
-            padding: 30px; border-radius: 20px; border: 2px solid var(--rasta-gold); text-align: center;
+            width: 90%; max-width: 380px; background: var(--card-bg); 
+            padding: 35px; border-radius: 24px; border: 2px solid var(--rasta-gold); text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.7);
+            animation: slideUp 0.5s ease-out;
         }
-        h2 { color: var(--rasta-gold); margin-bottom: 25px; letter-spacing: 2px; }
-        .input-group { text-align: left; margin-bottom: 15px; }
-        label { display: block; font-size: 0.7rem; color: #888; margin-bottom: 5px; text-transform: uppercase; }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .header-img { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--rasta-green); margin-bottom: 15px; }
+
+        h2 { color: var(--rasta-gold); margin-bottom: 25px; letter-spacing: 2px; font-weight: 800; }
+        
+        .input-group { text-align: left; margin-bottom: 18px; }
+        label { display: block; font-size: 0.7rem; color: #888; margin-bottom: 6px; text-transform: uppercase; font-weight: bold; }
+        
         input { 
-            width: 100%; padding: 14px; background: #000; border: 1px solid #333; 
-            color: white; border-radius: 10px; box-sizing: border-box; font-size: 1rem;
+            width: 100%; padding: 15px; background: #000; border: 1px solid #333; 
+            color: white; border-radius: 12px; font-size: 1rem; transition: 0.3s;
         }
-        input:focus { border-color: var(--rasta-gold); outline: none; }
+
+        input:focus { border-color: var(--rasta-gold); outline: none; background: #080808; }
+
         .btn-login { 
-            width: 100%; padding: 16px; background: var(--rasta-green); color: white; 
-            border: none; border-radius: 12px; font-weight: bold; font-size: 1.1rem; 
-            cursor: pointer; margin-top: 10px; box-shadow: 0 4px 0 #005a2d;
+            width: 100%; padding: 18px; background: var(--rasta-green); color: white; 
+            border: none; border-radius: 14px; font-weight: bold; font-size: 1.1rem; 
+            cursor: pointer; margin-top: 15px; box-shadow: 0 5px 0 #005a2d;
+            transition: 0.2s;
         }
-        .btn-login:disabled { opacity: 0.6; }
-        #msg { margin-top: 15px; color: var(--rasta-gold); font-size: 0.9rem; }
-        .footer-link { margin-top: 25px; font-size: 0.85rem; color: #888; }
+
+        .btn-login:active { transform: translateY(3px); box-shadow: 0 2px 0 #005a2d; }
+        .btn-login:disabled { opacity: 0.5; cursor: wait; }
+
+        #msg { margin-top: 18px; font-weight: 600; font-size: 0.9rem; min-height: 20px; }
+
+        .footer-link { margin-top: 30px; font-size: 0.85rem; color: #777; }
         a { color: var(--rasta-gold); text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="login-card">
-    <img src="asset/asset.ui.jpg" style="width:70px; border-radius:50%; border:2px solid var(--rasta-green); margin-bottom:10px;">
+    <img src="asset/asset.ui.jpg" class="header-img">
     <h2>PLAYER LOGIN</h2>
 
     <div class="input-group">
         <label>Phone Number / ስልክ</label>
-        <input type="tel" id="loginPhone" placeholder="09... or 07...">
+        <input type="tel" id="loginPhone" placeholder="09... or 07..." autocomplete="username">
     </div>
 
     <div class="input-group">
         <label>Password / የይለፍ ቃል</label>
-        <input type="password" id="loginPass" placeholder="••••••••">
+        <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
     </div>
 
     <button class="btn-login" id="loginBtn" onclick="handleLogin()">SECURE LOGIN (ግባ)</button>
     <div id="msg"></div>
 
     <div class="footer-link">
-        New Player? <a href="register.html">Create Account</a>
+        New to Rasta House? <a href="register.html">Create Account</a>
     </div>
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ78n_8B2VpNsxJKWagXOTRifs4tRYjfyq8OuQ_vKUe-MUN8iTguZYe4Q2muxAInhJtA/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzsHVX2FqOFl3xfoGXmnf1-7UazXSdcCSDjNzPdamDvGcDHQRwEYq58TRKQ-4NJBc4aQg/exec";
 
     async function handleLogin() {
         const phone = document.getElementById('loginPhone').value.trim();
@@ -68,14 +88,22 @@
         const btn = document.getElementById('loginBtn');
         const msg = document.getElementById('msg');
 
-        if(!phone || !pass) return alert("Enter Phone and Password!");
+        if(!phone || !pass) {
+            msg.style.color = "#FFD100";
+            msg.innerText = "Please provide both credentials.";
+            return;
+        }
 
         const cleanPhone = phone.replace(/^0+/, '');
         btn.disabled = true;
-        msg.innerText = "Verifying Tribe Member...";
+        btn.innerText = "VERIFYING...";
+        msg.style.color = "#FFD100";
+        msg.innerText = "Accessing Rasta Secure Server...";
 
         try {
-            const url = `${SCRIPT_URL}?action=login&phone=${encodeURIComponent(cleanPhone)}&password=${encodeURIComponent(pass)}&t=${Date.now()}`;
+            // URL matches the p.password logic in script v15.0
+            const url = `${SCRIPT_URL}?action=login&phone=${encodeURIComponent(cleanPhone)}&password=${encodeURIComponent(pass)}&cache=${Date.now()}`;
+            
             const response = await fetch(url);
             const data = await response.json();
 
@@ -83,23 +111,26 @@
                 msg.style.color = "#00FF88";
                 msg.innerText = "Welcome back, " + data.name + "!";
                 
-                // Save complete user data
+                // Save complete and fresh user data
                 localStorage.setItem('rasta_user', JSON.stringify({
                     name: data.name,
                     phone: cleanPhone,
-                    balance: data.balance
+                    balance: data.balance,
+                    id: data.id
                 }));
 
-                setTimeout(() => { window.location.href = "index.html"; }, 1200);
+                setTimeout(() => { window.location.href = "index.html"; }, 1000);
             } else {
-                alert("Login Failed! Check phone or password.");
+                msg.style.color = "#FF4444";
+                msg.innerText = data.message || "Invalid credentials. Try again.";
                 btn.disabled = false;
-                msg.innerText = "";
+                btn.innerText = "SECURE LOGIN (ግባ)";
             }
         } catch (error) {
-            alert("Error connecting to Rasta Server.");
+            msg.style.color = "#FF4444";
+            msg.innerText = "Connection Error. Check your signal.";
             btn.disabled = false;
-            msg.innerText = "";
+            btn.innerText = "SECURE LOGIN (ግባ)";
         }
     }
 </script>
