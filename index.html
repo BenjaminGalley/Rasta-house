@@ -4,189 +4,246 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RASTA HOUSE | LOBBY - WIN BIG</title>
-    <link href="https://fonts.googleapis.com/css2?family=Goldman&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Goldman:wght@400;700&family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root { 
             --rasta-green: #008542; 
             --rasta-gold: #FFD100; 
             --rasta-red: #E71D36; 
             --dark-bg: #0a0a0a; 
+            --darker-bg: #050505;
             --glass: rgba(255, 255, 255, 0.05);
-            --card-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --card-shadow: 0 10px 20px rgba(0,0,0,0.7);
+            --neon-glow: 0 0 15px rgba(255, 209, 0, 0.3);
         }
         
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
         body { 
             background: var(--dark-bg); 
             color: white; 
-            font-family: 'Goldman', 'Segoe UI', Roboto, sans-serif; 
+            font-family: 'Goldman', sans-serif; 
             margin: 0; 
             padding-bottom: 90px; 
             overflow-x: hidden; 
+            user-select: none;
         }
-        
+
         /* --- SIDE MENU STYLES --- */
         .sidebar {
             position: fixed; top: 0; left: -300px; width: 280px; height: 100%;
-            background: #111; z-index: 2000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border-right: 3px solid var(--rasta-gold); box-shadow: 10px 0 30px rgba(0,0,0,0.8);
+            background: linear-gradient(180deg, #111 0%, #000 100%); 
+            z-index: 2000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-right: 3px solid var(--rasta-gold); 
+            box-shadow: 15px 0 40px rgba(0,0,0,0.9);
         }
         .sidebar.active { left: 0; }
-        .sidebar-header { padding: 40px 20px; background: #000; text-align: center; border-bottom: 1px solid #222; }
+        
+        .sidebar-header { 
+            padding: 45px 20px; 
+            background: #000; 
+            text-align: center; 
+            border-bottom: 1px solid #222;
+            position: relative;
+        }
+        .sidebar-header::after {
+            content: ''; position: absolute; bottom: 0; left: 25%; width: 50%; height: 2px;
+            background: linear-gradient(90deg, var(--rasta-green), var(--rasta-gold), var(--rasta-red));
+        }
+
         .sidebar-menu { padding: 15px 0; }
         .menu-item { 
             display: flex; align-items: center; padding: 18px 25px; color: #ccc; text-decoration: none; 
             font-size: 1rem; border-bottom: 1px solid #1a1a1a; transition: 0.3s;
         }
-        .menu-item:active { background: #222; color: var(--rasta-gold); }
-        .menu-icon { margin-right: 15px; font-size: 1.2rem; }
+        .menu-item:active { background: #222; color: var(--rasta-gold); padding-left: 35px; }
+        .menu-icon { margin-right: 15px; font-size: 1.3rem; }
         .logout-btn { color: var(--rasta-red) !important; font-weight: bold; margin-top: 30px; border-top: 1px solid #333; }
         
         .overlay { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.8); display: none; z-index: 1500; backdrop-filter: blur(4px);
+            background: rgba(0,0,0,0.85); display: none; z-index: 1500; backdrop-filter: blur(6px);
+            transition: opacity 0.3s ease;
         }
 
         /* --- LOBBY HEADER --- */
         header { 
-            background: rgba(17, 17, 17, 0.95); padding: 15px 20px; display: flex; justify-content: space-between; 
+            background: rgba(10, 10, 10, 0.9); padding: 15px 20px; display: flex; justify-content: space-between; 
             align-items: center; border-bottom: 2px solid var(--rasta-gold); position: sticky; top: 0; z-index: 1000;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px); box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
         .menu-toggle { background: none; border: none; color: var(--rasta-gold); font-size: 1.8rem; cursor: pointer; padding: 0; }
-        .logo-text { font-weight: 900; color: var(--rasta-gold); font-size: 1.3rem; letter-spacing: 2px; font-style: italic; }
+        .logo-text { font-weight: 900; color: var(--rasta-gold); font-size: 1.3rem; letter-spacing: 2px; font-style: italic; text-shadow: 0 0 10px rgba(255,209,0,0.4); }
         
         .balance-pill { 
-            background: linear-gradient(to right, var(--rasta-green), #00a852); padding: 8px 16px; border-radius: 25px; 
-            font-weight: bold; border: 1px solid var(--rasta-gold); cursor: pointer;
-            box-shadow: 0 0 15px rgba(0, 133, 66, 0.5); font-size: 0.9rem;
-            transition: transform 0.3s ease;
+            background: linear-gradient(135deg, var(--rasta-green), #00a852); 
+            padding: 8px 18px; border-radius: 30px; 
+            font-weight: bold; border: 1.5px solid var(--rasta-gold); cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 133, 66, 0.4); font-size: 0.95rem;
+            transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 5px;
         }
+        .balance-pill:active { transform: scale(0.95); }
 
         @keyframes balancePop {
             0% { transform: scale(1); box-shadow: 0 0 15px var(--rasta-green); }
-            50% { transform: scale(1.15); box-shadow: 0 0 25px var(--rasta-gold); }
+            50% { transform: scale(1.1); box-shadow: 0 0 25px var(--rasta-gold); border-color: white; }
             100% { transform: scale(1); box-shadow: 0 0 15px var(--rasta-green); }
         }
-        .update-flash { animation: balancePop 0.6s ease-out; }
+        .update-flash { animation: balancePop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
         /* --- MAIN HERO BANNER --- */
         .banner { 
-            height: 240px; 
-            background: linear-gradient(to bottom, rgba(0,0,0,0.2), #0a0a0a), url('asset/asset.bg.jpg');
+            height: 250px; 
+            background: linear-gradient(to bottom, rgba(0,0,0,0.2), var(--dark-bg)), url('asset/asset.bg.jpg');
             background-size: cover; 
-            background-position: center top; 
+            background-position: center 20%; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             justify-content: flex-end;
-            padding-bottom: 20px;
+            padding-bottom: 25px;
             border-bottom: 4px solid var(--rasta-green); 
             position: relative;
             text-align: center;
         }
         
         .welcome-text-group {
-            background: rgba(0, 0, 0, 0.75);
-            padding: 12px 20px;
-            border-radius: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 25px;
+            border-radius: 20px;
             border: 1px solid var(--rasta-gold);
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(8px);
             margin-bottom: 10px;
-            width: 85%;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .welcome-title {
-            color: var(--rasta-gold); font-size: 1.2rem; font-weight: 900; margin: 0;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.8); letter-spacing: 1px;
+            color: var(--rasta-gold); font-size: 1.25rem; font-weight: 900; margin: 0;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.8); letter-spacing: 1.5px;
         }
 
         .welcome-motto {
-            color: var(--rasta-green); font-size: 0.8rem; letter-spacing: 3px; margin: 5px 0;
-            font-weight: bold; text-transform: uppercase;
+            color: var(--rasta-green); font-size: 0.8rem; letter-spacing: 4px; margin: 6px 0;
+            font-weight: bold; text-transform: uppercase; opacity: 0.9;
         }
 
         .player-name-display {
-            color: white; font-size: 1.1rem; font-weight: bold; text-shadow: 0 1px 3px black;
+            color: white; font-size: 1.15rem; font-weight: bold; text-shadow: 0 1px 3px black;
+            margin-top: 5px; font-family: 'Orbitron', sans-serif;
         }
 
         /* --- WINNER TICKER --- */
-        .ticker { background: #111; padding: 10px; font-size: 0.8rem; color: var(--rasta-gold); border-bottom: 1px solid #222; overflow: hidden; white-space: nowrap; }
-        .ticker-text { display: inline-block; animation: scroll 40s linear infinite; }
-        @keyframes scroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+        .ticker { 
+            background: #000; padding: 12px; font-size: 0.85rem; color: var(--rasta-gold); 
+            border-bottom: 1px solid #222; overflow: hidden; white-space: nowrap;
+            display: flex; align-items: center;
+        }
+        .ticker-label { 
+            background: var(--rasta-red); color: white; padding: 2px 8px; 
+            border-radius: 4px; font-weight: bold; margin-right: 15px; font-size: 0.7rem;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        
+        .ticker-text { display: inline-block; animation: scroll 45s linear infinite; font-family: 'Rajdhani', sans-serif; font-weight: bold; }
+        @keyframes scroll { from { transform: translateX(20%); } to { transform: translateX(-100%); } }
 
         /* --- GAME GRID --- */
-        .game-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; }
+        .game-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; padding: 18px; }
+        
         .game-card { 
-            background: #1a1a1a; border-radius: 20px; overflow: hidden; 
-            border: 1px solid #2a2a2a; position: relative; aspect-ratio: 1/1.2; cursor: pointer;
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: var(--card-shadow);
+            background: #151515; border-radius: 24px; overflow: hidden; 
+            border: 1px solid #222; position: relative; aspect-ratio: 1/1.25; cursor: pointer;
+            transition: 0.4s cubic-bezier(0.23, 1, 0.32, 1); box-shadow: var(--card-shadow);
         }
         
         .game-card.featured {
             grid-column: span 2;
-            aspect-ratio: 2 / 1.1;
+            aspect-ratio: 2 / 1.15;
             border: 2px solid var(--rasta-gold);
+            box-shadow: 0 0 20px rgba(255, 209, 0, 0.2);
         }
 
-        .game-card img { width: 100%; height: 78%; object-fit: cover; transition: 0.5s; filter: brightness(0.9); }
-        .game-card:hover img { transform: scale(1.08); filter: brightness(1.1); }
-        .game-card:active { transform: scale(0.96); }
+        .game-card img { width: 100%; height: 80%; object-fit: cover; transition: 0.6s ease; filter: brightness(0.8); }
+        .game-card:hover img { transform: scale(1.1); filter: brightness(1.1); }
+        .game-card:active { transform: scale(0.94); filter: contrast(1.2); }
         
         .game-tag {
-            position: absolute; top: 10px; right: 10px; background: var(--rasta-red); color: white;
-            font-size: 0.65rem; font-weight: bold; padding: 4px 10px; border-radius: 6px; text-transform: uppercase;
-            z-index: 5; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            position: absolute; top: 12px; right: 12px; background: var(--rasta-red); color: white;
+            font-size: 0.65rem; font-weight: bold; padding: 5px 12px; border-radius: 8px; text-transform: uppercase;
+            z-index: 5; box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.2);
         }
 
         .game-footer { 
-            position: absolute; bottom: 0; width: 100%; background: #000; 
-            padding: 12px 0; text-align: center; color: white; border-top: 2px solid var(--rasta-gold);
+            position: absolute; bottom: 0; width: 100%; 
+            background: linear-gradient(0deg, #000 0%, rgba(0,0,0,0.9) 100%); 
+            padding: 14px 0; text-align: center; color: white; border-top: 2px solid var(--rasta-gold);
         }
-        .game-title-text { font-size: 0.8rem; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
+        .game-title-text { font-size: 0.85rem; font-weight: bold; letter-spacing: 1.2px; text-transform: uppercase; font-family: 'Orbitron', sans-serif; }
 
         .special-logo {
             position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
             border: 3px solid var(--rasta-gold);
-            color: white; border-radius: 50%; width: 75px; height: 75px;
+            color: white; border-radius: 50%; width: 80px; height: 80px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-weight: 900; box-shadow: 0 0 20px rgba(0,0,0,0.8); z-index: 4;
+            font-weight: 900; box-shadow: 0 0 25px rgba(0,0,0,0.9); z-index: 4;
             text-align: center;
         }
 
-        .keno-logo { background: var(--rasta-red); }
+        .keno-logo { background: linear-gradient(135deg, var(--rasta-red), #8b0000); }
         .wheel-logo { 
-            background: conic-gradient(red, yellow, green, red, yellow, green); 
-            animation: spinWheel 8s linear infinite;
+            background: conic-gradient(var(--rasta-red), var(--rasta-gold), var(--rasta-green), var(--rasta-red)); 
+            animation: spinWheel 10s linear infinite;
         }
         @keyframes spinWheel { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
 
-        .scratch-logo { background: #444; border-radius: 10px; width: 80px; height: 50px; font-size: 0.7rem; }
+        .scratch-logo { background: #333; border-radius: 12px; width: 85px; height: 55px; font-size: 0.75rem; border: 2px solid #555; }
 
         /* --- VISITOR GATE --- */
         #visitor-gate {
             height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center;
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('asset/asset.bg.jpg');
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.95)), url('asset/asset.bg.jpg');
             background-size: cover; background-position: center; text-align: center;
         }
-        .gate-logo { width: 130px; height: 130px; margin-bottom: 25px; border: 4px solid var(--rasta-gold); border-radius: 50%; box-shadow: 0 0 30px var(--rasta-gold); }
-        .btn-gate { 
-            display: block; width: 250px; padding: 18px; margin: 15px 0; border-radius: 45px; 
-            text-decoration: none; font-weight: 900; font-size: 1.2rem; text-align: center; transition: 0.3s;
+        .gate-logo { 
+            width: 140px; height: 140px; margin-bottom: 30px; 
+            border: 5px solid var(--rasta-gold); border-radius: 50%; 
+            box-shadow: 0 0 40px var(--rasta-gold);
+            animation: logoFloat 3s ease-in-out infinite;
         }
-        .btn-login-gate { background: var(--rasta-green); color: white; box-shadow: 0 6px 0 #004d26; }
-        .btn-reg-gate { border: 2px solid var(--rasta-gold); color: var(--rasta-gold); background: rgba(0,0,0,0.6); }
-        .btn-gate:active { transform: translateY(4px); box-shadow: none; }
+        @keyframes logoFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+
+        .btn-gate { 
+            display: block; width: 260px; padding: 20px; margin: 18px 0; border-radius: 50px; 
+            text-decoration: none; font-weight: 900; font-size: 1.25rem; text-align: center; transition: 0.3s;
+            letter-spacing: 2px;
+        }
+        .btn-login-gate { background: var(--rasta-green); color: white; box-shadow: 0 6px 0 #004d26, 0 10px 20px rgba(0,0,0,0.5); }
+        .btn-reg-gate { border: 2.5px solid var(--rasta-gold); color: var(--rasta-gold); background: rgba(0,0,0,0.6); }
+        .btn-gate:active { transform: translateY(4px); box-shadow: 0 2px 0 #004d26; }
 
         /* --- BOTTOM NAV --- */
         .bottom-nav { 
-            position: fixed; bottom: 0; width: 100%; height: 75px; background: #000; 
-            display: flex; justify-content: space-around; align-items: center; border-top: 3px solid var(--rasta-gold);
+            position: fixed; bottom: 0; width: 100%; height: 80px; background: #000; 
+            display: flex; justify-content: space-around; align-items: center; border-top: 3.5px solid var(--rasta-gold);
             z-index: 1000; padding-bottom: env(safe-area-inset-bottom);
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.8);
         }
-        .nav-link { text-decoration: none; color: #777; text-align: center; font-size: 0.7rem; font-weight: bold; transition: 0.3s; }
-        .nav-link.active { color: var(--rasta-gold); text-shadow: 0 0 8px var(--rasta-gold); }
-        .nav-icon { font-size: 1.4rem; display: block; margin-bottom: 2px; }
+        .nav-link { text-decoration: none; color: #666; text-align: center; font-size: 0.75rem; font-weight: bold; transition: 0.3s; }
+        .nav-link.active { color: var(--rasta-gold); transform: translateY(-5px); }
+        .nav-icon { font-size: 1.6rem; display: block; margin-bottom: 4px; transition: 0.3s; }
+        .nav-link.active .nav-icon { text-shadow: 0 0 12px var(--rasta-gold); }
     </style>
 </head>
 <body>
@@ -195,10 +252,10 @@
 
 <div class="sidebar" id="mainSidebar">
     <div class="sidebar-header">
-        <img src="asset/king.jpg" onerror="this.src='https://via.placeholder.com/80?text=Rasta'" style="width:80px; height:80px; border-radius:50%; border:3px solid var(--rasta-gold); margin-bottom:10px; object-fit: cover;">
-        <h2 style="color:var(--rasta-gold); margin:0; letter-spacing:1px; font-size: 1.4rem;">RASTA HOUSE</h2>
-        <p id="sideUserID" style="color:var(--rasta-green); font-weight:bold; font-size:0.9rem; margin-top:5px;">RH-XXXX</p>
-        <p id="sideUserPhone" style="color:#888; font-size:0.85rem; margin:8px 0 0;"></p>
+        <img src="asset/king.jpg" onerror="this.src='https://via.placeholder.com/80?text=Rasta'" style="width:85px; height:85px; border-radius:50%; border:3px solid var(--rasta-gold); margin-bottom:12px; object-fit: cover; box-shadow: 0 0 15px rgba(255,209,0,0.3);">
+        <h2 style="color:var(--rasta-gold); margin:0; letter-spacing:2px; font-size: 1.5rem; font-family: 'Orbitron';">RASTA HOUSE</h2>
+        <p id="sideUserID" style="color:var(--rasta-green); font-weight:bold; font-size:0.95rem; margin-top:5px; font-family: monospace;">RH-XXXX</p>
+        <p id="sideUserPhone" style="color:#888; font-size:0.85rem; margin:10px 0 0;"></p>
     </div>
     <div class="sidebar-menu">
         <a href="index.html" class="menu-item"><span class="menu-icon">🏠</span> Lobby / መግቢያ</a>
@@ -212,8 +269,8 @@
 
 <div id="visitor-gate">
     <img src="asset/king.jpg" onerror="this.src='https://via.placeholder.com/130?text=Rasta'" class="gate-logo">
-    <h1 style="color:var(--rasta-gold); font-size: 2.5rem; margin: 0; letter-spacing: 2px;">RASTA HOUSE</h1>
-    <p style="color:var(--rasta-green); font-weight:bold; letter-spacing:4px; margin: 5px 0 35px;">ONE LOVE • WIN BIG</p>
+    <h1 style="color:var(--rasta-gold); font-size: 2.8rem; margin: 0; letter-spacing: 3px; font-family: 'Orbitron';">RASTA HOUSE</h1>
+    <p style="color:var(--rasta-green); font-weight:bold; letter-spacing:5px; margin: 5px 0 40px;">ONE LOVE • WIN BIG</p>
     <div class="gate-buttons">
         <a href="login.html" class="btn-gate btn-login-gate">LOGIN</a>
         <a href="register.html" class="btn-gate btn-reg-gate">REGISTER</a>
@@ -225,12 +282,13 @@
         <button class="menu-toggle" onclick="toggleMenu()">☰</button>
         <div class="logo-text">RASTA HOUSE</div>
         <div class="balance-pill" id="balContainer" onclick="location.href='profile.html'">
-            <span id="userBal">0.00</span> ETB
+            <span id="userBal">0.00</span> <small>ETB</small>
         </div>
     </header>
 
     <div class="ticker">
-        <div class="ticker-text" id="winnerTicker">Loading current winners...</div>
+        <span class="ticker-label">LIVE WINS</span>
+        <div class="ticker-text" id="winnerTicker">Connecting to Rasta House Network... Getting latest winners...</div>
     </div>
 
     <div class="banner">
@@ -238,7 +296,7 @@
             <h3 class="welcome-title">WELCOME RASTA HOUSE</h3>
             <div class="welcome-motto">ONE LOVE • ONE HEART</div>
             <div id="welcomeUser" class="player-name-display">PLAYER</div>
-            <div id="welcomeID" style="color:var(--rasta-gold); font-size:0.75rem; margin-top:2px;">RH-XXXX</div>
+            <div id="welcomeID" style="color:var(--rasta-gold); font-size:0.8rem; margin-top:4px; font-family: monospace; letter-spacing: 1px;">RH-XXXX</div>
         </div>
     </div>
 
@@ -247,7 +305,7 @@
             <div class="game-tag" style="background:var(--rasta-gold); color:black; font-size:0.8rem;">NEW FEATURED</div>
             <img src="asset/fruit-master.png" onerror="this.src='https://via.placeholder.com/400x200?text=Fruit+Bounce'"> 
             <div class="game-footer">
-                <div class="game-title-text" style="font-size:0.9rem;">FRUIT BOUNCE</div>
+                <div class="game-title-text" style="font-size:0.95rem;">FRUIT BOUNCE</div>
             </div>
         </div>
 
@@ -287,8 +345,8 @@
             <div class="game-tag" style="background:var(--rasta-green);">FAST</div>
             <img src="asset/mar.jpg" onerror="this.src='https://via.placeholder.com/200?text=Keno'">
             <div class="special-logo keno-logo">
-                <span style="font-size:0.7rem;">KENO</span>
-                <span style="font-size:1.8rem; line-height:1;">80</span>
+                <span style="font-size:0.75rem;">KENO</span>
+                <span style="font-size:2rem; line-height:1;">80</span>
             </div>
             <div class="game-footer">
                 <div class="game-title-text">FAST KENO 80</div>
@@ -299,7 +357,7 @@
             <div class="game-tag" style="background:var(--rasta-red);">Big Win</div>
             <img src="asset/king.jpg" onerror="this.src='https://via.placeholder.com/200?text=Wheel'">
             <div class="special-logo wheel-logo">
-                <span style="font-size:0.6rem; color:black;">WHEEL</span>
+                <span style="font-size:0.65rem; color:black; font-weight: 900;">WHEEL</span>
             </div>
             <div class="game-footer">
                 <div class="game-title-text">RASTA WHEEL</div>
@@ -384,16 +442,26 @@
 
 <script>
     /**
-     * RASTA HOUSE LOBBY ENGINE v7.1
+     * RASTA HOUSE LOBBY ENGINE v8.0
      * PROFESSIONAL SYNC & UI MANAGEMENT
      */
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ78n_8B2VpNsxJKWagXOTRifs4tRYjfyq8OuQ_vKUe-MUN8iTguZYe4Q2muxAInhJtA/exec";
 
+    /**
+     * UI TOGGLES
+     */
     function toggleMenu() {
         const sidebar = document.getElementById('mainSidebar');
         const overlay = document.getElementById('menuOverlay');
         const isActive = sidebar.classList.toggle('active');
-        overlay.style.display = isActive ? 'block' : 'none';
+        
+        if (isActive) {
+            overlay.style.display = 'block';
+            setTimeout(() => overlay.style.opacity = '1', 10);
+        } else {
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.style.display = 'none', 300);
+        }
     }
 
     function handleLogout() {
@@ -416,7 +484,11 @@
 
         try {
             // Using a timestamp cache-buster to ensure we get fresh data
-            const response = await fetch(`${SCRIPT_URL}?action=getBalance&phone=${cleanPhone}&cache=${Date.now()}`);
+            const response = await fetch(`${SCRIPT_URL}?action=getBalance&phone=${cleanPhone}&cache=${Date.now()}`, {
+                method: 'GET',
+                mode: 'cors'
+            });
+            
             if (!response.ok) throw new Error("Network response was not ok");
             
             const data = await response.json();
@@ -425,11 +497,12 @@
                 const liveBal = parseFloat(data.balance);
                 const localBal = parseFloat(user.balance || 0);
                 
-                // If balance changed in the sheet (e.g., win in game or admin approved deposit)
+                // If balance changed in the sheet
                 if (Math.abs(liveBal - localBal) > 0.001) {
                     const pill = document.getElementById('balContainer');
+                    const balDisplay = document.getElementById('userBal');
                     
-                    // Visual feedback for the user
+                    // Visual feedback animation
                     pill.classList.remove('update-flash');
                     void pill.offsetWidth; // Trigger reflow
                     pill.classList.add('update-flash');
@@ -437,11 +510,13 @@
                     // Update storage and UI
                     user.balance = liveBal;
                     localStorage.setItem('rasta_user', JSON.stringify(user));
-                    document.getElementById('userBal').innerText = liveBal.toFixed(2);
+                    
+                    // Animate the number change if possible, otherwise direct set
+                    balDisplay.innerText = liveBal.toFixed(2);
                 }
             }
         } catch(error) {
-            console.error("Balance sync failed. Check internet connection.");
+            console.warn("Sync: Connection to Rasta Server is slow...");
         }
     }
 
@@ -470,25 +545,33 @@
             
             // Start Background Services
             syncBalance(); 
-            setInterval(syncBalance, 8000); // Sync every 8 seconds
+            setInterval(syncBalance, 10000); // Sync every 10 seconds for performance
             
             // Initialize Winner Ticker
             generateWinnerTicker();
         }
     };
 
+    /**
+     * WINNER TICKER GENERATOR
+     * Creates a long string of fake/real simulated winners
+     */
     function generateWinnerTicker() {
-        const etNames = ["Abebe", "Selam", "Dawit", "Hanna", "Mulu", "Aster", "Yared", "Tsion", "Kassa", "Elias", "Fikru", "Beti", "Desta"];
-        const games = ["Trip Revelation", "Fruit Bounce", "Safari Simba", "Zion Slots", "Rasta Wheel", "Emperor Reels"];
+        const etNames = ["Abebe", "Selam", "Dawit", "Hanna", "Mulu", "Aster", "Yared", "Tsion", "Kassa", "Elias", "Fikru", "Beti", "Desta", "Tewodros", "Zenebe", "Mesfin"];
+        const games = ["Trip Revelation", "Fruit Bounce", "Safari Simba", "Zion Slots", "Rasta Wheel", "Emperor Reels", "Omnitrix Luck", "Rasta Crash"];
         let tickerText = "";
         
-        for(let i=0; i<20; i++) {
+        // Generate 25 random winning entries
+        for(let i=0; i<25; i++) {
             const name = etNames[Math.floor(Math.random() * etNames.length)];
             const game = games[Math.floor(Math.random() * games.length)];
-            const win = (Math.random() * 3500 + 100).toFixed(0);
-            tickerText += ` • ${name} just won ${win} ETB on ${game}! `;
+            const win = (Math.random() * 4500 + 150).toFixed(0);
+            tickerText += ` • [${name.toUpperCase()}] WON ${win} ETB ON ${game.toUpperCase()}! `;
         }
-        document.getElementById('winnerTicker').innerText = tickerText + tickerText;
+        
+        const tickerElement = document.getElementById('winnerTicker');
+        // Double it to ensure seamless looping
+        tickerElement.innerText = tickerText + " --- " + tickerText;
     }
 </script>
 </body>
