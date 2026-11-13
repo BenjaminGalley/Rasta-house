@@ -282,13 +282,13 @@
         <button class="menu-toggle" onclick="toggleMenu()">☰</button>
         <div class="logo-text">RASTA HOUSE</div>
         <div class="balance-pill" id="balContainer" onclick="location.href='profile.html'">
-            <span id="userBal">0.00</span> <small>ETB</small>
+            <span id="userBal">0.00</span>
         </div>
     </header>
 
     <div class="ticker">
-        <span class="ticker-label">LIVE WINS</span>
-        <div class="ticker-text" id="winnerTicker">Connecting to Rasta House Network... Getting latest winners...</div>
+        <span class="ticker-label">DEMO</span>
+        <div class="ticker-text" id="winnerTicker">DEMO SIMULATION • NO REAL MONEY</div>
     </div>
 
     <div class="banner">
@@ -445,7 +445,7 @@
      * RASTA HOUSE LOBBY ENGINE v8.0
      * PROFESSIONAL SYNC & UI MANAGEMENT
      */
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ78n_8B2VpNsxJKWagXOTRifs4tRYjfyq8OuQ_vKUe-MUN8iTguZYe4Q2muxAInhJtA/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRaI42PJaPNxUm2G-efbSk7DBWbJiVOkynHzHJj56xFsPQI4Fisl3njpZJ-HwNPd3u8Q/exec";
 
     /**
      * UI TOGGLES
@@ -556,23 +556,7 @@
      * WINNER TICKER GENERATOR
      * Creates a long string of fake/real simulated winners
      */
-    function generateWinnerTicker() {
-        const etNames = ["Abebe", "Selam", "Dawit", "Hanna", "Mulu", "Aster", "Yared", "Tsion", "Kassa", "Elias", "Fikru", "Beti", "Desta", "Tewodros", "Zenebe", "Mesfin"];
-        const games = ["Trip Revelation", "Fruit Bounce", "Safari Simba", "Zion Slots", "Rasta Wheel", "Emperor Reels", "Omnitrix Luck", "Rasta Crash"];
-        let tickerText = "";
-        
-        // Generate 25 random winning entries
-        for(let i=0; i<25; i++) {
-            const name = etNames[Math.floor(Math.random() * etNames.length)];
-            const game = games[Math.floor(Math.random() * games.length)];
-            const win = (Math.random() * 4500 + 150).toFixed(0);
-            tickerText += ` • [${name.toUpperCase()}] WON ${win} ETB ON ${game.toUpperCase()}! `;
-        }
-        
-        const tickerElement = document.getElementById('winnerTicker');
-        // Double it to ensure seamless looping
-        tickerElement.innerText = tickerText + " --- " + tickerText;
-    }
+    function generateWinnerTicker() {\n        document.getElementById("winnerTicker").innerText = "DEMO SIMULATION • NO REAL MONEY • RESULTS ARE FOR TESTING ONLY";\n    }
 </script>
 </body>
 </html>
