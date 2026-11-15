@@ -51,7 +51,7 @@
         /* --- DASHBOARD CONTROLS --- */
         .dashboard {
             width: 100%; background: linear-gradient(to top, #000, #051a08); 
-            border-top: 3px solid var(--gold); padding: 15px 0 35px;
+            border-top: 3px solid var(--gold); padding: 8px 0 calc(10px + env(safe-area-inset-bottom, 0px)); flex:none;
             display: flex; flex-direction: column; align-items: center; gap: 15px;
         }
 
@@ -80,7 +80,7 @@
         }
 
         .spin-trigger {
-            width: 110px; height: 110px; border-radius: 50%;
+            width: 88px; height: 88px; border-radius: 50%;
             background: radial-gradient(circle, #34e05b, #0b4f18);
             border: 5px solid #fff; color: white; font-weight: 900; font-size: 1.4rem;
             cursor: pointer; box-shadow: 0 8px 0 #022b0a, 0 0 30px rgba(46,189,71,0.3);
