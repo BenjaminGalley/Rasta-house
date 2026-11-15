@@ -1,236 +1,74 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MULTI HOT 5 | RASTA HOUSE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Goldman&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --rasta-gold: #FFD100;
-            --neon-green: #00ff66;
-            --deep-green: #051a0c;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            background: var(--deep-green) url('asset/safari.jpeg'); /* Using your green clover background */
-            background-size: cover;
-            background-position: center;
-            font-family: 'Goldman', sans-serif;
-            color: white;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        /* --- HEADER --- */
-        .game-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 15px;
-            background: rgba(0,0,0,0.85);
-            border-bottom: 2px solid var(--rasta-gold);
-        }
-
-        .balance-display {
-            background: linear-gradient(to right, #008542, #004d26);
-            padding: 5px 15px;
-            border-radius: 20px;
-            border: 1px solid var(--rasta-gold);
-            font-weight: bold;
-        }
-
-        /* --- SMARTSOFT STYLE LAYOUT --- */
-        .main-layout {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            flex-grow: 1;
-            padding: 10px;
-        }
-
-        /* Multipliers (No Black Box - Industry Standard) */
-        .multiplier-column {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .m-badge {
-            width: 70px;
-            height: 50px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.4rem;
-            font-weight: 900;
-            border-radius: 10px;
-            background: rgba(0, 40, 20, 0.5); /* Transparent to let clovers show */
-            border: 1px solid rgba(0, 255, 102, 0.2);
-            color: rgba(255, 255, 255, 0.3);
-            transition: 0.3s ease;
-        }
-
-        .m-badge.active {
-            background: rgba(0, 255, 102, 0.15);
-            border: 2px solid var(--neon-green);
-            color: var(--neon-green);
-            box-shadow: 0 0 20px var(--neon-green), inset 0 0 10px var(--neon-green);
-            transform: scale(1.1);
-            text-shadow: 0 0 10px var(--neon-green);
-        }
-
-        /* Slot Window */
-        .slot-frame {
-            background: rgba(0, 0, 0, 0.8);
-            border: 3px solid var(--rasta-gold);
-            border-radius: 15px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            padding: 12px;
-            width: 260px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.6);
-        }
-
-        .reel {
-            background: rgba(255, 255, 255, 0.03);
-            height: 220px;
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-around;
-        }
-
-        .symbol { font-size: 2.2rem; }
-
-        /* --- BOTTOM CONTROLS --- */
-        .controls {
-            background: rgba(0, 0, 0, 0.9);
-            padding: 20px 10px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 3px solid var(--rasta-gold);
-        }
-
-        .spin-btn {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #fff, var(--rasta-gold));
-            border: none;
-            font-weight: 900;
-            box-shadow: 0 0 20px var(--rasta-gold);
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .spin-btn:active { transform: scale(0.9); }
-        .spin-btn:disabled { filter: grayscale(1); opacity: 0.5; }
-
-        .stat-pill {
-            text-align: center;
-            background: #111;
-            padding: 8px 15px;
-            border-radius: 15px;
-            border: 1px solid #333;
-            min-width: 80px;
-        }
-        .stat-pill small { display: block; font-size: 0.6rem; color: #888; }
-        .stat-pill span { color: var(--rasta-gold); font-weight: bold; font-size: 1.1rem; }
-    </style>
-</head>
-<body>
-
-    <header class="game-header">
-        <button onclick="location.href='index.html'" style="background:none; border:none; color:white; font-size:1.5rem;">✕</button>
-        <div style="text-align: center;">
-            <div style="color:var(--rasta-gold); font-weight:900; font-size:1.1rem;">MULTI HOT 5</div>
-            <div style="font-size:0.5rem; color:var(--neon-green); letter-spacing: 2px;">WILD EDITION</div>
-        </div>
-        <div class="balance-display" id="headerBal">0.00</div>
-    </header>
-
-    <div class="main-layout">
-        <div class="multiplier-column">
-            <div class="m-badge">1x</div>
-            <div class="m-badge active">2x</div>
-            <div class="m-badge">4x</div>
-        </div>
-
-        <div class="slot-frame">
-            <div class="reel">
-                <div class="symbol">77</div>
-                <div class="symbol">🍋</div>
-                <div class="symbol">🍒</div>
-            </div>
-            <div class="reel">
-                <div class="symbol">🍒</div>
-                <div class="symbol">77</div>
-                <div class="symbol">🍇</div>
-            </div>
-            <div class="reel">
-                <div class="symbol">🍊</div>
-                <div class="symbol">🍉</div>
-                <div class="symbol">77</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="controls">
-        <div class="stat-pill">
-            <small>BET</small>
-            <span>5.00</span>
-        </div>
-
-        <button class="spin-btn" id="spinBtn" onclick="runSpin()">SPIN</button>
-
-        <div class="stat-pill">
-            <small>WIN</small>
-            <span id="winDisplay">0.00</span>
-        </div>
-    </div>
-
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
-        let userData = JSON.parse(localStorage.getItem('rasta_user'));
-
-        function init() {
-            if(!userData) window.location.href = 'index.html';
-            document.getElementById('headerBal').innerText = parseFloat(userData.balance).toFixed(2);
-        }
-
-        function runSpin() {
-            if(userData.balance < 5) {
-                alert("Insufficient Balance!");
-                return;
-            }
-
-            // Update balance
-            userData.balance -= 5;
-            document.getElementById('headerBal').innerText = userData.balance.toFixed(2);
-            localStorage.setItem('rasta_user', JSON.stringify(userData));
-
-            const btn = document.getElementById('spinBtn');
-            btn.disabled = true;
-
-            // Sync with Sheets
-            fetch(`${SCRIPT_URL}?action=login&phone=${userData.phone}&updateBal=${userData.balance}`);
-
-            setTimeout(() => {
-                btn.disabled = false;
-                document.getElementById('winDisplay').innerText = "0.00";
-            }, 1000);
-        }
-
-        window.onload = init;
-    </script>
-</body>
-</html>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>MULTI HOT 5 | RASTA HOUSE</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#ffd34f;--green:#00d86a;--red:#ed334d;--ink:#05080b;--panel:#101820;--safe:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#05080b;color:#fff;font-family:Rajdhani,Arial,sans-serif}
+body{display:flex;flex-direction:column;background:radial-gradient(ellipse at 50% 42%,#29402d 0,#101b19 44%,#05080b 100%)}
+.top{height:64px;flex:none;display:grid;grid-template-columns:54px 1fr auto;align-items:center;padding:0 12px;background:linear-gradient(180deg,#101820,#05080b);border-bottom:2px solid var(--gold);box-shadow:0 5px 22px #0009;z-index:5}
+.home{width:42px;height:42px;border:1px solid #ffffff30;border-radius:50%;background:#101820;color:white;font-size:23px}
+.brand{text-align:center;font:900 clamp(15px,4vw,21px) Orbitron;letter-spacing:1px;color:var(--gold);text-shadow:0 0 14px #ffb00066}
+.brand small{display:block;color:var(--green);font:800 9px Orbitron;letter-spacing:3px;margin-top:3px}
+.balance{padding:8px 13px;border-radius:22px;border:1px solid var(--green);background:linear-gradient(135deg,#08783d,#04351e);font:800 13px Orbitron;white-space:nowrap}
+.stage{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 12px 6px;gap:10px}
+.feature-row{width:min(100%,520px);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.feature-label{font:800 10px Orbitron;letter-spacing:2px;color:#cbd5c9}
+.multis{display:flex;gap:7px}
+.multi{width:55px;height:36px;border:1px solid #47775d;border-radius:9px;background:#0b2118;color:#a6b8aa;font:900 13px Orbitron}
+.multi.active{background:linear-gradient(#28ff8b,#008d4b);color:#04150c;border:2px solid #a6ffd0;box-shadow:0 0 17px #00ff7755}
+.machine{width:min(100%,520px);padding:11px;border-radius:22px;border:3px solid var(--gold);background:linear-gradient(145deg,#26302b,#080c0a 60%,#1d2922);box-shadow:0 0 0 2px #000,0 0 32px #ffcb3c30,inset 0 0 24px #000;position:relative}
+.machine:before{content:"";position:absolute;inset:5px;border:1px solid #fff2;border-radius:14px;pointer-events:none}
+.reels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:7px;border-radius:13px;background:linear-gradient(180deg,#050707,#172019 48%,#050707);box-shadow:inset 0 0 18px #000}
+.reel{display:grid;grid-template-rows:repeat(3,minmax(0,1fr));gap:6px;min-height:clamp(225px,43vh,390px);overflow:hidden;border-radius:9px}
+.cell{display:grid;place-items:center;min-height:0;border-radius:8px;background:linear-gradient(145deg,#28372d,#111a14 62%,#080c09);border:1px solid #ffffff20;box-shadow:inset 0 1px #ffffff18,0 3px 7px #000a}
+.cell svg{width:min(82%,76px);height:min(82%,76px);overflow:visible;filter:drop-shadow(0 5px 4px #000b)}
+.cell.win{border:2px solid #fff0a0;background:linear-gradient(145deg,#fff0a0,#c28a1e);box-shadow:0 0 20px #ffd84d;animation:winPulse .5s infinite alternate}
+@keyframes winPulse{to{transform:scale(1.035);filter:brightness(1.25)}}
+.reels.spinning .cell{animation:blur .12s infinite alternate}
+@keyframes blur{to{filter:blur(2px);transform:translateY(3px)}}
+.status{min-height:24px;text-align:center;color:var(--gold);font:800 12px Orbitron;letter-spacing:1px;padding-top:7px}
+.stats{width:min(100%,520px);display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+.stat{background:#050a08d9;border:1px solid #ffffff20;border-radius:10px;padding:7px 5px;text-align:center}
+.stat small{display:block;color:#8c9b90;font:700 9px Orbitron;letter-spacing:1px}
+.stat b{display:block;color:var(--gold);font:800 16px Orbitron;margin-top:4px}
+.controls{flex:none;width:100%;padding:9px 12px calc(10px + var(--safe));background:linear-gradient(180deg,#121a17,#030605);border-top:2px solid #c99a22;box-shadow:0 -8px 25px #000a;z-index:8}
+.control-inner{width:min(100%,520px);margin:auto;display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:9px;align-items:center}
+.betbox{background:#080d0a;border:1px solid #ffffff28;border-radius:12px;padding:7px 5px;text-align:center;min-width:0}
+.betbox small{display:block;color:#9eaa9f;font:700 9px Orbitron;letter-spacing:1px}
+.stepper{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:5px}
+.stepper button{width:34px;height:36px;border:1px solid #d4a52e;border-radius:8px;background:linear-gradient(#f8d86e,#9b6410);color:#1a1203;font-size:23px;font-weight:900;touch-action:manipulation}
+.stepper strong{min-width:28px;color:#fff;font:900 15px Orbitron}
+.spin{height:62px;border:2px solid #fff0a4;border-radius:50px;background:radial-gradient(ellipse at 50% 15%,#fff3a1,#ffd12f 42%,#a96500);color:#231600;font:900 18px Orbitron;letter-spacing:1px;box-shadow:0 5px 0 #69420b,0 0 18px #ffca3d66;touch-action:manipulation}
+.spin:active:not(:disabled){transform:translateY(3px);box-shadow:0 2px 0 #69420b}.spin:disabled{filter:grayscale(1);opacity:.55}
+.bottomline{display:flex;justify-content:center;gap:14px;margin-top:8px}
+.linkbtn{border:0;background:transparent;color:#aeb9af;font:700 11px Rajdhani;padding:5px 10px}
+.notice{font:600 9px Rajdhani;color:#65746a;text-align:center;margin-top:4px}
+@media(max-height:700px){.top{height:55px}.stage{gap:6px;padding:5px 9px}.reel{min-height:clamp(160px,35vh,250px)}.machine{padding:7px}.reels{gap:5px;padding:5px}.cell svg{width:72%;height:72%}.controls{padding-top:6px}.spin{height:54px}.status{min-height:18px;padding-top:3px}}
+</style></head><body>
+<header class="top"><button class="home" onclick="location.href='index.html'" aria-label="Back to lobby">×</button><div class="brand">MULTI HOT 5<small>WILD EDITION · RASTA HOUSE</small></div><div class="balance"><span id="balance">0.00</span></div></header>
+<main class="stage">
+ <div class="feature-row"><span class="feature-label">MULTIPLIER BOOST</span><div class="multis"><button class="multi" data-m="1">1×</button><button class="multi active" data-m="2">2×</button><button class="multi" data-m="4">4×</button></div></div>
+ <section class="machine"><div class="reels" id="reels"><div class="reel"></div><div class="reel"></div><div class="reel"></div></div><div class="status" id="status">READY TO SPIN</div></section>
+ <div class="stats"><div class="stat"><small>BET</small><b id="betTop">2.00</b></div><div class="stat"><small>LAST WIN</small><b id="winTop">0.00</b></div><div class="stat"><small>PAYLINES</small><b>5</b></div></div>
+</main>
+<footer class="controls"><div class="control-inner">
+ <div class="betbox"><small>BET SIZE</small><div class="stepper"><button id="minus" aria-label="Decrease bet">−</button><strong id="bet">2</strong><button id="plus" aria-label="Increase bet">+</button></div></div>
+ <button class="spin" id="spin">SPIN</button>
+ <div class="betbox"><small>WIN</small><b id="winBottom" style="display:block;color:#00e879;font:900 15px Orbitron;margin-top:11px">0.00</b></div>
+ </div><div class="bottomline"><button class="linkbtn" id="rules">PAYTABLE & RULES</button><button class="linkbtn" id="sound">♪ SOUND: OFF</button><button class="linkbtn" id="reset">RESET DEMO</button></div><div class="notice">DEMO CREDITS ONLY · NO REAL-MONEY PLAY OR PAYOUTS</div></footer>
+<script>
+const SPRITE='asset/slot-symbols.svg';
+const SYMBOLS=[['seven',20],['wild',12],['grapes',8],['cherry',7],['orange',6],['watermelon',5],['lemon',4],['plum',3],['bell',2]];
+const USER_KEY='rasta_user';let user=JSON.parse(localStorage.getItem(USER_KEY)||'null')||{balance:500,phone:'000'};if(!Number.isFinite(Number(user.balance)))user.balance=500;
+let bet=2,multiplier=2,busy=false,soundOn=false,lastGrid=[];
+const reels=document.getElementById('reels');
+function icon(id){return '<svg viewBox="0 0 120 120" role="img" aria-label="'+id+'"><use href="'+SPRITE+'#sym-'+id+'"></use></svg>'}
+function randomSymbol(){const weights=[5,4,8,9,10,9,11,11,8];let n=Math.random()*weights.reduce((a,b)=>a+b,0);for(let i=0;i<weights.length;i++){n-=weights[i];if(n<=0)return SYMBOLS[i][0]}return 'bell'}
+function drawGrid(grid){reels.innerHTML='';for(let c=0;c<3;c++){const reel=document.createElement('div');reel.className='reel';for(let r=0;r<3;r++){const cell=document.createElement('div');cell.className='cell';cell.dataset.col=c;cell.dataset.row=r;cell.innerHTML=icon(grid[c][r]);reel.appendChild(cell)}reels.appendChild(reel)}}
+function refresh(){document.getElementById('balance').textContent=Number(user.balance).toFixed(2);document.getElementById('bet').textContent=bet;document.getElementById('betTop').textContent=(bet*multiplier).toFixed(2);document.getElementById('spin').disabled=busy||Number(user.balance)<bet*multiplier;localStorage.setItem(USER_KEY,JSON.stringify(user))}
+function setStatus(s){document.getElementById('status').textContent=s}
+function beep(freq=540){if(!soundOn)return;try{const C=window.AudioContext||window.webkitAudioContext,c=new C(),o=c.createOscillator(),g=c.createGain();o.frequency.value=freq;g.gain.value=.04;o.connect(g);g.connect(c.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.16);o.stop(c.currentTime+.16)}catch(e){}}
+function pay(grid){const lines=[[0,0,0],[1,1,1],[2,2,2],[0,1,2],[2,1,0]];let total=0,winners=[];for(const line of lines){const ids=line.map((r,c)=>grid[c][r]);let base=ids.find(x=>x!=='wild')||'wild';if(ids.every(x=>x===base||x==='wild')){total+=bet*multiplier*(SYMBOLS.find(x=>x[0]===base)?.[1]||10);winners.push(line)}else if(ids[0]===ids[1]||ids[0]==='wild'&&ids[1]===ids[2]){if(ids[0]===ids[1]||ids[1]==='wild') {total+=bet*multiplier*2;winners.push(line)}}}return {total,winners}}
+async function spin(){if(busy)return;const stake=bet*multiplier;if(Number(user.balance)<stake){setStatus('NOT ENOUGH DEMO CREDITS');return}busy=true;user.balance=Number(user.balance)-stake;document.getElementById('winTop').textContent='0.00';document.getElementById('winBottom').textContent='0.00';refresh();document.getElementById('spin').textContent='SPINNING';setStatus('REELS IN MOTION');reels.classList.add('spinning');beep(260);for(let i=0;i<3;i++){const temp=Array.from({length:3},randomSymbol);drawGrid([temp,temp,temp]);await new Promise(r=>setTimeout(r,170))}const grid=Array.from({length:3},()=>Array.from({length:3},randomSymbol));await new Promise(r=>setTimeout(r,220));drawGrid(grid);reels.classList.remove('spinning');const result=pay(grid);if(result.total>0){user.balance+=result.total;setStatus('WIN · '+result.total.toFixed(2)+' CREDITS');document.getElementById('winTop').textContent=result.total.toFixed(2);document.getElementById('winBottom').textContent=result.total.toFixed(2);for(const line of result.winners)line.forEach((r,c)=>reels.querySelector('[data-col="'+c+'"][data-row="'+r+'"]')?.classList.add('win'));beep(880)}else setStatus('NO WIN · TRY AGAIN');busy=false;document.getElementById('spin').textContent='SPIN';refresh()}
+document.getElementById('spin').onclick=spin;document.getElementById('minus').onclick=()=>{if(!busy){bet=Math.max(1,bet-1);refresh()}};document.getElementById('plus').onclick=()=>{if(!busy){bet=Math.min(100,bet+1);refresh()}};document.querySelectorAll('.multi').forEach(b=>b.onclick=()=>{if(!busy){multiplier=Number(b.dataset.m);document.querySelectorAll('.multi').forEach(x=>x.classList.toggle('active',x===b));refresh()}});document.getElementById('sound').onclick=e=>{soundOn=!soundOn;e.target.textContent='♪ SOUND: '+(soundOn?'ON':'OFF');beep(640)};document.getElementById('reset').onclick=()=>{if(!busy&&confirm('Reset this device to 500 demo credits?')){user.balance=500;refresh();setStatus('DEMO CREDITS RESET')}};document.getElementById('rules').onclick=()=>alert('Five paylines: three horizontal rows and two diagonals. Three matching symbols or WILD substitutions on a line award demo credits. Payout values are shown by symbol value. All play is simulated locally.');drawGrid([['seven','cherry','orange'],['cherry','seven','grapes'],['orange','watermelon','seven']]);refresh();
+</script></body></html>
