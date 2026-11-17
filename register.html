@@ -105,12 +105,16 @@
 
     <div class="input-group">
         <label>Phone Number / ስልክ</label>
-        <input type="tel" id="regPhone" placeholder="09... or 07..." autocomplete="tel">
+        <div style="display:flex;align-items:center;gap:8px"><span style="padding:17px 13px;border:1px solid #444;border-radius:12px;background:#171717;color:#ffd100;font-weight:800">+251</span><input type="tel" id="regPhone" placeholder="9XXXXXXXX" autocomplete="tel" inputmode="numeric" maxlength="9" style="flex:1;min-width:0"></div>
     </div>
 
     <div class="input-group">
         <label>Create Password / የይለፍ ቃል</label>
-        <input type="password" id="regPass" placeholder="Minimum 4 characters" autocomplete="new-password">
+        <div style="display:flex;gap:8px"><input type="password" id="regPass" placeholder="At least 8 characters" autocomplete="new-password" style="flex:1;min-width:0"><button type="button" onclick="togglePassword('regPass',this)" style="padding:0 13px;border-radius:10px;background:#222;color:#ffd100;border:1px solid #555">SHOW</button></div>
+    </div>
+    <div class="input-group">
+        <label>Confirm Password / የይለፍ ቃል ድገም</label>
+        <div style="display:flex;gap:8px"><input type="password" id="regPass2" placeholder="Repeat password" autocomplete="new-password" style="flex:1;min-width:0"><button type="button" onclick="togglePassword('regPass2',this)" style="padding:0 13px;border-radius:10px;background:#222;color:#ffd100;border:1px solid #555">SHOW</button></div>
     </div>
 
     <button class="btn-join" id="regBtn" onclick="handleRegister()">CREATE ACCOUNT (ክፈት)</button>
@@ -127,7 +131,8 @@
     async function handleRegister() {
         const name = document.getElementById('regName').value.trim();
         const phone = document.getElementById('regPhone').value.trim();
-        const pass = document.getElementById('regPass').value.trim();
+        const pass = document.getElementById('regPass').value;
+        const pass2 = document.getElementById('regPass2').value;
         const btn = document.getElementById('regBtn');
         const msg = document.getElementById('statusMsg');
 
@@ -137,13 +142,20 @@
             return;
         }
 
-        if(pass.length < 4) {
-            showMsg("Password too short!", "error");
+        if(pass.length < 8) {
+            showMsg("Use at least 8 characters for your password.", "error");
             return;
         }
-
-        // Clean phone: Remove any leading zeros to standardize the ID
-        const cleanPhone = phone.replace(/^0+/, '');
+        if(pass !== pass2) {
+            showMsg("Passwords do not match.", "error");
+            return;
+        }
+        const digits = phone.replace(/\D/g, '');
+        if(!/^[79]\d{8}$/.test(digits)) {
+            showMsg("Enter a valid Ethiopian mobile number: 9 digits after +251.", "error");
+            return;
+        }
+        const cleanPhone = '251' + digits;
 
         // UI State: Loading
         btn.disabled = true;
@@ -185,6 +197,8 @@
             btn.innerText = "CREATE ACCOUNT (ክፈት)";
         }
     }
+
+    function togglePassword(id, button) { const field=document.getElementById(id); field.type=field.type==='password'?'text':'password'; button.innerText=field.type==='password'?'SHOW':'HIDE'; }
 
     function showMsg(text, type) {
         const msg = document.getElementById('statusMsg');
