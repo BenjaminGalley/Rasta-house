@@ -277,6 +277,10 @@
         if(urlParams.get('view') === 'withdraw') {
             switchTab('withdraw');
         }
+        if(urlParams.get('view') === 'history') {
+            document.getElementById('historySection').style.display='block';
+            loadHistory();
+        }
 
         // Active Balance Syncing
         syncBalance();
