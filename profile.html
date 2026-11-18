@@ -164,6 +164,14 @@
         <div class="balance-id" id="playerID">ID: RH-CONNECTING...</div>
     </div>
 
+    <section id="historySection" style="display:none;margin:0 0 24px;padding:18px;background:#111;border:1px solid #333;border-radius:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px">
+            <strong style="color:#FFD100;letter-spacing:1px">TRANSACTION HISTORY</strong>
+            <button onclick="loadHistory()" style="background:#222;color:#FFD100;border:1px solid #555;border-radius:8px;padding:8px 12px">REFRESH</button>
+        </div>
+        <div id="historyList" style="font:13px Arial,sans-serif;color:#bbb">Loading transactions...</div>
+    </section>
+
     <div class="tab-container">
         <button class="tab-btn active-dep" id="tabDep" onclick="switchTab('deposit')">Deposit</button>
         <button class="tab-btn" id="tabWit" onclick="switchTab('withdraw')">Withdraw</button>
@@ -241,7 +249,7 @@
 <nav class="bottom-nav">
     <a href="index.html" class="nav-link">🏠<br>GAMES</a>
     <a href="profile.html" class="nav-link active">💰<br>WALLET</a>
-    <a href="profile.html?view=withdraw" class="nav-link">💸<br>CASHOUT</a>
+    <a href="profile.html?view=withdraw" class="nav-link">💸<br>CASHOUT</a>\n    <a href="profile.html?view=history" class="nav-link">📜<br>HISTORY</a>
 </nav>
 
 <script>
@@ -332,6 +340,24 @@
                 refreshUI();
             }
         } catch(e) { console.log("Sync..."); }
+    }
+
+    async function loadHistory() {
+        const box=document.getElementById('historyList');
+        box.innerHTML='Loading transactions...';
+        try {
+            const phone=encodeURIComponent((currentUser.phone||'').toString().replace(/^0+/, ''));
+            const res=await fetch(SCRIPT_URL+'?action=getHistory&phone='+phone+'&_='+Date.now());
+            const data=await res.json();
+            if(data.status!=='success') throw new Error(data.message||'History unavailable');
+            const rows=Array.isArray(data.transactions)?data.transactions:[];
+            if(!rows.length){box.innerHTML='<div style="padding:16px;text-align:center;color:#777">No transactions yet.</div>';return;}
+            box.innerHTML=rows.map(x=>{
+                const st=String(x.status||'PENDING').toUpperCase();
+                const color=st==='APPROVED'?'#00d879':st==='REJECTED'?'#ff5365':'#ffd100';
+                return '<div style="padding:13px 2px;border-bottom:1px solid #292929"><div style="display:flex;justify-content:space-between;gap:8px"><b style="color:#fff">'+(x.type||'TRANSACTION')+'</b><b style="color:'+color+'">'+st+'</b></div><div style="margin-top:5px;color:#ddd">'+Number(x.amount||0).toLocaleString()+' demo credits</div><div style="margin-top:4px;color:#777;font-size:11px">'+(x.date||'')+' · '+(x.details||'')+'</div></div>';
+            }).join('');
+        } catch(e) { box.innerHTML='<div style="color:#ff6978;padding:12px">Could not load history. Please refresh.</div>'; }
     }
 
     async function handleTransaction(type) {
