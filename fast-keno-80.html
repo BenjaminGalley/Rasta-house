@@ -113,6 +113,16 @@ html,body{height:100%;height:100dvh;min-height:0}
 .step-btn{width:50px;height:46px;min-width:50px;touch-action:manipulation}
 #betBtn{min-height:52px;padding:10px 14px;font-size:1.05rem;touch-action:manipulation}
 @media(max-height:720px){.header{padding:6px 9px}.tray{max-height:54px;min-height:38px}.controls{padding-top:5px}.step-btn{height:40px;width:44px;min-width:44px}#betBtn{min-height:46px;padding:8px}.grid-container{padding:3px}}
+
+/* Keep bet bar and play button visible on short screens */
+html,body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto}
+body{padding-bottom:150px}
+.game-layout{overflow:visible;flex:none;min-height:0}
+.grid-container{overflow:visible;flex:none}
+.side-board{max-height:45vh}
+.tray{max-height:82px}
+.controls{position:fixed;left:0;right:0;bottom:0;z-index:120;padding:7px 12px calc(9px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 20px #000d}
+
 </style>
 </head>
 <body>
