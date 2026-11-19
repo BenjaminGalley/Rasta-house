@@ -239,14 +239,14 @@
 
         /* --- BOTTOM NAV --- */
         .bottom-nav { 
-            position: fixed; bottom: 0; width: 100%; height: 80px; background: #000; 
-            display: flex; justify-content: space-around; align-items: center; border-top: 3.5px solid var(--rasta-gold);
+            position: fixed; bottom: 0; width: 100%; min-height: 76px; background: rgba(5,8,8,.97); 
+            display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(244,199,107,.65);
             z-index: 1000; padding-bottom: env(safe-area-inset-bottom);
             box-shadow: 0 -10px 30px rgba(0,0,0,0.8);
         }
-        .nav-link { text-decoration: none; color: #666; text-align: center; font-size: 0.75rem; font-weight: bold; transition: 0.3s; }
-        .nav-link.active { color: var(--rasta-gold); transform: translateY(-5px); }
-        .nav-icon { font-size: 1.6rem; display: block; margin-bottom: 4px; transition: 0.3s; }
+        .nav-link { text-decoration: none; color: #89919a; text-align: center; font: 700 .66rem Orbitron, sans-serif; letter-spacing: .8px; transition: .2s; min-width: 62px; padding: 7px 5px; border-radius: 13px; }
+        .nav-link.active { color: var(--rasta-gold); background: rgba(244,199,107,.09); transform: translateY(-2px); }
+        .nav-icon { font-size: 1.35rem; display: block; margin-bottom: 5px; transition: .2s; filter: drop-shadow(0 2px 5px #000); }
         .nav-link.active .nav-icon { text-shadow: 0 0 12px var(--rasta-gold); }
     </style>
 </head>
