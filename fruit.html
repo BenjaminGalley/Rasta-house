@@ -242,7 +242,20 @@
             100% { filter: brightness(1); }
         }
         .winner-anim { animation: glow 0.5s infinite; }
-    </style>
+    
+/* Mobile controls anchored above browser navigation */
+html{min-height:100%;background:#050505}
+body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bottom:175px}
+.viewport-section{flex:none;min-height:0;padding:14px 8px 20px;justify-content:center}
+.machine-frame{width:min(90vw,340px);height:min(90vw,340px);flex:none;border:4px solid #c9a64d;box-shadow:0 0 0 2px #161006,0 0 28px #000}
+.bottom-controls{position:fixed;left:0;right:0;bottom:0;z-index:120;padding:8px 8px calc(10px + env(safe-area-inset-bottom,0px));border-top:3px solid var(--rasta-gold)}
+.status-msg{height:auto;min-height:20px;margin-bottom:7px;font-size:.95rem}
+.control-interface{width:100%;gap:clamp(8px,3vw,18px);flex-wrap:wrap}
+.btn-circle{width:40px;height:40px;min-width:40px;font-size:1.5rem}
+.spin-action{width:82px;height:82px;font-size:1.1rem}
+@media(max-height:700px){.viewport-section{padding:8px}.machine-frame{width:min(72vw,270px);height:min(72vw,270px)}.bottom-controls{padding-top:6px}.spin-action{width:68px;height:68px}}
+
+</style>
 </head>
 <body>
 
