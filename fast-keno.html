@@ -122,6 +122,15 @@ html,body{min-height:100%;height:100%;height:100dvh}
 .ticket-scroll-container{padding:6px;gap:7px}
 .ticket-card{min-width:125px;padding:6px;font-size:.7rem}
 @media(max-height:720px){.keno-header{padding:6px 9px}.grid-container{padding:5px}.keno-grid{gap:3px}.info-tray{min-height:65px;max-height:70px}.controls{padding-top:6px}.btn-step{height:42px;width:44px;min-width:44px}.play-btn{min-height:48px;padding:9px}.stake-row{margin-bottom:5px}}
+
+/* Keep wager controls fixed and leave scroll room for the board */
+html,body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto}
+body{padding-bottom:155px}
+.main-layout{overflow:visible;flex:none;min-height:0}
+.grid-container{overflow:visible;flex:none;padding-bottom:12px}
+.info-tray{max-height:100px;min-height:72px}
+.controls{position:fixed;left:0;right:0;bottom:0;z-index:120;padding:8px 12px calc(9px + env(safe-area-inset-bottom,0px))}
+
 </style>
 </head>
 <body>
