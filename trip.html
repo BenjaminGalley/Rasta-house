@@ -152,7 +152,21 @@
             pointer-events: none; z-index: 60;
         }
 
-    </style>
+    
+/* Responsive game controls stay visible on phone */
+html{min-height:100%;background:#000}
+body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bottom:190px}
+.stage{flex:none;min-height:42dvh;padding:12px 8px}
+.grid-frame{width:min(96vw,550px);height:min(68dvh,430px);min-height:230px}
+.console{position:fixed;left:0;right:0;bottom:0;z-index:120;padding:9px 10px calc(10px + env(safe-area-inset-bottom,0px));background:linear-gradient(180deg,#050805f2,#000);border-top:2px solid var(--gold)}
+.info-display{font-size:1rem;margin-bottom:8px;height:auto;min-height:20px}
+.dashboard{gap:10px;flex-wrap:wrap}
+.bet-buttons{gap:10px}
+.btn-ui{width:44px;height:44px}
+.spin-master{padding:12px 28px;font-size:1.3rem}
+@media(max-height:700px){.stage{min-height:38dvh}.grid-frame{height:36dvh;min-height:190px}.console{padding-top:6px}.info-display{margin-bottom:5px}}
+
+</style>
 </head>
 <body>
 
