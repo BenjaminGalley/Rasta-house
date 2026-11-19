@@ -67,7 +67,18 @@
         .btn-bet { background: linear-gradient(var(--green), #004d26); box-shadow: 0 6px 0 #002e17; }
         .btn-cash { background: linear-gradient(var(--gold), #b39200); color: black; text-shadow: none; box-shadow: 0 6px 0 #6e5a00; display: none; }
         .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 inherit; }
-    </style>
+    
+/* Crash game: keep bet and cash-out buttons visible */
+html{min-height:100%;background:#0a0a0a}
+body{min-height:100dvh;height:auto;overflow-x:hidden;overflow-y:auto;padding-bottom:205px}
+.game-area{height:min(48dvh,340px);min-height:210px;margin:12px}
+#multiplier{margin-top:clamp(55px,12vh,100px);font-size:clamp(2.6rem,12vw,4.5rem)}
+.controls{position:fixed;left:0;right:0;bottom:0;z-index:120;padding:8px 10px calc(10px + env(safe-area-inset-bottom,0px));background:#050505f5;border-top:2px solid var(--gold)}
+.bet-bar{gap:10px;margin-bottom:8px}
+.step-btn{width:44px;height:44px}
+.btn{min-height:52px;padding:10px;font-size:1.2rem}
+
+</style>
 </head>
 <body>
 
