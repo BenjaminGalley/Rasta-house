@@ -9,3 +9,5 @@
 .multiplier-rail span.active{background:linear-gradient(#fff2a0,#d38a0d);color:#211500;border:2px solid #fff3b0;box-shadow:0 0 15px #ffdf5c}
 .multiplier{display:none}
 @media(max-width:370px){.reel-area.has-multiplier{grid-template-columns:40px minmax(0,1fr)}.multiplier-rail span{font-size:10px}}
+
+.reels-grid{position:relative}.reels-grid .lines{inset:0;width:100%;height:100%;z-index:3}
