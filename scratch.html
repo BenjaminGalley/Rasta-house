@@ -29,7 +29,18 @@
         .bet-info b { font-size: 1.4rem; color: var(--gold); }
         .btn-buy { width: 80%; padding: 15px; background: linear-gradient(var(--green), #004d26); color: white; border: none; border-radius: 50px; font-weight: 900; font-size: 1.4rem; cursor: pointer; box-shadow: 0 5px 0 #002e17; }
         .btn-buy:disabled { filter: grayscale(1); opacity: 0.5; transform: none; box-shadow: none; }
-    </style>
+    
+/* Scratch card and controls fit smaller mobile screens */
+html{min-height:100%;background:var(--dark)}
+body{min-height:100dvh;height:auto;overflow-x:hidden;overflow-y:auto;touch-action:pan-y;padding-bottom:185px}
+.card-container{width:min(82vw,320px);height:min(82vw,320px);margin:16px auto}
+#msg{margin:8px 0;height:auto;min-height:24px}
+.controls{position:fixed;left:0;right:0;bottom:0;z-index:120;padding:8px 8px calc(10px + env(safe-area-inset-bottom,0px));}
+.bet-bar{gap:12px;margin-bottom:8px}
+.step-btn{width:42px;height:42px}
+.btn-buy{min-height:52px;padding:10px;font-size:1.15rem}
+
+</style>
 </head>
 <body>
 
