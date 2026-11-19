@@ -97,7 +97,21 @@
             100% { filter: brightness(1); }
         }
         .winner-reel { animation: winGlow 0.5s ease infinite; }
-    </style>
+    
+/* Rasta House mobile fit + framed machine */
+html{min-height:100%;background:#011a06}
+body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bottom:190px}
+.top-bar{flex:none}
+.stage{flex:none;min-height:42dvh;padding:clamp(18px,4vh,36px) 12px 24px;align-items:center;justify-content:center}
+.slot-machine{width:min(92vw,390px);height:min(82vw,340px);min-height:245px;border:5px solid #d6b04a;border-radius:22px;box-shadow:0 0 0 2px #251b08,0 0 32px #00b83f55,inset 0 0 18px #000;overflow:hidden}
+.dashboard{position:fixed;left:0;right:0;bottom:0;z-index:100;width:100%;padding:10px 10px calc(12px + env(safe-area-inset-bottom,0px));gap:12px;border-top:3px solid var(--gold);box-shadow:0 -8px 24px #000d}
+.live-stats{padding:7px 5px;width:min(100%,460px)}
+.interaction-row{width:100%;gap:clamp(12px,5vw,25px);flex-wrap:wrap}
+.spin-trigger{width:76px;height:76px;font-size:1.1rem}
+.btn-round{width:42px;height:42px;min-width:42px}
+@media(max-height:700px){.stage{min-height:38dvh;padding:10px}.slot-machine{height:min(68vw,260px);min-height:205px}.dashboard{gap:7px;padding-top:7px}.live-stats{padding:6px}.spin-trigger{width:64px;height:64px}}
+
+</style>
 </head>
 <body>
 
@@ -210,10 +224,15 @@
         for(let i=0; i<3; i++) {
             const strip = document.getElementById(`r${i}`);
             const symbolHeight = 90;
-            const stopPos = -((40 + results[i]) * symbolHeight);
+            // Put the selected symbol at the landing position, then roll DOWN into it.
+            const landingIndex = 40 + results[i];
+            const landingSymbol = strip.children[landingIndex];
+            if (landingSymbol) landingSymbol.innerHTML = '<img src="' + PAYTABLE[results[i]].src + '">';
+            const startPos = -((50 + results[i]) * symbolHeight);
+            const stopPos = -(landingIndex * symbolHeight);
 
             strip.style.transition = 'none';
-            strip.style.transform = 'translateY(0)';
+            strip.style.transform = 'translateY(' + startPos + 'px)';
             strip.offsetHeight; 
 
             animations.push(new Promise(resolve => {
