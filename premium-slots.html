@@ -71,6 +71,16 @@ body:before{content:'';position:fixed;inset:0;pointer-events:none;opacity:.12;ba
 .pay-row b{color:#ffdf6e;font:800 12px Orbitron}
 .pay-foot{color:#aab9ac;font:600 12px Rajdhani;line-height:1.4;margin-top:12px}
 @media(max-height:700px){.top{height:55px}.stage{gap:6px;padding:5px 9px}.reel{min-height:clamp(160px,35vh,250px)}.machine{padding:7px}.reels{gap:5px;padding:5px}.cell svg{width:72%;height:72%}.controls{padding-top:6px}.spin{height:54px}.status{min-height:18px;padding-top:3px}}
+
+/* Responsive cabinet: scrollable stage, always-visible controls */
+html,body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto}
+body{padding-bottom:0}
+.stage{flex:none;min-height:0;padding:10px 10px 14px;justify-content:flex-start}
+.machine{width:min(100%,520px)}
+.reel{min-height:clamp(175px,34vh,310px)}
+.controls{position:sticky;bottom:0;z-index:18;padding:8px 10px calc(9px + var(--safe));}
+@media(max-height:700px){.reel{min-height:165px}.stage{padding-top:6px}.controls{padding-top:6px}}
+
 </style></head><body>
 <header class="top"><button class="home" onclick="location.href='index.html'" aria-label="Back to lobby">×</button><div class="brand">RASTA FRUIT RUSH<small>JUNGLE EDITION · DEMO PLAY</small></div><div class="balance"><span id="balance">0.00</span></div></header>
 <main class="stage">
