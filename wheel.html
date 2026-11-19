@@ -104,7 +104,20 @@
         .spin-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #002e17; }
         .spin-btn:disabled { background: #444; box-shadow: 0 2px 0 #222; filter: grayscale(1); }
 
-    </style>
+    
+/* Wheel layout adapts to phone height; bet controls remain accessible */
+html{min-height:100%;background:#000}
+body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bottom:185px}
+.wheel-container{flex:none;min-height:46dvh;padding:18px 8px}
+.wheel-outer{width:min(76vw,340px)}
+.controls{position:fixed;left:0;right:0;bottom:0;z-index:120;padding:8px 10px calc(10px + env(safe-area-inset-bottom,0px));}
+#status-msg{height:auto;min-height:18px;margin-bottom:7px}
+.bet-bar{gap:12px;margin-bottom:7px}
+.step-btn{width:46px;height:46px}
+.bet-info{padding:6px 18px}
+.spin-btn{min-height:50px;font-size:1.3rem}
+
+</style>
 </head>
 <body>
 
