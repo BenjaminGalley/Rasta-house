@@ -256,6 +256,13 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
 @media(max-height:700px){.viewport-section{padding:8px}.machine-frame{width:min(72vw,270px);height:min(72vw,270px)}.bottom-controls{padding-top:6px}.spin-action{width:68px;height:68px}}
 
 </style>
+<style>
+#fruitPayline{position:absolute;inset:0;width:100%;height:100%;z-index:16;pointer-events:none}
+#fruitPayline polyline{fill:none;stroke:#fff06a;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 5px #000) drop-shadow(0 0 10px #ffd94a);stroke-dasharray:1200;stroke-dashoffset:1200;animation:fruitLine .65s ease forwards}
+@keyframes fruitLine{to{stroke-dashoffset:0}}
+#fruitWinBanner{position:absolute;top:8px;left:50%;transform:translate(-50%,-10px);z-index:30;padding:7px 14px;border:2px solid #fff1a7;border-radius:25px;background:linear-gradient(#fff1a7,#d99525 65%,#74400c);color:#241604;font-weight:900;white-space:nowrap;opacity:0;pointer-events:none;box-shadow:0 5px 18px #000b}
+#fruitWinBanner.show{opacity:1;transform:translate(-50%,0);transition:.25s}
+</style>
 </head>
 <body>
 
@@ -337,10 +344,3 @@ window.onload=setupGame;
 </script>
 </body>
 </html>
-<style>
-#fruitPayline{position:absolute;inset:0;width:100%;height:100%;z-index:16;pointer-events:none}
-#fruitPayline polyline{fill:none;stroke:#fff06a;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 5px #000) drop-shadow(0 0 10px #ffd94a);stroke-dasharray:1200;stroke-dashoffset:1200;animation:fruitLine .65s ease forwards}
-@keyframes fruitLine{to{stroke-dashoffset:0}}
-#fruitWinBanner{position:absolute;top:8px;left:50%;transform:translate(-50%,-10px);z-index:30;padding:7px 14px;border:2px solid #fff1a7;border-radius:25px;background:linear-gradient(#fff1a7,#d99525 65%,#74400c);color:#241604;font-weight:900;white-space:nowrap;opacity:0;pointer-events:none;box-shadow:0 5px 18px #000b}
-#fruitWinBanner.show{opacity:1;transform:translate(-50%,0);transition:.25s}
-</style>
