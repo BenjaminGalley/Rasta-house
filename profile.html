@@ -355,22 +355,27 @@ input::placeholder{color:#69786c}input:focus,select:focus{background:#fff;color:
 
     async function syncBalance() {
         const savedDemo=localStorage.getItem('rasta_demo_credits');
-        if(savedDemo!==null&&Number.isFinite(Number(savedDemo))){
+        const phone=encodeURIComponent((currentUser.phone||'').toString().replace(/^0+/, ''));
+        try {
+            // Server balance is authoritative after an admin approves a request.
+            const response=await fetch(`${SCRIPT_URL}?action=getBalance&phone=${phone}&nocache=${Date.now()}`, {cache:'no-store'});
+            const data=await response.json();
+            if(data.status==='success' && Number.isFinite(Number(data.balance))) {
+                currentUser.balance=Number(data.balance);
+                localStorage.setItem('rasta_user',JSON.stringify(currentUser));
+                localStorage.setItem('rasta_demo_credits',String(currentUser.balance));
+                refreshUI();
+                return;
+            }
+        } catch(e) {
+            console.log('Server balance sync unavailable; showing saved demo balance.');
+        }
+        // Keep the last known balance visible only if the server cannot be reached.
+        if(savedDemo!==null && Number.isFinite(Number(savedDemo))) {
             currentUser.balance=Number(savedDemo);
             localStorage.setItem('rasta_user',JSON.stringify(currentUser));
             refreshUI();
-            return;
         }
-        const phone=currentUser.phone.toString().replace(/^0+/,'');
-        try{
-            const response=await fetch(`${SCRIPT_URL}?action=getBalance&phone=${phone}&nocache=${Date.now()}`);
-            const data=await response.json();
-            if(data.status==='success'&&Number.isFinite(Number(data.balance))){
-                currentUser.balance=Number(data.balance);
-                localStorage.setItem('rasta_user',JSON.stringify(currentUser));
-                refreshUI();
-            }
-        }catch(e){console.log('Wallet sync unavailable');}
     }
 
     async function loadHistory() {
