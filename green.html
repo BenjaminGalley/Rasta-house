@@ -112,6 +112,15 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
 @media(max-height:700px){.stage{min-height:34dvh;padding:8px}.slot-machine{height:min(62vw,245px);min-height:190px}.dashboard{gap:7px;padding-top:7px}.live-stats{padding:6px}.spin-trigger{width:64px;height:64px}}
 
 </style>
+<style>
+#machineFrame{position:relative}
+#greenPayline{position:absolute;inset:0;width:100%;height:100%;z-index:12;pointer-events:none;overflow:visible}
+#greenPayline polyline{fill:none;stroke:#fff06a;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 5px #000) drop-shadow(0 0 10px #ffe04b);stroke-dasharray:1200;stroke-dashoffset:1200;animation:greenLine .65s ease forwards}
+@keyframes greenLine{to{stroke-dashoffset:0}}
+#greenWinBanner{position:absolute;top:7px;left:50%;transform:translate(-50%,-10px);z-index:14;padding:7px 13px;border:2px solid #fff0a5;border-radius:24px;background:linear-gradient(#fff0a5,#d69a2d 60%,#70420d);color:#251604;font:900 clamp(11px,3vw,16px) Montserrat,sans-serif;white-space:nowrap;opacity:0;pointer-events:none;box-shadow:0 5px 18px #000b}
+#greenWinBanner.show{opacity:1;transform:translate(-50%,0);transition:.25s}
+#machineFrame .reel-window{position:relative;z-index:2}
+</style>
 </head>
 <body>
 
@@ -278,12 +287,3 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
 </body>
 </html>
 
-<style>
-#machineFrame{position:relative}
-#greenPayline{position:absolute;inset:0;width:100%;height:100%;z-index:12;pointer-events:none;overflow:visible}
-#greenPayline polyline{fill:none;stroke:#fff06a;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 5px #000) drop-shadow(0 0 10px #ffe04b);stroke-dasharray:1200;stroke-dashoffset:1200;animation:greenLine .65s ease forwards}
-@keyframes greenLine{to{stroke-dashoffset:0}}
-#greenWinBanner{position:absolute;top:7px;left:50%;transform:translate(-50%,-10px);z-index:14;padding:7px 13px;border:2px solid #fff0a5;border-radius:24px;background:linear-gradient(#fff0a5,#d69a2d 60%,#70420d);color:#251604;font:900 clamp(11px,3vw,16px) Montserrat,sans-serif;white-space:nowrap;opacity:0;pointer-events:none;box-shadow:0 5px 18px #000b}
-#greenWinBanner.show{opacity:1;transform:translate(-50%,0);transition:.25s}
-#machineFrame .reel-window{position:relative;z-index:2}
-</style>
