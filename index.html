@@ -405,41 +405,35 @@
     async function syncBalance() {
         const userData = localStorage.getItem('rasta_user');
         if(!userData) return;
-        
-        const user = JSON.parse(userData);
-        const cleanPhone = (user.phone || "").toString().trim().replace(/^0+/, '');
+        let user;
+        try { user = JSON.parse(userData); } catch (_) { return; }
 
+        // Game credits are a separate local demo wallet. Once initialized,
+        // refreshing the lobby must never replace the played-down balance
+        // with the original spreadsheet deposit balance.
+        const savedDemo = localStorage.getItem('rasta_demo_credits');
+        if (savedDemo !== null && Number.isFinite(Number(savedDemo))) {
+            user.balance = Number(savedDemo);
+            localStorage.setItem('rasta_user', JSON.stringify(user));
+            document.getElementById('userBal').innerText = Number(savedDemo).toFixed(2);
+            return;
+        }
+
+        const cleanPhone = (user.phone || "").toString().trim().replace(/^0+/, '');
         try {
-            // Using a timestamp cache-buster to ensure we get fresh data
             const response = await fetch(`${SCRIPT_URL}?action=getBalance&phone=${cleanPhone}&cache=${Date.now()}`, {
                 method: 'GET',
                 mode: 'cors'
             });
-            
             if (!response.ok) throw new Error("Network response was not ok");
-            
             const data = await response.json();
-            
             if(data && data.status === "success" && data.balance !== undefined) {
-                const liveBal = parseFloat(data.balance);
-                const localBal = parseFloat(user.balance || 0);
-                
-                // If balance changed in the sheet
-                if (Math.abs(liveBal - localBal) > 0.001) {
-                    const pill = document.getElementById('balContainer');
-                    const balDisplay = document.getElementById('userBal');
-                    
-                    // Visual feedback animation
-                    pill.classList.remove('update-flash');
-                    void pill.offsetWidth; // Trigger reflow
-                    pill.classList.add('update-flash');
-                    
-                    // Update storage and UI
+                const liveBal = Number(data.balance);
+                if (Number.isFinite(liveBal) && liveBal >= 0) {
+                    localStorage.setItem('rasta_demo_credits', String(liveBal));
                     user.balance = liveBal;
                     localStorage.setItem('rasta_user', JSON.stringify(user));
-                    
-                    // Animate the number change if possible, otherwise direct set
-                    balDisplay.innerText = liveBal.toFixed(2);
+                    document.getElementById('userBal').innerText = liveBal.toFixed(2);
                 }
             }
         } catch(error) {
