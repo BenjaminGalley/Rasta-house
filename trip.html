@@ -190,12 +190,12 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
 </div>
 
 <div class="stage">
-    <div class="grid-frame">
+    <div class="grid-frame" id="tripGrid">
         <div class="reel-column" id="r0"></div>
         <div class="reel-column" id="r1"></div>
         <div class="reel-column" id="r2"></div>
         <div class="reel-column" id="r3"></div>
-        <div class="reel-column" id="r4"></div>
+        <div class="reel-column" id="r4"></div><svg id="tripPaylines" aria-hidden="true"></svg>
     </div>
 </div>
 
@@ -221,165 +221,35 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
 </audio>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5oeX598AtqVX_owDmR1yKiAQ6z0fjquHzf4YJccbyBqF1GwrGnRwyFt_pVvGyGl7j/exec";
-    let state = JSON.parse(localStorage.getItem('rasta_user')) || { balance: 500, phone: "000" };
-    let currentBet = 4;
-    let isActive = false;
-
-    const payTable = [
-        { id: 'king', src: 'asset/king.jpg', m: 500, w: 2 },
-        { id: 'bob', src: 'asset/bob.jpg', m: 200, w: 4 },
-        { id: 'lion', src: 'asset/lion.king.jpg', m: 100, w: 8 },
-        { id: 'blunt', src: 'asset/blunt.jpg', m: 50, w: 12 },
-        { id: 'tree', src: 'asset/tree.jpg', m: 20, w: 20 },
-        { id: 'leaf', src: 'asset/mar.jpg', m: 10, w: 30 }
-    ];
-
-    let mathPool = [];
-    payTable.forEach((s, idx) => { for(let i=0; i<s.w; i++) mathPool.push(idx); });
-
-    function init() {
-        refreshUI();
-        syncBalance();
-        for(let i=0; i<5; i++) buildReel(i);
-    }
-
-    function buildReel(id) {
-        const r = document.getElementById('r' + id);
-        r.innerHTML = '';
-        for(let i=0; i<30; i++) {
-            const div = document.createElement('div');
-            div.className = 'slot-item';
-            const sym = mathPool[Math.floor(Math.random() * mathPool.length)];
-            div.innerHTML = `<img src="${payTable[sym].src}">`;
-            r.appendChild(div);
-        }
-    }
-
-    function modBet(n) {
-        if(isActive) return;
-        currentBet = Math.max(4, currentBet + n);
-        document.getElementById('betValTop').innerText = currentBet;
-    }
-
-    async function runGame() {
-        if(isActive || state.balance < currentBet) return;
-        
-        isActive = true;
-        state.balance -= currentBet;
-        refreshUI();
-        
-        document.getElementById('spinBtn').disabled = true;
-        document.getElementById('msgBox').innerText = "ROLLING...";
-        document.getElementById('winAmt').innerText = "0";
-
-        const stops = [];
-        for(let i=0; i<5; i++) {
-            const reel = document.getElementById('r' + i);
-            const cellHeight = reel.querySelector('.slot-item').getBoundingClientRect().height || 108;
-            const reelResult = [0,1,2,3].map(() => mathPool[Math.floor(Math.random() * mathPool.length)]);
-            stops.push(reelResult);
-
-            const children = reel.children;
-            for(let j=0; j<4; j++) {
-                children[j].querySelector('img').src = payTable[reelResult[j]].src;
-            }
-
-            reel.classList.add('blur-fx');
-            reel.style.transition = 'none';
-            reel.style.transform = `translateY(-${cellHeight*25}px)`;
-            void reel.offsetWidth; 
-            reel.style.transition = `transform ${2.05 + (i * 0.32)}s cubic-bezier(.12,.72,.18,1)`;
-            reel.style.transform = `translateY(0)`;
-            
-            setTimeout(() => reel.classList.remove('blur-fx'), 2050 + (i * 320));
-        }
-
-        setTimeout(() => {
-            calculateLogic(stops);
-            isActive = false;
-            document.getElementById('spinBtn').disabled = false;
-        }, 2050 + 4*320 + 120);
-    }
-
-    function calculateLogic(grid) {
-        let totalWin = 0;
-        for(let row=0; row<4; row++) {
-            let count = 1;
-            let icon = grid[0][row];
-            for(let col=1; col<5; col++) {
-                if(grid[col][row] === icon) count++;
-                else break;
-            }
-            if(count >= 3) {
-                totalWin += currentBet * (payTable[icon].m / 10) * (count - 2);
-            }
-        }
-
-        if(totalWin > 0) {
-            document.getElementById('msgBox').innerText = "TRIP REVEALED!";
-            document.getElementById('winAmt').innerText = totalWin.toFixed(2);
-            state.balance += totalWin;
-            burstCoins();
-            refreshUI();
-        } else {
-            document.getElementById('msgBox').innerText = "TRY AGAIN";
-        }
-        pushData();
-    }
-
-    function refreshUI() {
-        document.getElementById('balDisplay').innerText = parseFloat(state.balance).toFixed(2) + " ETB";
-        document.getElementById('betValTop').innerText = currentBet;
-        localStorage.setItem('rasta_user', JSON.stringify(state));
-    }
-
-    async function syncBalance() {
-        try {
-            const r = await fetch(`${SCRIPT_URL}?action=login&phone=${state.phone}`);
-            const d = await r.json();
-            if(d.balance !== undefined) { state.balance = d.balance; refreshUI(); }
-        } catch(e) {}
-    }
-
-    function pushData() {
-        fetch(`${SCRIPT_URL}?action=login&phone=${state.phone}&updateBal=${state.balance}`);
-    }
-
-    const cvs = document.getElementById('mega-canvas');
-    const ctx = cvs.getContext('2d');
-    let part = [];
-
-    function burstCoins() {
-        cvs.width = window.innerWidth; cvs.height = window.innerHeight;
-        for(let i=0; i<70; i++) {
-            part.push({
-                x: cvs.width/2, y: cvs.height/2,
-                vx: (Math.random()-0.5)*18, vy: (Math.random()-0.5)*18 - 10,
-                size: Math.random()*7 + 3
-            });
-        }
-        drawLoop();
-    }
-
-    function drawLoop() {
-        ctx.clearRect(0,0, cvs.width, cvs.height);
-        part.forEach((p, i) => {
-            p.x += p.vx; p.y += p.vy; p.vy += 0.5;
-            ctx.fillStyle = "#FFD100";
-            ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
-            if(p.y > cvs.height) part.splice(i, 1);
-        });
-        if(part.length > 0) requestAnimationFrame(drawLoop);
-    }
-
-    function toggleSound() {
-        const a = document.getElementById('audioTrack');
-        const s = document.getElementById('soundIcon');
-        if(a.paused) { a.play(); s.innerText = "🔊"; } else { a.pause(); s.innerText = "🔈"; }
-    }
-
-    window.onload = init;
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycby5oeX598AtqVX_owDmR1yKiAQ6z0fjquHzf4YJccbyBqF1GwrGnRwyFt_pVvGyGl7j/exec";
+let state=JSON.parse(localStorage.getItem('rasta_user'))||{balance:500,phone:'000'},currentBet=4,isActive=false;
+const payTable=[{id:'king',src:'asset/king.jpg',m:500,w:2},{id:'bob',src:'asset/bob.jpg',m:200,w:4},{id:'lion',src:'asset/lion.king.jpg',m:100,w:8},{id:'blunt',src:'asset/blunt.jpg',m:50,w:12},{id:'tree',src:'asset/tree.jpg',m:20,w:20},{id:'leaf',src:'asset/mar.jpg',m:10,w:30}];
+let mathPool=[];payTable.forEach((s,i)=>{for(let n=0;n<s.w;n++)mathPool.push(i)});
+const $=id=>document.getElementById(id);
+function init(){refreshUI();syncBalance();for(let i=0;i<5;i++)buildReel(i)}
+function buildReel(id){const r=$('r'+id);r.innerHTML='';for(let i=0;i<30;i++){const d=document.createElement('div'),sym=mathPool[Math.floor(Math.random()*mathPool.length)];d.className='slot-item';d.innerHTML='<img src="'+payTable[sym].src+'">';r.appendChild(d)}}
+function modBet(n){if(isActive)return;currentBet=Math.max(4,currentBet+n);$('betValTop').textContent=currentBet;refreshUI()}
+async function runGame(){if(isActive||Number(state.balance)<currentBet)return;isActive=true;state.balance-=currentBet;refreshUI();$('spinBtn').disabled=true;$('msgBox').textContent='REELS SLIDING';$('winAmt').textContent='0';$('tripPaylines').innerHTML='';document.querySelectorAll('.trip-hit').forEach(x=>x.classList.remove('trip-hit'));
+const grid=[],promises=[];
+for(let c=0;c<5;c++){const reel=$('r'+c),height=reel.querySelector('.slot-item').getBoundingClientRect().height||108,result=Array.from({length:4},()=>mathPool[Math.floor(Math.random()*mathPool.length)]);grid.push(result);for(let row=0;row<4;row++)reel.children[row].querySelector('img').src=payTable[result[row]].src;reel.style.transition='none';reel.style.transform='translateY('+(-25*height)+'px)';void reel.offsetHeight;promises.push(new Promise(resolve=>setTimeout(()=>{const duration=2100+c*340;reel.style.transition='transform '+duration+'ms cubic-bezier(.12,.72,.16,1)';reel.style.transform='translateY(0)';setTimeout(resolve,duration+40)},c*120)))}
+await Promise.all(promises);calculateLogic(grid);isActive=false;$('spinBtn').disabled=false;refreshUI()}
+function calculateLogic(grid){let total=0,wins=[];for(let row=0;row<4;row++){const symbol=grid[0][row];let count=1;for(let col=1;col<5;col++){if(grid[col][row]===symbol)count++;else break}if(count>=3){const amount=Math.round(currentBet*(payTable[symbol].m/10)*(count-2));total+=amount;wins.push({row,count,amount})}}
+if(total>0){state.balance+=total;$('msgBox').textContent='YOU WIN '+total.toLocaleString()+' CREDITS';$('winAmt').textContent=total.toLocaleString();const svg=$('tripPaylines'),rect=svg.getBoundingClientRect();svg.setAttribute('viewBox','0 0 '+rect.width+' '+rect.height);wins.forEach(w=>{const points=[];for(let col=0;col<w.count;col++){const cell=$('r'+col).children[w.row],b=cell.getBoundingClientRect();cell.classList.add('trip-hit');points.push((b.left+b.width/2-rect.left)+','+(b.top+b.height/2-rect.top))}const p=document.createElementNS('http://www.w3.org/2000/svg','polyline');p.setAttribute('points',points.join(' '));svg.appendChild(p)});burstCoins()}else{$('msgBox').textContent='NO WIN · TRY AGAIN';$('winAmt').textContent='0'}refreshUI();pushData()}
+function refreshUI(){$('balDisplay').textContent=Number(state.balance).toFixed(2)+' ETB';$('betValTop').textContent=currentBet;localStorage.setItem('rasta_user',JSON.stringify(state))}
+async function syncBalance(){try{const r=await fetch(SCRIPT_URL+'?action=login&phone='+encodeURIComponent(state.phone));const d=await r.json();if(d.balance!==undefined){state.balance=Number(d.balance);refreshUI()}}catch(e){}}
+function pushData(){fetch(SCRIPT_URL+'?action=login&phone='+encodeURIComponent(state.phone)+'&updateBal='+encodeURIComponent(state.balance)).catch(()=>{})}
+const cvs=$('mega-canvas'),ctx=cvs.getContext('2d');let part=[];
+function burstCoins(){cvs.width=innerWidth;cvs.height=innerHeight;for(let i=0;i<45;i++)part.push({x:cvs.width/2,y:cvs.height/2,vx:(Math.random()-.5)*14,vy:(Math.random()-.5)*14-8,size:Math.random()*6+3});drawLoop()}
+function drawLoop(){ctx.clearRect(0,0,cvs.width,cvs.height);part.forEach((p,i)=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.5;ctx.fillStyle='#ffd34e';ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill()});part=part.filter(p=>p.y<cvs.height);if(part.length)requestAnimationFrame(drawLoop)}
+function toggleSound(){const a=$('audioTrack'),s=$('soundIcon');if(a.paused){a.play();s.innerText='🔊'}else{a.pause();s.innerText='🔈'}}
+window.onload=init;
 </script>
 </body>
 </html>
+<style>
+#tripGrid{position:relative}
+#tripPaylines{position:absolute;inset:0;width:100%;height:100%;z-index:8;pointer-events:none}
+#tripPaylines polyline{fill:none;stroke:#fff06a;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 5px #000) drop-shadow(0 0 9px #ffd84a);stroke-dasharray:1300;stroke-dashoffset:1300;animation:tripLine .65s ease forwards}
+@keyframes tripLine{to{stroke-dashoffset:0}}
+#tripGrid .slot-item.trip-hit{background:linear-gradient(145deg,#fff0a8,#c99532 55%,#345b36);box-shadow:inset 0 0 12px #fff8,0 0 13px #ffd44e}
+</style>
