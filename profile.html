@@ -146,7 +146,27 @@
             border-radius: 50px; font-weight: bold; z-index: 9999; transition: 0.5s;
             box-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
-    </style>
+    
+/* WALLET BRIGHTENING — warmer, clearer mobile contrast */
+body{background-color:#09110e;background-image:radial-gradient(ellipse at 15% 0%,rgba(18,130,77,.24),transparent 42%),radial-gradient(ellipse at 95% 35%,rgba(255,191,57,.13),transparent 38%),linear-gradient(160deg,#0c1712,#080b0a 65%)}
+.balance-card{background:linear-gradient(145deg,#183d2c 0%,#10261d 48%,#101714 100%);border:1px solid #d8b75e;box-shadow:0 14px 34px #0008,0 0 22px #d9aa3b20}
+.balance-label{color:#bde8c9}.balance-id{color:#b7c8bd}
+.tab-container{background:linear-gradient(120deg,#182c22,#191d18);border:1px solid #8eaa8f66;box-shadow:0 8px 20px #0005}
+.tab-btn{color:#c1c9c2}.tab-btn.active-dep{background:linear-gradient(135deg,#18a45d,#08713c);color:#fff;border:1px solid #7ff0ad}.tab-btn.active-wit{background:linear-gradient(135deg,#e44a55,#9e1e32);color:#fff;border:1px solid #ff9da6}
+.form-section{background:linear-gradient(155deg,#17251e,#101713);border:1px solid #526d58;border-radius:20px;padding:18px;box-shadow:0 12px 28px #0007}
+label{color:#d4dfd5}
+input,select{background:#f2f6f0;color:#17231b;border:1px solid #a6bca9;font-weight:700}
+input::placeholder{color:#69786c}input:focus,select:focus{background:#fff;color:#111;border-color:#e5bd54;box-shadow:0 0 0 3px #e5bd5430}
+.bank-info-box{background:linear-gradient(135deg,#253d2d,#17251c);border:1px solid #bda052;border-left:6px solid #ffd15a;box-shadow:0 8px 20px #0005}
+.bank-label{color:#c5d3c7}.bank-number{color:#fff;text-shadow:0 2px 8px #000}.bank-name{color:#ffe18a}.copy-hint{background:#ffd15a;color:#17130a}
+.submit-btn{filter:brightness(1.12)}.btn-green{background:linear-gradient(135deg,#18a65e,#08723d);box-shadow:0 5px 0 #034326}.btn-red{background:linear-gradient(135deg,#ef5963,#ae1d33);box-shadow:0 5px 0 #64101e}
+#historySection{display:block!important;background:linear-gradient(145deg,#1a2b21,#101814)!important;border:1px solid #a98d45!important;box-shadow:0 12px 26px #0007}
+#historySection strong{color:#ffe18a!important}
+#historyList{color:#e6eee7!important}
+#historyList>div{background:#1e3025;border:1px solid #59765f;border-radius:12px;margin:9px 0;padding:13px!important}
+#historyList>div b:first-child{color:#fff!important}
+.helper-text{color:#aab8ad}
+</style>
 </head>
 <body>
 
@@ -334,16 +354,23 @@
     }
 
     async function syncBalance() {
-        const phone = currentUser.phone.toString().replace(/^0+/, '');
-        try {
-            const response = await fetch(`${SCRIPT_URL}?action=getBalance&phone=${phone}&nocache=${Date.now()}`);
-            const data = await response.json();
-            if(data.status === "success") {
-                currentUser.balance = data.balance;
-                localStorage.setItem('rasta_user', JSON.stringify(currentUser));
+        const savedDemo=localStorage.getItem('rasta_demo_credits');
+        if(savedDemo!==null&&Number.isFinite(Number(savedDemo))){
+            currentUser.balance=Number(savedDemo);
+            localStorage.setItem('rasta_user',JSON.stringify(currentUser));
+            refreshUI();
+            return;
+        }
+        const phone=currentUser.phone.toString().replace(/^0+/,'');
+        try{
+            const response=await fetch(`${SCRIPT_URL}?action=getBalance&phone=${phone}&nocache=${Date.now()}`);
+            const data=await response.json();
+            if(data.status==='success'&&Number.isFinite(Number(data.balance))){
+                currentUser.balance=Number(data.balance);
+                localStorage.setItem('rasta_user',JSON.stringify(currentUser));
                 refreshUI();
             }
-        } catch(e) { console.log("Sync..."); }
+        }catch(e){console.log('Wallet sync unavailable');}
     }
 
     async function loadHistory() {
