@@ -149,14 +149,14 @@
             will-change: transform;
         }
 
-        .symbol {
-            width: 100%;
-            height: 100px; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background:linear-gradient(145deg,#19231d,#050806 65%,#000);border:1px solid #c9a64d55;box-shadow:inset 0 0 18px #000,0 2px 5px #000;
-        }
+        .symbol{width:100%;height:100px;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#f5dfa0 0%,#b98a35 24%,#193b29 26%,#07170f 78%,#030806);border:2px solid #d8b65e;box-shadow:inset 0 0 15px #ffe9a455,0 2px 8px #000;border-radius:7px}
+        .symbol img{width:85px;height:85px;object-fit:contain;filter:drop-shadow(0 5px 7px #000)}
+        .symbol.payline-hit{background:linear-gradient(145deg,#fff0a5,#d99b2d 48%,#315a32);border:3px solid #fff0a8;box-shadow:0 0 18px #ffd34e,inset 0 0 12px #fff8}
+        .revelation-payline{position:absolute;inset:0;width:100%;height:100%;z-index:8;pointer-events:none;overflow:visible}
+        .revelation-payline polyline{fill:none;stroke:#ffeb61;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px #000) drop-shadow(0 0 8px #ffcf36);stroke-dasharray:1600;stroke-dashoffset:1600;animation:revelationLine .65s ease forwards}
+        @keyframes revelationLine{to{stroke-dashoffset:0}}
+        .revelation-win-banner{position:absolute;top:8px;left:50%;transform:translate(-50%,-10px);z-index:20;padding:8px 15px;border:2px solid #fff1a5;border-radius:30px;background:linear-gradient(#fff0a4,#d58d22 65%,#74400e);color:#241504;font-size:clamp(12px,3.4vw,18px);white-space:nowrap;box-shadow:0 5px 18px #000b;opacity:0;pointer-events:none}
+        .revelation-win-banner.show{opacity:1;transform:translate(-50%,0);transition:.25s}
 
         .symbol img {
             width: 85px;
@@ -279,7 +279,7 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
     </div>
 
     <div class="machine-container">
-        <div class="reel-viewport">
+        <div class="reel-viewport" id="reelViewport">
             <div class="reel-mask"></div>
             <div class="reel"><div class="reel-strip" id="reel0"></div></div>
             <div class="reel"><div class="reel-strip" id="reel1"></div></div>
@@ -288,6 +288,8 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
             <div class="reel"><div class="reel-strip" id="reel4"></div></div>
             <div class="reel-frame"></div>
             <div class="reel-glass"></div>
+            <svg class="revelation-payline" id="revelationPayline" aria-hidden="true"></svg>
+            <div class="revelation-win-banner" id="revelationWinBanner"></div>
         </div>
     </div>
 </div>
@@ -312,165 +314,32 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
 </audio>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
-    
-    // Original Icons (The Former)
-    const symbols = [
-        { id: 'king', img: 'asset/king.jpg', mult: 100 },
-        { id: 'bob', img: 'asset/bob.jpg', mult: 50 },
-        { id: 'lion', img: 'asset/lion.king.jpg', mult: 25 },
-        { id: 'blunt', img: 'asset/blunt.jpg', mult: 15 },
-        { id: 'tree', img: 'asset/tree.jpg', mult: 10 },
-        { id: 'leaf', img: 'asset/mar.jpg', mult: 5 }
-    ];
-
-    let user = JSON.parse(localStorage.getItem('rasta_user')) || { balance: 0, phone: "000" };
-    let currentBet = 10;
-    let isSpinning = false;
-
-    function init() {
-        refreshUI();
-        syncData();
-        // Generate Reel Strips
-        for(let i=0; i<5; i++) {
-            const strip = document.getElementById(`reel${i}`);
-            // 50 symbols for high-speed scrolling effect
-            for(let s=0; s<60; s++) {
-                const data = symbols[Math.floor(Math.random() * symbols.length)];
-                const div = document.createElement('div');
-                div.className = 'symbol';
-                div.innerHTML = `<img src="${data.img}" data-id="${data.id}">`;
-                strip.appendChild(div);
-            }
-        }
-    }
-
-    function adjustBet(val) {
-        if(isSpinning) return;
-        currentBet = Math.max(5, Math.min(5000, currentBet + val));
-        refreshUI();
-    }
-
-    async function spin() {
-        if(isSpinning) return;
-        if(user.balance < currentBet) {
-            alert("Insufficient Balance, Rasta!");
-            return;
-        }
-
-        // Lock State
-        isSpinning = true;
-        user.balance -= currentBet;
-        refreshUI();
-        updateDatabase(user.balance);
-
-        document.getElementById('spinBtn').disabled = true;
-        document.getElementById('statusBox').innerText = "VIBING...";
-        document.getElementById('winLabelTop').innerText = "0.00";
-
-        const results = [];
-        const promises = [];
-
-        for(let i=0; i<5; i++) {
-            const reel = document.getElementById(`reel${i}`);
-            const stopIdx = Math.floor(Math.random() * symbols.length);
-            results.push(stopIdx);
-
-            // Reset Position instantly
-            reel.style.transition = 'none';
-            reel.style.transform = 'translateY(0)';
-            
-            // Physics-based Scroll
-            promises.push(new Promise(resolve => {
-                setTimeout(() => {
-                    reel.style.transition = `transform ${2.35 + (i * 0.38)}s cubic-bezier(.12,.72,.18,1)`;
-                    // Target = (Number of buffer symbols * height) + (stop symbol * height)
-                    const targetY = -(landingIndex * cellHeight);
-                    reel.style.transform = `translateY(${targetY}px)`;
-                    setTimeout(resolve, 2450 + (i * 380));
-                }, 50);
-            }));
-        }
-
-        await Promise.all(promises);
-        processWin(results);
-    }
-
-    function processWin(results) {
-        let win = 0;
-        const s1 = symbols[results[0]];
-        const s2 = symbols[results[1]];
-        const s3 = symbols[results[2]];
-        const s4 = symbols[results[3]];
-        const s5 = symbols[results[4]];
-
-        // Central Payline Logic
-        if(s1.id === s2.id && s2.id === s3.id) {
-            win = currentBet * s1.mult;
-            if(s4.id === s1.id) win *= 2;
-            if(s5.id === s1.id) win *= 3;
-        }
-
-        if(win > 0) {
-            user.balance += win;
-            document.getElementById('winLabelTop').innerText = win.toFixed(2);
-            document.getElementById('statusBox').innerText = "RASTA REVELATION!";
-            triggerWinEffect();
-            refreshUI();
-            updateDatabase(user.balance);
-        } else {
-            document.getElementById('statusBox').innerText = "TRY AGAIN";
-        }
-
-        isSpinning = false;
-        document.getElementById('spinBtn').disabled = false;
-    }
-
-    function triggerWinEffect() {
-        // Simple confetti for impact
-        for(let i=0; i<30; i++) {
-            const part = document.createElement('div');
-            part.style.cssText = `position:fixed; width:10px; height:10px; background:var(--rasta-gold); top:-10px; left:${Math.random()*100}%; z-index:200; border-radius:50%;`;
-            document.body.appendChild(part);
-            let y = -10;
-            const drop = setInterval(() => {
-                y += 7;
-                part.style.top = y + 'px';
-                if(y > window.innerHeight) { clearInterval(drop); part.remove(); }
-            }, 20);
-        }
-    }
-
-    function refreshUI() {
-        document.getElementById('userBal').innerText = parseFloat(user.balance).toLocaleString(undefined, {minimumFractionDigits: 2});
-        document.getElementById('betLabelTop').innerText = currentBet.toFixed(2);
-        document.getElementById('betMid').innerText = currentBet;
-        localStorage.setItem('rasta_user', JSON.stringify(user));
-    }
-
-    async function syncData() {
-        try {
-            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}`);
-            const data = await res.json();
-            if(data.balance !== undefined) { 
-                user.balance = parseFloat(data.balance); 
-                refreshUI(); 
-            }
-        } catch(e) { console.warn("Offline Sync Active"); }
-    }
-
-    async function updateDatabase(bal) {
-        fetch(`${SCRIPT_URL}?action=updateBalance&phone=${user.phone}&balance=${bal}`);
-    }
-
-    function toggleMusic() {
-        const music = document.getElementById('bgMusic');
-        const speaker = document.getElementById('speaker');
-        if(music.paused) { music.play(); speaker.innerText = "🔊"; } 
-        else { music.pause(); speaker.innerText = "🔈"; }
-    }
-
-    window.onload = init;
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdPewsjld31mT1oBLhtCk_bkM5B_iVcaOeTMJUFMPxqgyH2bFJVYZIFTcZrPgxBrID/exec";
+const symbols=[
+ {id:'king',img:'asset/king.jpg',mult:100},
+ {id:'bob',img:'asset/bob.jpg',mult:50},
+ {id:'lion',img:'asset/lion.king.jpg',mult:25},
+ {id:'blunt',img:'asset/blunt.jpg',mult:15},
+ {id:'tree',img:'asset/tree.jpg',mult:10},
+ {id:'leaf',img:'asset/mar.jpg',mult:5}
+];
+let user=JSON.parse(localStorage.getItem('rasta_user'))||{balance:0,phone:'000'};
+let currentBet=10,isSpinning=false,landed=[];
+const $=id=>document.getElementById(id);
+function init(){refreshUI();syncData();for(let i=0;i<5;i++){const strip=$('reel'+i);for(let n=0;n<70;n++){const d=symbols[Math.floor(Math.random()*symbols.length)],cell=document.createElement('div');cell.className='symbol';cell.dataset.index=n;cell.innerHTML='<img src="'+d.img+'" alt="'+d.id+'">';strip.appendChild(cell)}}}
+function adjustBet(v){if(isSpinning)return;currentBet=Math.max(5,Math.min(5000,currentBet+v));refreshUI()}
+function drawRevelationLine(count,amount){const svg=$('revelationPayline'),viewport=$('reelViewport'),rect=svg.getBoundingClientRect();svg.innerHTML='';svg.setAttribute('viewBox','0 0 '+rect.width+' '+rect.height);const pts=[];for(let i=0;i<count;i++){const cell=landed[i];if(!cell)continue;const b=cell.getBoundingClientRect();pts.push((b.left+b.width/2-rect.left)+','+(b.top+b.height/2-rect.top));cell.classList.add('payline-hit')}if(pts.length>1){const p=document.createElementNS('http://www.w3.org/2000/svg','polyline');p.setAttribute('points',pts.join(' '));svg.appendChild(p)}$('revelationWinBanner').textContent='YOU WIN '+amount.toLocaleString()+' ETB';$('revelationWinBanner').classList.toggle('show',amount>0)}
+async function spin(){if(isSpinning)return;if(Number(user.balance)<currentBet){alert('Insufficient Balance, Rasta!');return}isSpinning=true;user.balance-=currentBet;refreshUI();updateDatabase(user.balance);$('spinBtn').disabled=true;$('statusBox').textContent='REELS SLIDING';$('winLabelTop').textContent='0.00';$('revelationPayline').innerHTML='';$('revelationWinBanner').classList.remove('show');document.querySelectorAll('.symbol').forEach(x=>x.classList.remove('payline-hit'));const results=[],promises=[];landed=[];
+for(let i=0;i<5;i++){const reel=$('reel'+i),height=reel.children[0].getBoundingClientRect().height||100,index=42+Math.floor(Math.random()*symbols.length);results.push(index%symbols.length);const target=reel.children[index];target.querySelector('img').src=symbols[results[i]].img;const finalIndex=index-1,startY=-(finalIndex+10)*height,stopY=-finalIndex*height;reel.style.transition='none';reel.style.transform='translateY('+startY+'px)';void reel.offsetHeight;promises.push(new Promise(resolve=>setTimeout(()=>{const duration=2200+i*360;reel.style.transition='transform '+duration+'ms cubic-bezier(.12,.72,.16,1)';reel.style.transform='translateY('+stopY+'px)';setTimeout(()=>{landed[i]=target;resolve()},duration+40)},i*110)))}await Promise.all(promises);processWin(results)}
+function processWin(results){let win=0,count=0;const first=symbols[results[0]];if(results[0]===results[1]&&results[1]===results[2]){count=3;win=currentBet*first.mult;if(results[3]===results[0]){count=4;win*=2}if(results[4]===results[0]){count=5;win*=1.5}}
+if(win>0){user.balance+=win;$('winLabelTop').textContent=win.toFixed(2);$('statusBox').textContent='RASTA REVELATION · YOU WIN '+win.toLocaleString();drawRevelationLine(count,win);triggerWinEffect();refreshUI();updateDatabase(user.balance)}else{$('statusBox').textContent='NO WIN · TRY AGAIN'}
+isSpinning=false;$('spinBtn').disabled=false;refreshUI()}
+function triggerWinEffect(){for(let i=0;i<30;i++){const p=document.createElement('div');p.style.cssText='position:fixed;width:10px;height:10px;background:var(--rasta-gold);top:-10px;left:'+(Math.random()*100)+'%;z-index:200;border-radius:50%;';document.body.appendChild(p);let y=-10;const drop=setInterval(()=>{y+=7;p.style.top=y+'px';if(y>window.innerHeight){clearInterval(drop);p.remove()}},20)}}
+function refreshUI(){$('userBal').textContent=Number(user.balance).toLocaleString(undefined,{minimumFractionDigits:2});$('betLabelTop').textContent=currentBet.toFixed(2);$('betMid').textContent=currentBet;localStorage.setItem('rasta_user',JSON.stringify(user))}
+async function syncData(){try{const res=await fetch(SCRIPT_URL+'?action=login&phone='+encodeURIComponent(user.phone));const data=await res.json();if(data.balance!==undefined){user.balance=Number(data.balance);refreshUI()}}catch(e){console.warn('Offline Sync Active')}}
+function updateDatabase(bal){fetch(SCRIPT_URL+'?action=updateBalance&phone='+encodeURIComponent(user.phone)+'&balance='+encodeURIComponent(bal)).catch(()=>{})}
+function toggleMusic(){const music=$('bgMusic'),speaker=$('speaker');if(music.paused){music.play();speaker.innerText='🔊'}else{music.pause();speaker.innerText='🔈'}}
+window.onload=init;
 </script>
 </body>
 </html>
