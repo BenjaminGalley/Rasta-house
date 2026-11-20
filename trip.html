@@ -276,6 +276,7 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
         const stops = [];
         for(let i=0; i<5; i++) {
             const reel = document.getElementById('r' + i);
+            const cellHeight = reel.querySelector('.slot-item').getBoundingClientRect().height || 108;
             const reelResult = [0,1,2,3].map(() => mathPool[Math.floor(Math.random() * mathPool.length)]);
             stops.push(reelResult);
 
