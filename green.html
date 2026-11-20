@@ -126,6 +126,7 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
             <div class="reel-window"><div class="reel-strip" id="r0"></div></div>
             <div class="reel-window"><div class="reel-strip" id="r1"></div></div>
             <div class="reel-window"><div class="reel-strip" id="r2"></div></div>
+            <svg id="greenPayline" aria-hidden="true"></svg><div id="greenWinBanner">YOU WIN</div>
         </div>
     </div>
 
@@ -202,77 +203,62 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
             if(state.user.balance < state.bet) alert("Insufficient Balance");
             return;
         }
-
-        state.spinning = true;
-        state.user.balance -= state.bet;
+        state.spinning=true;
+        state.user.balance-=state.bet;
         refreshUI();
         syncCloud(state.user.balance);
-
-        const btn = document.getElementById('spinBtn');
-        const frame = document.getElementById('machineFrame');
-        btn.disabled = true;
+        const btn=document.getElementById('spinBtn'),frame=document.getElementById('machineFrame');
+        btn.disabled=true;
         frame.classList.remove('winner-reel');
-        document.getElementById('uiWin').innerText = "0.00";
-
-        const results = [
-            Math.floor(Math.random() * PAYTABLE.length),
-            Math.floor(Math.random() * PAYTABLE.length),
-            Math.floor(Math.random() * PAYTABLE.length)
-        ];
-
-        const animations = [];
-        for(let i=0; i<3; i++) {
-            const strip = document.getElementById(`r${i}`);
-            const symbolHeight = strip.children[0].getBoundingClientRect().height || 90;
-            // Put the selected symbol at the landing position, then roll DOWN into it.
-            const landingIndex = 40 + results[i];
-            const landingSymbol = strip.children[landingIndex];
-            if (landingSymbol) landingSymbol.innerHTML = '<img src="' + PAYTABLE[results[i]].src + '">';
-            const startPos = -((50 + results[i]) * symbolHeight);
-            const stopPos = -(landingIndex * symbolHeight);
-
-            strip.style.transition = 'none';
-            strip.style.transform = 'translateY(' + startPos + 'px)';
-            strip.offsetHeight; 
-
-            animations.push(new Promise(resolve => {
-                setTimeout(() => {
-                    strip.style.transition = `transform ${2.15 + i*0.48}s cubic-bezier(.12,.72,.18,1)`;
-                    strip.style.transform = `translateY(${stopPos}px)`;
-                    setTimeout(resolve, 2150 + i*480);
-                }, 50);
-            }));
+        document.getElementById('uiWin').innerText='0.00';
+        document.getElementById('greenPayline').innerHTML='';
+        document.getElementById('greenWinBanner').classList.remove('show');
+        const results=Array.from({length:3},()=>Math.floor(Math.random()*PAYTABLE.length));
+        const animations=[];
+        for(let i=0;i<3;i++){
+            const strip=document.getElementById('r'+i),h=strip.children[0].getBoundingClientRect().height||90;
+            const landingIndex=40+results[i],landing=strip.children[landingIndex];
+            if(landing)landing.innerHTML='<img src="'+PAYTABLE[results[i]].src+'" alt="'+PAYTABLE[results[i]].id+'">';
+            const stopY=-landingIndex*h,startY=stopY-10*h;
+            strip.style.transition='none';
+            strip.style.transform='translateY('+startY+'px)';
+            void strip.offsetHeight;
+            animations.push(new Promise(resolve=>setTimeout(()=>{
+                const duration=2200+i*430;
+                strip.style.transition='transform '+duration+'ms cubic-bezier(.12,.72,.16,1)';
+                strip.style.transform='translateY('+stopY+'px)';
+                setTimeout(resolve,duration+40);
+            },i*130)));
         }
-
         await Promise.all(animations);
         finalizeWin(results);
     }
 
     function finalizeWin(indices) {
-        const s1 = PAYTABLE[indices[0]], s2 = PAYTABLE[indices[1]], s3 = PAYTABLE[indices[2]];
-        let win = 0;
-
-        // Winning Logic
-        if(s1.id === s2.id && s2.id === s3.id) {
-            win = state.bet * s1.x;
-        } 
-        // Wild Logic (Wild acts as a joker for 2-matches)
-        else if ((s1.id === s2.id && s3.id === 'wild') || 
-                 (s1.id === s3.id && s2.id === 'wild') || 
-                 (s2.id === s3.id && s1.id === 'wild')) {
-            const baseItem = (s1.id !== 'wild') ? s1 : s2;
-            win = state.bet * (baseItem.x / 2);
-        }
-
-        if(win > 0) {
-            state.user.balance += win;
-            document.getElementById('uiWin').innerText = win.toFixed(2);
-            document.getElementById('machineFrame').classList.add('winner-reel');
+        const picked=indices.map(i=>PAYTABLE[i]);
+        const wild=PAYTABLE.findIndex(s=>s.id==='wild');
+        let base=picked.find(s=>s.id!=='wild'),count=0,win=0;
+        if(picked.every(s=>s.id==='wild')){base=picked[0];count=3}
+        else if(base&&picked.every(s=>s.id===base.id||s.id==='wild'))count=3;
+        if(count===3)win=state.bet*(base.x||100);
+        const line=document.getElementById('greenPayline'),frame=document.getElementById('machineFrame'),rect=line.getBoundingClientRect();
+        line.innerHTML='';
+        if(win>0){
+            state.user.balance+=win;
+            document.getElementById('uiWin').innerText=win.toFixed(2);
+            document.getElementById('greenWinBanner').textContent='YOU WIN '+win.toLocaleString()+' CREDITS';
+            document.getElementById('greenWinBanner').classList.add('show');
+            const windows=[...frame.querySelectorAll('.reel-window')],pts=windows.map(el=>{const b=el.getBoundingClientRect();return (b.left+b.width/2-rect.left)+','+(b.top+b.height/2-rect.top)});
+            line.setAttribute('viewBox','0 0 '+rect.width+' '+rect.height);
+            const p=document.createElementNS('http://www.w3.org/2000/svg','polyline');p.setAttribute('points',pts.join(' '));line.appendChild(p);
+            frame.classList.add('winner-reel');
             syncCloud(state.user.balance);
+        }else{
+            document.getElementById('uiWin').innerText='0.00';
+            document.getElementById('greenWinBanner').classList.remove('show');
         }
-
-        state.spinning = false;
-        document.getElementById('spinBtn').disabled = false;
+        state.spinning=false;
+        document.getElementById('spinBtn').disabled=false;
         refreshUI();
     }
 
@@ -291,3 +277,13 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
 </script>
 </body>
 </html>
+
+<style>
+#machineFrame{position:relative}
+#greenPayline{position:absolute;inset:0;width:100%;height:100%;z-index:12;pointer-events:none;overflow:visible}
+#greenPayline polyline{fill:none;stroke:#fff06a;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 5px #000) drop-shadow(0 0 10px #ffe04b);stroke-dasharray:1200;stroke-dashoffset:1200;animation:greenLine .65s ease forwards}
+@keyframes greenLine{to{stroke-dashoffset:0}}
+#greenWinBanner{position:absolute;top:7px;left:50%;transform:translate(-50%,-10px);z-index:14;padding:7px 13px;border:2px solid #fff0a5;border-radius:24px;background:linear-gradient(#fff0a5,#d69a2d 60%,#70420d);color:#251604;font:900 clamp(11px,3vw,16px) Montserrat,sans-serif;white-space:nowrap;opacity:0;pointer-events:none;box-shadow:0 5px 18px #000b}
+#greenWinBanner.show{opacity:1;transform:translate(-50%,0);transition:.25s}
+#machineFrame .reel-window{position:relative;z-index:2}
+</style>
