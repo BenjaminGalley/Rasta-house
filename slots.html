@@ -1,79 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JUNGLE SLOTS</title>
-    <style>
-        body { background: #000; color: white; font-family: sans-serif; text-align: center; margin: 0; }
-        /* Background uses your asset.bg.jpg */
-        .game-area { 
-            height: 100vh; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('asset/asset.bg.jpg'); 
-            background-size: cover; display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .reels { display: flex; gap: 10px; background: rgba(0,0,0,0.8); padding: 20px; border: 3px solid #FFD100; border-radius: 15px; }
-        .reel { width: 80px; height: 120px; background: white; border-radius: 5px; overflow: hidden; position: relative; }
-        /* Reel images use your asset.tiles.jpg */
-        .symbol { width: 80px; height: 120px; background: url('asset/asset.tiles.jpg'); background-size: cover; }
-        .spin-btn { background: #008542; color: white; padding: 20px 60px; font-size: 1.5rem; border: none; border-radius: 50px; margin-top: 20px; font-weight: bold; cursor: pointer; border: 2px solid #FFD100; }
-    </style>
-
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Zion Slots | Rasta House</title>
 <style>
-html,body{min-height:100%;margin:0}
-body{overflow-x:hidden;overflow-y:auto}
-.game-area{min-height:100dvh;height:auto;padding:22px 12px 30px;box-sizing:border-box;justify-content:center}
-.reels{width:min(94vw,360px);justify-content:center;gap:clamp(5px,2vw,10px);padding:clamp(8px,3vw,20px)}
-.reel{width:clamp(58px,23vw,90px);height:clamp(100px,36vw,140px)}
-.symbol{width:100%;height:100%}
-.spin-btn{min-height:58px;width:min(90vw,320px);padding:14px 20px;touch-action:manipulation}
-</style>
-</head>
-<body>
-    <div class="game-area">
-        <h1 style="color:#FFD100; margin-bottom: 10px;">JUNGLE SLOTS</h1>
-        <div class="reels">
-            <div class="reel"><div id="r1" class="symbol"></div></div>
-            <div class="reel"><div id="r2" class="symbol"></div></div>
-            <div class="reel"><div id="r3" class="symbol"></div></div>
-        </div>
-        <div style="margin-top:20px; font-size: 1.2rem;">BALANCE: <span id="s-bal">0.00</span> ETB</div>
-        <button class="spin-btn" onclick="spin()">SPIN (5 ETB)</button>
-        <a href="index.html" style="color:#FFD100; display:block; margin-top: 20px; text-decoration: none;">BACK</a>
-    </div>
-
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5oeX598AtqVX_owDmR1yKiAQ6z0fjquHzf4YJccbyBqF1GwrGnRwyFt_pVvGyGl7j/exec";
-        let user = JSON.parse(localStorage.getItem('rasta_user'));
-
-        function spin() {
-            if(user.balance < 5) return alert("No money!");
-            user.balance -= 5;
-            document.getElementById('s-bal').innerText = user.balance.toFixed(2);
-            
-            // Spinning Animation Logic
-            const r1 = document.getElementById('r1');
-            r1.style.opacity = "0.5";
-            setTimeout(() => {
-                r1.style.opacity = "1";
-                const win = Math.random() > 0.9;
-                if(win) {
-                    user.balance += 50;
-                    alert("BIG WIN! +50 ETB");
-                }
-                updateServer();
-            }, 1000);
-        }
-
-        async function updateServer() {
-            localStorage.setItem('rasta_user', JSON.stringify(user));
-            document.getElementById('s-bal').innerText = user.balance.toFixed(2);
-            // This would normally sync to the sheet in a real game
-        }
-
-        window.onload = () => { 
-            if(!user) location.href='login.html';
-            document.getElementById('s-bal').innerText = parseFloat(user.balance).toFixed(2);
-        };
-    </script>
-</body>
-</html>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#050706;color:#fff;font-family:Arial,sans-serif}body{min-height:100dvh;background:radial-gradient(ellipse at 50% 8%,#253528,#090d0a 55%,#020302);padding-bottom:18px}.top{height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid #c9a64d;background:#030504}.top a{color:#f3d98d;text-decoration:none;font-weight:800}.brand{font-weight:900;letter-spacing:2px;color:#ffdf83}.wrap{width:min(96vw,520px);margin:auto;padding:12px 8px 22px}.title{text-align:center;font-weight:900;letter-spacing:2px;color:#ffe7a0;font-size:clamp(22px,6vw,32px);margin:10px 0 5px}.sub{text-align:center;color:#aeb9a9;font-size:11px;letter-spacing:2px;margin-bottom:14px}.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}.stat{background:#0d1710;border:1px solid #c9a64d88;border-radius:10px;padding:9px;text-align:center}.stat small{display:block;color:#aeb9a9;font-size:10px;letter-spacing:1px}.stat b{display:block;color:#ffe7a0;font-size:18px;margin-top:4px}.machine{padding:10px;border:4px solid #bd9147;border-radius:18px;background:linear-gradient(145deg,#18241b,#050806 60%);box-shadow:0 12px 30px #000,inset 0 0 22px #000}.reels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;background:#020302;padding:7px;border:2px solid #6f552c;border-radius:10px}.reel{display:grid;grid-template-rows:repeat(3,1fr);gap:5px;min-width:0}.cell{height:clamp(82px,24vw,118px);display:grid;place-items:center;background:linear-gradient(145deg,#f6edce,#c6b98f 55%,#8c7a50);border:1px solid #fff0c0;border-radius:8px;overflow:hidden}.cell img{width:82%;height:82%;object-fit:contain;filter:drop-shadow(0 4px 5px #392b13)}.cell.win{background:linear-gradient(145deg,#fff4b5,#f2b735);box-shadow:0 0 18px #ffd65c;animation:pulse .5s infinite alternate}@keyframes pulse{to{filter:brightness(1.2);transform:scale(.97)}}.machine.spinning .cell img{animation:blur .12s infinite alternate}@keyframes blur{to{filter:blur(2px);transform:translateY(5px)}}.status{height:30px;text-align:center;color:#ffe08a;font-size:13px;font-weight:900;letter-spacing:1px;margin:10px 0}.controls{position:sticky;bottom:8px;z-index:5;background:#070b08f5;border:1px solid #c9a64d88;border-radius:14px;padding:11px;box-shadow:0 -5px 24px #000}.betrow{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:10px}.betrow button{width:48px;height:44px;border-radius:10px;border:1px solid #f3d98d;background:linear-gradient(#72552b,#291d0c);color:#fff0bd;font-size:25px;font-weight:900}.betvalue{min-width:88px;text-align:center;color:#ffe7a0;font-size:21px;font-weight:900}.spin{width:100%;min-height:58px;border:2px solid #fff0b2;border-radius:12px;background:linear-gradient(#ffdf86,#d58a23 60%,#75400e);color:#251605;font-weight:1000;font-size:20px;letter-spacing:2px;box-shadow:0 4px 0 #60370e}.spin:disabled{opacity:.55}.note{text-align:center;color:#879184;font-size:10px;margin-top:10px}@media(max-height:680px){.cell{height:clamp(66px,19vw,90px)}.wrap{padding-top:6px}.title{margin-top:4px}.controls{padding:8px}.spin{min-height:50px}}
+</style></head><body><header class="top"><a href="index.html">← LOBBY</a><div class="brand">RASTA HOUSE</div><span style="color:#d8c58e;font-size:11px">ZION</span></header><main class="wrap"><h1 class="title">ZION SLOTS</h1><div class="sub">THREE REELS · FIVE PAYLINES</div><div class="stats"><div class="stat"><small>DEMO CREDITS</small><b id="balance">1,000</b></div><div class="stat"><small>LAST WIN</small><b id="lastWin">0</b></div></div><section class="machine" id="machine"><div class="reels" id="reels"></div></section><div class="status" id="status">READY TO SPIN</div><section class="controls"><div class="betrow"><button id="minus">−</button><div class="betvalue">BET <span id="bet">10</span></div><button id="plus">+</button></div><button class="spin" id="spin">SPIN</button></section><div class="note">Demo credits only · No cash wagering or cash prizes</div></main>
+<script>
+(()=>{const assets=['asset/cherry.g.png','asset/lemon.g.png','asset/orange.g.png','asset/plum.g.png','asset/seven.g.png','asset/wild.g.png'];const names=['Cherry','Lemon','Orange','Plum','Seven','Wild'];const pays=[3,4,5,6,12,20];const lines=[[1,1,1],[0,0,0],[2,2,2],[0,1,2],[2,1,0]];let credits=Number(localStorage.getItem('rasta_demo_credits'));if(!Number.isFinite(credits)||credits<0)credits=1000;let bet=10,busy=false,last=0;const $=id=>document.getElementById(id),machine=$('machine'),reels=$('reels');function save(){localStorage.setItem('rasta_demo_credits',String(credits));$('balance').textContent=Math.floor(credits).toLocaleString();$('bet').textContent=bet;$('lastWin').textContent=last.toLocaleString();$('spin').disabled=busy||credits<bet;$('minus').disabled=busy||bet<=2;$('plus').disabled=busy||bet>=1500}function draw(grid){reels.innerHTML='';for(let c=0;c<3;c++){const col=document.createElement('div');col.className='reel';for(let r=0;r<3;r++){const cell=document.createElement('div');cell.className='cell';cell.dataset.c=c;cell.dataset.r=r;const img=document.createElement('img');img.src=assets[grid[c][r]];img.alt=names[grid[c][r]];cell.appendChild(img);col.appendChild(cell)}reels.appendChild(col)}}function rand(){return Math.floor(Math.random()*assets.length)}function spin(){if(busy||credits<bet)return;busy=true;last=0;credits-=bet;save();$('status').textContent='REELS IN MOTION';machine.classList.add('spinning');const g=Array.from({length:3},()=>Array.from({length:3},rand));const delay=850;setTimeout(()=>{draw(g);[...reels.children].forEach((el,i)=>{el.animate([{transform:'translateY(-35px)',filter:'blur(3px)'},{transform:'translateY(5px)',filter:'blur(0)'},{transform:'translateY(0)'}],{duration:420,delay:i*180,easing:'cubic-bezier(.15,.75,.2,1)'})});setTimeout(()=>{let win=0;for(const line of lines){const a=g[0][line[0]],b=g[1][line[1]],c=g[2][line[2]];const target=a===5?(b===5?c:b):a;if((a===target||a===5)&&(b===target||b===5)&&(c===target||c===5)){win+=bet/lines.length*pays[target]||0;line.forEach((row,col)=>{const cell=reels.querySelector('[data-c="'+col+'"][data-r="'+row+'"]');if(cell)cell.classList.add('win')})}}last=Math.round(win);credits+=last;machine.classList.remove('spinning');busy=false;$('status').textContent=last?'WIN '+last.toLocaleString()+' CREDITS':'NO WIN · TRY AGAIN';save()},1050)},delay)}$('spin').onclick=spin;$('minus').onclick=()=>{bet=Math.max(2,bet-2);save()};$('plus').onclick=()=>{bet=Math.min(1500,bet+2);save()};draw(Array.from({length:3},()=>Array.from({length:3},rand)));save()})();
+</script></body></html>
