@@ -18,7 +18,7 @@
         .sym-icon { font-size: 3rem; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); }
         .sym-mult { font-size: 0.7rem; color: var(--gold); margin-top: 5px; opacity: 0.8; }
 
-        canvas { position: absolute; top: 0; left: 0; cursor: pointer; z-index: 5; }
+        canvas { position:absolute; inset:0; width:100%; height:100%; cursor:crosshair; z-index:5; touch-action:none; }
         #msg { height: 35px; color: var(--gold); font-weight: bold; margin: 15px 0; text-transform: uppercase; font-size: 1.1rem; text-shadow: 0 0 10px rgba(255,209,0,0.4); }
 
         .controls { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.9); padding: 20px 0; border-top: 3px solid var(--gold); }
@@ -73,84 +73,20 @@ body{min-height:100dvh;height:auto;overflow-x:hidden;overflow-y:auto;touch-actio
 
 <script>
     const SCRIPT = "https://script.google.com/macros/s/AKfycby5oeX598AtqVX_owDmR1yKiAQ6z0fjquHzf4YJccbyBqF1GwrGnRwyFt_pVvGyGl7j/exec";
-    let user = JSON.parse(localStorage.getItem('rasta_user'));
-    let bet = 5;
-    let active = false;
-    const cvs = document.getElementById('cvs');
-    const ctx = cvs.getContext('2d');
-    const icons = [{i:'🦁', m:50}, {i:'💎', m:20}, {i:'💰', m:10}, {i:'🍀', m:5}];
-
-    function init() {
-        if(!user) return window.location.href='index.html';
-        document.getElementById('balDisplay').innerText = parseFloat(user.balance).toFixed(2);
-        cover();
-    }
-
-    function cover() {
-        ctx.globalCompositeOperation = 'source-over';
-        let g = ctx.createLinearGradient(0,0,320,320);
-        g.addColorStop(0, '#8A6E00'); g.addColorStop(0.5, '#FFD100'); g.addColorStop(1, '#C5A000');
-        ctx.fillStyle = g; ctx.fillRect(0,0,320,320);
-        ctx.fillStyle = "rgba(0,0,0,0.2)"; ctx.font = "20px Goldman"; ctx.textAlign="center";
-        ctx.fillText("RASTA GOLD", 160, 160);
-    }
-
-    function adj(v) { if(!active) { bet = Math.max(5, bet + v); document.getElementById('bet').innerText = bet; } }
-
-    function buy() {
-        if(user.balance < bet) return alert("Low Balance");
-        user.balance -= bet;
-        sync();
-        active = true;
-        document.getElementById('buyBtn').disabled = true;
-        document.getElementById('msg').innerText = "SCRATCH NOW!";
-        
-        const results = Array.from({length:4}, () => icons[Math.floor(Math.random()*icons.length)]);
-        const grid = document.getElementById('grid');
-        grid.innerHTML = results.map(r => `<div class="prize-cell"><div class="sym-icon">${r.i}</div><div class="sym-mult">x${r.m}</div></div>`).join('');
-        
-        // Win Logic
-        let win = 0;
-        const counts = {};
-        results.forEach(r => { counts[r.i] = (counts[r.i] || 0) + 1; if(counts[r.i] >= 3) win = bet * r.m; });
-        cvs.win = win;
-    }
-
-    function scratch(e) {
-        if(!active) return;
-        const r = cvs.getBoundingClientRect();
-        const x = (e.clientX || e.touches[0].clientX) - r.left;
-        const y = (e.clientY || e.touches[0].clientY) - r.top;
-        ctx.globalCompositeOperation = 'destination-out';
-        ctx.beginPath(); ctx.arc(x, y, 30, 0, Math.PI*2); ctx.fill();
-        
-        // Percent Check
-        const d = ctx.getImageData(0,0,320,320).data;
-        let c = 0; for(let i=3; i<d.length; i+=4) if(d[i]===0) c++;
-        if((c/(320*320)) > 0.45) finish();
-    }
-
-    function finish() {
-        active = false;
-        cvs.style.opacity = "0";
-        setTimeout(() => {
-            if(cvs.win > 0) { user.balance += cvs.win; document.getElementById('msg').innerText = "WIN: "+cvs.win+" ETB"; }
-            else { document.getElementById('msg').innerText = "TRY AGAIN"; }
-            sync();
-            document.getElementById('buyBtn').disabled = false;
-            cover(); cvs.style.opacity = "1";
-        }, 500);
-    }
-
-    function sync() {
-        document.getElementById('balDisplay').innerText = parseFloat(user.balance).toFixed(2);
-        localStorage.setItem('rasta_user', JSON.stringify(user));
-        fetch(`${SCRIPT}?action=login&phone=${user.phone}&updateBal=${user.balance}`);
-    }
-
-    cvs.addEventListener('mousemove', (e) => { if(e.buttons===1) scratch(e); });
-    cvs.addEventListener('touchmove', (e) => { e.preventDefault(); scratch(e); });
-    window.onload = init;
-</script>
+    let user = JSON.parse(localStorage.getItem('rasta_user')||'null');
+    let bet=5, active=false, finished=false, scratchPixels=0;
+    const cvs=document.getElementById('cvs'),ctx=cvs.getContext('2d',{willReadFrequently:true});
+    const icons=[{i:'LION',m:50},{i:'DIAMOND',m:20},{i:'GOLD',m:10},{i:'CLOVER',m:5}];
+    function fitCanvas(){const box=cvs.parentElement.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);cvs.width=Math.round(box.width*dpr);cvs.height=Math.round(box.height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);cover();}
+    function init(){if(!user)return location.href='index.html';user.balance=Number(user.balance)||0;fitCanvas();syncUI();window.addEventListener('resize',()=>{if(!active)fitCanvas()});}
+    function cover(){const w=cvs.width/(Math.min(devicePixelRatio||1,2)),h=cvs.height/(Math.min(devicePixelRatio||1,2));ctx.globalCompositeOperation='source-over';const g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,'#704000');g.addColorStop(.45,'#ffd65b');g.addColorStop(1,'#9a5a08');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);ctx.strokeStyle='#fff0a6';ctx.lineWidth=3;for(let y=14;y<h;y+=22){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y-8);ctx.stroke()}ctx.fillStyle='#321900';ctx.font='900 19px sans-serif';ctx.textAlign='center';ctx.fillText('RASTA GOLD',w/2,h/2+7);}
+    function syncUI(){document.getElementById('balDisplay').textContent=user.balance.toFixed(2);document.getElementById('bet').textContent=bet;localStorage.setItem('rasta_user',JSON.stringify(user));}
+    function adj(v){if(!active){bet=Math.max(5,Math.min(500,bet+v));syncUI();}}
+    function buy(){if(active)return;if(finished){finished=false;document.getElementById('buyBtn').textContent='BUY TICKET';document.getElementById('msg').textContent='BUY TICKET TO START';cover();return;}if(user.balance<bet){document.getElementById('msg').textContent='INSUFFICIENT BALANCE';return;}user.balance-=bet;sync();active=true;document.getElementById('buyBtn').disabled=true;document.getElementById('msg').textContent='SCRATCH THE GOLD';const results=Array.from({length:4},()=>icons[Math.floor(Math.random()*icons.length)]);document.getElementById('grid').innerHTML=results.map(r=>'<div class="prize-cell"><div class="sym-icon" style="font-size:clamp(1.25rem,7vw,2.6rem);font-weight:900;color:#ffe28a;text-shadow:0 3px 8px #000">'+r.i+'</div><div class="sym-mult">x'+r.m+'</div></div>').join('');const counts={};results.forEach(r=>counts[r.i]=(counts[r.i]||0)+1);cvs.win=results.reduce((best,r)=>counts[r.i]>=3?Math.max(best,bet*r.m):best,0);scratchPixels=0;cvs.style.opacity='1';cover();}
+    function scratch(e){if(!active)return;const rect=cvs.getBoundingClientRect(),dpr=cvs.width/rect.width,x=e.clientX-rect.left,y=e.clientY-rect.top;ctx.globalCompositeOperation='destination-out';ctx.beginPath();ctx.arc(x,y,Math.max(18,rect.width*.075),0,Math.PI*2);ctx.fill();scratchPixels+=Math.PI*Math.pow(Math.max(18,rect.width*.075),2);if(scratchPixels/(rect.width*rect.height)>.5)finish();}
+    function finish(){if(!active)return;active=false;ctx.globalCompositeOperation='source-over';if(cvs.win>0){user.balance+=cvs.win;document.getElementById('msg').textContent='YOU WON '+cvs.win.toFixed(2)+' ETB';}else document.getElementById('msg').textContent='NO WIN THIS TIME';sync();finished=true;document.getElementById('buyBtn').disabled=false;document.getElementById('buyBtn').textContent='NEW TICKET';}
+    function sync(){syncUI();fetch(SCRIPT+'?action=updateBalance&phone='+encodeURIComponent(user.phone||'')+'&balance='+encodeURIComponent(user.balance)).catch(()=>{});}
+    cvs.addEventListener('pointerdown',e=>{if(active){cvs.setPointerCapture(e.pointerId);scratch(e)}});cvs.addEventListener('pointermove',e=>{if(active&&e.buttons)scratch(e)});
+    window.onload=init;</script>
 </body>
 </html>
