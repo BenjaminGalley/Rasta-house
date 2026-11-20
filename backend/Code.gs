@@ -29,7 +29,7 @@ const HEADERS = {
 function onOpen() {
   SpreadsheetApp.getUi().createMenu('RASTA ADMIN')
     .addItem('Setup / Repair Sheets', 'setup')
-    .addItem('Configure Telegram Bot', 'configureTelegram')
+    .addItem('Configure Telegram Bot', 'configureTelegram')\n    .addItem('Connect Telegram Approval Buttons', 'configureTelegramWebhook')
     .addItem('Test Telegram', 'testTelegram')
     .addSeparator()
     .addItem('Approve Selected Request', 'approveSelectedRequest')
@@ -87,6 +87,16 @@ function doGet(e) {
 }
 
 function doPost(e) {
+  // Telegram sends JSON updates; website forms send URL-encoded parameters.
+  let body = {};
+  try {
+    if (e && e.postData && e.postData.contents) {
+      const raw = e.postData.contents;
+      if (String(e.postData.type || '').toLowerCase().indexOf('application/json') >= 0) body = JSON.parse(raw);
+    }
+  } catch (_) {}
+  if (body && body.callback_query) return handleTelegramCallback_(body.callback_query);
+
   const lock = LockService.getScriptLock();
   try {
     lock.waitLock(20000);
@@ -126,9 +136,8 @@ function doPost(e) {
     const message = (action === 'deposit' ? '🟡 NEW DEPOSIT REQUEST' : '🟠 NEW WITHDRAWAL REQUEST') +
       '\nID: ' + requestId + '\nPlayer: ' + user.name + '\nPhone: ' + phone +
       '\nAmount: ' + amount + ' demo credits\nDetails: ' + details +
-      (transactionId ? '\nTransaction ID: ' + transactionId : '') +
-      '\n\nApprove/reject it in the Requests sheet using RASTA ADMIN menu.';
-    sendTelegram_(message);
+      (transactionId ? '\nTransaction ID: ' + transactionId : '');
+    sendTelegramRequest_(message, requestId);
     return json_({status:'success',message:'Request recorded and awaiting review.',requestId:requestId});
   } catch (err) {
     return json_({status:'error',message:String(err.message || err)});
@@ -229,6 +238,111 @@ function processSelectedRequest_(decision) {
       '\nAmount: '+amount+'\nNew balance: '+balance+
       (type==='WITHDRAW' && decision==='REJECTED' ? '\nReserved amount refunded.' : ''));
     SpreadsheetApp.getUi().alert(type+' request '+decision.toLowerCase()+'.');
+  } finally { lock.releaseLock(); }
+}
+
+// Run once after deploying the updated Web App. This registers Telegram's
+// button callbacks with this same Apps Script deployment.
+function configureTelegramWebhook() {
+  const token = getBotToken_();
+  const url = ScriptApp.getService().getUrl();
+  if (!token || !url) throw new Error('Missing bot token or deployed Web App URL. Deploy as Execute as Me / Anyone first.');
+  const response = UrlFetchApp.fetch('https://api.telegram.org/bot'+token+'/setWebhook', {
+    method:'post', contentType:'application/json',
+    payload:JSON.stringify({url:url,allowed_updates:['message','callback_query']}),
+    muteHttpExceptions:true
+  });
+  const result = JSON.parse(response.getContentText());
+  SpreadsheetApp.getUi().alert(result.ok ? 'Telegram approval buttons connected.' : 'Webhook setup failed: '+(result.description || 'Unknown error'));
+  return result;
+}
+
+function sendTelegramRequest_(message, requestId) {
+  const token = getBotToken_();
+  if (!token) return false;
+  const chatId = PropertiesService.getScriptProperties().getProperty('TELEGRAM_CHAT_ID') || CFG.CHAT_ID;
+  try {
+    const response = UrlFetchApp.fetch('https://api.telegram.org/bot'+token+'/sendMessage', {
+      method:'post', contentType:'application/json',
+      payload:JSON.stringify({
+        chat_id:chatId, text:message,
+        reply_markup:{inline_keyboard:[[
+          {text:'Approve',callback_data:'RH|APPROVED|'+requestId},
+          {text:'Reject',callback_data:'RH|REJECTED|'+requestId}
+        ]]}
+      }),
+      muteHttpExceptions:true
+    });
+    return !!JSON.parse(response.getContentText()).ok;
+  } catch(err) { console.error('Telegram request notification: '+err); return false; }
+}
+
+function handleTelegramCallback_(q) {
+  const token = getBotToken_();
+  const props = PropertiesService.getScriptProperties();
+  const allowedChat = String(props.getProperty('TELEGRAM_CHAT_ID') || CFG.CHAT_ID);
+  const callbackId = String(q.id || '');
+  const messageChat = String(q.message && q.message.chat ? q.message.chat.id : '');
+  const data = String(q.data || '').split('|');
+  if (messageChat !== allowedChat || data.length !== 3 || data[0] !== 'RH' ||
+      !['APPROVED','REJECTED'].includes(data[1])) {
+    answerTelegramCallback_(callbackId, 'Not authorized or invalid button.', true);
+    return json_({status:'error',message:'Unauthorized Telegram callback.'});
+  }
+  try {
+    const result = processRequestById_(data[2], data[1]);
+    answerTelegramCallback_(callbackId, result.message, false);
+    if (q.message && q.message.message_id) {
+      const suffix = result.status === 'success' ? '\n\n'+(data[1] === 'APPROVED' ? '✅ APPROVED' : '❌ REJECTED')+' by admin' : '';
+      UrlFetchApp.fetch('https://api.telegram.org/bot'+token+'/editMessageText', {
+        method:'post', contentType:'application/json',
+        payload:JSON.stringify({chat_id:messageChat,message_id:q.message.message_id,
+          text:String(q.message.text || '')+suffix,reply_markup:{inline_keyboard:[]}}),
+        muteHttpExceptions:true
+      });
+    }
+    return json_({status:result.status,message:result.message});
+  } catch(err) {
+    answerTelegramCallback_(callbackId, 'Approval failed: '+String(err.message || err), true);
+    return json_({status:'error',message:String(err.message || err)});
+  }
+}
+
+function answerTelegramCallback_(callbackId, message, alert) {
+  const token = getBotToken_();
+  if (!token || !callbackId) return;
+  UrlFetchApp.fetch('https://api.telegram.org/bot'+token+'/answerCallbackQuery', {
+    method:'post', contentType:'application/json',
+    payload:JSON.stringify({callback_query_id:callbackId,text:String(message || '').slice(0,180),show_alert:!!alert}),
+    muteHttpExceptions:true
+  });
+}
+
+function processRequestById_(requestId, decision) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    const sh = sheet_(CFG.REQUESTS);
+    if (sh.getLastRow() < 2) throw new Error('No requests found.');
+    const rows = sh.getRange(2,1,sh.getLastRow()-1,HEADERS.Requests.length).getValues();
+    let row = -1, r = null;
+    for (let i=0;i<rows.length;i++) if (String(rows[i][0]) === String(requestId)) { row=i+2; r=rows[i]; break; }
+    if (row < 0) throw new Error('Request ID not found: '+requestId);
+    const status = String(r[8] || '').toUpperCase();
+    if (status !== 'PENDING') return {status:'error',message:'Already '+status+'. No balance change made.'};
+    const type = String(r[2] || '').toUpperCase();
+    if (!['DEPOSIT','WITHDRAW'].includes(type)) throw new Error('Invalid request type.');
+    const phone = cleanPhone_(r[3]), amount = Number(r[5]) || 0;
+    const user = findUserByPhone_(phone);
+    if (!user) throw new Error('Player record not found.');
+    const balRow = ensureBalanceRow_(user), balSh = sheet_(CFG.BALANCES);
+    let balance = Number(balSh.getRange(balRow,3).getValue()) || 0;
+    if (type === 'DEPOSIT' && decision === 'APPROVED') balance += amount;
+    if (type === 'WITHDRAW' && decision === 'REJECTED') balance += amount;
+    balSh.getRange(balRow,3).setValue(balance);
+    balSh.getRange(balRow,4).setValue(new Date());
+    sh.getRange(row,9,1,3).setValues([[decision,new Date(),decision==='REJECTED' && type==='WITHDRAW' ? 'Withdrawal refunded' : '']]);
+    return {status:'success',message:type+' '+decision.toLowerCase()+'. Balance: '+balance};
   } finally { lock.releaseLock(); }
 }
 
