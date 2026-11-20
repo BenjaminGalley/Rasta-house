@@ -284,14 +284,28 @@ function handleTelegramCallback_(q) {
   const allowedChat = String(props.getProperty('TELEGRAM_CHAT_ID') || CFG.CHAT_ID);
   const callbackId = String(q.id || '');
   const messageChat = String(q.message && q.message.chat ? q.message.chat.id : '');
-  const data = String(q.data || '').split('|');
-  if (messageChat !== allowedChat || data.length !== 3 || data[0] !== 'RH' ||
-      !['APPROVED','REJECTED'].includes(data[1])) {
-    answerTelegramCallback_(callbackId, 'Not authorized or invalid button.', true);
-    return json_({status:'error',message:'Unauthorized Telegram callback.'});
+  const rawData = String(q.data || '');
+  // Accept current RH|APPROVED|ID callbacks and common legacy button payloads.
+  let decision = '', requestId = '';
+  const parts = rawData.split('|');
+  if (parts.length === 3 && parts[0] === 'RH') {
+    decision = parts[1].toUpperCase();
+    requestId = parts[2];
+  } else {
+    const actionMatch = rawData.match(/APPROVE(?:D)?|REJECT(?:ED)?/i);
+    const idMatch = rawData.match(/RH-[A-Z0-9]{8}/i);
+    if (actionMatch && idMatch) {
+      decision = /^APPROVE/i.test(actionMatch[0]) ? 'APPROVED' : 'REJECTED';
+      requestId = idMatch[0].toUpperCase();
+    }
+  }
+  if (messageChat !== allowedChat || !requestId ||
+      !['APPROVED','REJECTED'].includes(decision)) {
+    answerTelegramCallback_(callbackId, 'Not authorized or unsupported button. Update the Apps Script deployment.', true);
+    return json_({status:'error',message:'Unauthorized or unsupported Telegram callback.'});
   }
   try {
-    const result = processRequestById_(data[2], data[1]);
+    const result = processRequestById_(requestId, decision);
     answerTelegramCallback_(callbackId, result.message, false);
     if (q.message && q.message.message_id) {
       const suffix = result.status === 'success' ? '\n\n'+(data[1] === 'APPROVED' ? '✅ APPROVED' : '❌ REJECTED')+' by admin' : '';
