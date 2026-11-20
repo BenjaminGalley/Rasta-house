@@ -29,7 +29,8 @@ const HEADERS = {
 function onOpen() {
   SpreadsheetApp.getUi().createMenu('RASTA ADMIN')
     .addItem('Setup / Repair Sheets', 'setup')
-    .addItem('Configure Telegram Bot', 'configureTelegram')\n    .addItem('Connect Telegram Approval Buttons', 'configureTelegramWebhook')
+    .addItem('Configure Telegram Bot', 'configureTelegram')
+    .addItem('Connect Telegram Approval Buttons', 'configureTelegramWebhook')
     .addItem('Test Telegram', 'testTelegram')
     .addSeparator()
     .addItem('Approve Selected Request', 'approveSelectedRequest')
