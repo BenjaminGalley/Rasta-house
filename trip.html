@@ -157,14 +157,14 @@
 html{min-height:100%;background:#000}
 body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bottom:190px}
 .stage{flex:none;min-height:42dvh;padding:12px 8px}
-.grid-frame{width:min(96vw,550px);height:min(68dvh,430px);min-height:230px}
+.grid-frame{width:min(96vw,550px);height:min(62dvh,400px);min-height:220px;--trip-cell:calc(min(62dvh,400px) / 4);border:5px solid #c9a64d;background:radial-gradient(ellipse at 50% 40%,#202820,#050706 72%);box-shadow:0 0 0 2px #080a08,0 0 30px #c99a3440,inset 0 0 35px #000}
 .console{position:fixed;left:0;right:0;bottom:0;z-index:120;padding:9px 10px calc(10px + env(safe-area-inset-bottom,0px));background:linear-gradient(180deg,#050805f2,#000);border-top:2px solid var(--gold)}
 .info-display{font-size:1rem;margin-bottom:8px;height:auto;min-height:20px}
 .dashboard{gap:10px;flex-wrap:wrap}
 .bet-buttons{gap:10px}
 .btn-ui{width:44px;height:44px}
 .spin-master{padding:12px 28px;font-size:1.3rem}
-@media(max-height:700px){.stage{min-height:38dvh}.grid-frame{height:36dvh;min-height:190px}.console{padding-top:6px}.info-display{margin-bottom:5px}}
+@media(max-height:700px){.stage{min-height:34dvh}.grid-frame{height:34dvh;min-height:190px;--trip-cell:calc(34dvh / 4)}.console{padding-top:6px}.info-display{margin-bottom:5px}}
 
 </style>
 </head>
@@ -286,19 +286,19 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
 
             reel.classList.add('blur-fx');
             reel.style.transition = 'none';
-            reel.style.transform = `translateY(-3000px)`;
+            reel.style.transform = `translateY(-${cellHeight*25}px)`;
             void reel.offsetWidth; 
-            reel.style.transition = `transform ${1.8 + (i * 0.2)}s cubic-bezier(0.1, 0, 0.1, 1)`;
+            reel.style.transition = `transform ${2.05 + (i * 0.32)}s cubic-bezier(.12,.72,.18,1)`;
             reel.style.transform = `translateY(0)`;
             
-            setTimeout(() => reel.classList.remove('blur-fx'), 1800 + (i * 200));
+            setTimeout(() => reel.classList.remove('blur-fx'), 2050 + (i * 320));
         }
 
         setTimeout(() => {
             calculateLogic(stops);
             isActive = false;
             document.getElementById('spinBtn').disabled = false;
-        }, 3000);
+        }, 2050 + 4*320 + 120);
     }
 
     function calculateLogic(grid) {
