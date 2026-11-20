@@ -245,7 +245,7 @@
     
 /* Mobile controls anchored above browser navigation */
 html{min-height:100%;background:#050505}
-body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bottom:175px}
+body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bottom:190px}
 .viewport-section{flex:none;min-height:0;padding:14px 8px 20px;justify-content:center}
 .machine-frame{width:min(90vw,340px);height:min(90vw,340px);flex:none;border:4px solid #c9a64d;box-shadow:0 0 0 2px #161006,0 0 28px #000}
 .bottom-controls{position:fixed;left:0;right:0;bottom:0;z-index:120;padding:8px 8px calc(10px + env(safe-area-inset-bottom,0px));border-top:3px solid var(--rasta-gold)}
@@ -382,11 +382,11 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
             // Start Animation
             animationPromises.push(new Promise(resolve => {
                 setTimeout(() => {
-                    reel.style.transition = `transform ${2 + (i * 0.6)}s cubic-bezier(0.1, 0, 0.1, 1)`;
+                    reel.style.transition = `transform ${2.1 + (i * 0.43)}s cubic-bezier(.12,.72,.18,1)`;
                     // Calculate Y position (Symbol height is 108px)
-                    const finalY = -( (50 * 108) + (stopPoint * 108) );
+                    const finalY = -(landingIndex * cellHeight);
                     reel.style.transform = `translateY(${finalY}px)`;
-                    setTimeout(resolve, 2500 + (i * 600));
+                    setTimeout(resolve, 2200 + (i * 430));
                 }, 50);
             }));
         }
