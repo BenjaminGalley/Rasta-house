@@ -308,7 +308,7 @@ function handleTelegramCallback_(q) {
     const result = processRequestById_(requestId, decision);
     answerTelegramCallback_(callbackId, result.message, false);
     if (q.message && q.message.message_id) {
-      const suffix = result.status === 'success' ? '\n\n'+(data[1] === 'APPROVED' ? '✅ APPROVED' : '❌ REJECTED')+' by admin' : '';
+      const suffix = result.status === 'success' ? '\n\n'+(decision === 'APPROVED' ? '✅ APPROVED' : '❌ REJECTED')+' by admin' : '';
       UrlFetchApp.fetch('https://api.telegram.org/bot'+token+'/editMessageText', {
         method:'post', contentType:'application/json',
         payload:JSON.stringify({chat_id:messageChat,message_id:q.message.message_id,
