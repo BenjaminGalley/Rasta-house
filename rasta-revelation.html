@@ -248,13 +248,13 @@
 html{min-height:100%;background:#050505}
 body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bottom:185px}
 .slot-wrapper{flex:none;min-height:0;padding:12px 8px 18px}
-.machine-container{width:min(96vw,600px);height:min(56dvh,390px);min-height:220px;border:4px solid #c9a64d;box-shadow:0 0 0 2px #151006,0 0 30px #000}
+.machine-container{width:min(96vw,600px);height:min(54dvh,370px);min-height:220px;border:5px solid #c9a64d;border-radius:14px;background:radial-gradient(ellipse at 50% 40%,#171d1b,#020303 72%);box-shadow:0 0 0 2px #151006,0 0 30px #000,inset 0 0 32px #000;overflow:hidden}
 .control-panel{position:fixed;left:0;right:0;bottom:0;z-index:120;padding:8px 8px calc(10px + env(safe-area-inset-bottom,0px));border-top:3px solid var(--rasta-gold)}
 .status-text{height:auto;min-height:20px;margin-bottom:7px;font-size:.95rem}
 .interaction-row{gap:clamp(8px,3vw,18px);flex-wrap:wrap}
 .btn-round{width:42px;height:42px}
 .spin-trigger{width:78px;height:78px;font-size:1.1rem}
-@media(max-height:700px){.machine-container{height:42dvh;min-height:190px}.control-panel{padding-top:6px}.spin-trigger{width:66px;height:66px}}
+@media(max-height:700px){.machine-container{height:40dvh;min-height:190px}.control-panel{padding-top:6px}.spin-trigger{width:66px;height:66px}}
 
 </style>
 </head>
@@ -383,11 +383,11 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
             // Physics-based Scroll
             promises.push(new Promise(resolve => {
                 setTimeout(() => {
-                    reel.style.transition = `transform ${2.5 + (i * 0.4)}s cubic-bezier(0.15, 0, 0.15, 1)`;
+                    reel.style.transition = `transform ${2.35 + (i * 0.38)}s cubic-bezier(.12,.72,.18,1)`;
                     // Target = (Number of buffer symbols * height) + (stop symbol * height)
-                    const targetY = -( (50 * 100) + (stopIdx * 100) );
+                    const targetY = -(landingIndex * cellHeight);
                     reel.style.transform = `translateY(${targetY}px)`;
-                    setTimeout(resolve, 3000 + (i * 400));
+                    setTimeout(resolve, 2450 + (i * 380));
                 }, 50);
             }));
         }
