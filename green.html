@@ -228,7 +228,7 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
             const strip=document.getElementById('r'+i),h=strip.children[0].getBoundingClientRect().height||90;
             const landingIndex=40+results[i],landing=strip.children[landingIndex];
             if(landing)landing.innerHTML='<img src="'+PAYTABLE[results[i]].src+'" alt="'+PAYTABLE[results[i]].id+'">';
-            const stopY=-landingIndex*h,startY=stopY-10*h;
+            const stopY=-(landingIndex-1)*h,startY=stopY-10*h;
             strip.style.transition='none';
             strip.style.transform='translateY('+startY+'px)';
             void strip.offsetHeight;
