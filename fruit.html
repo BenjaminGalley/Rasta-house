@@ -284,7 +284,7 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
             <div class="reel-column"><div class="reel-strip" id="reel1"></div></div>
             <div class="reel-column"><div class="reel-strip" id="reel2"></div></div>
             <div class="asset-frame"></div>
-            <div class="asset-glass"></div>
+            <div class="asset-glass"></div><svg id="fruitPayline" aria-hidden="true"></svg><div id="fruitWinBanner"></div>
         </div>
     </div>
 </div>
@@ -309,169 +309,38 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
 </audio>
 
 <script>
-    // Configuration & State
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5oeX598AtqVX_owDmR1yKiAQ6z0fjquHzf4YJccbyBqF1GwrGnRwyFt_pVvGyGl7j/exec";
-    
-    // Correct Asset Files (.g.png)
-    const SYMBOLS_DATA = [
-        { id: 'wild', img: 'asset/wild.g.png', factor: 50 },
-        { id: 'seven', img: 'asset/seven.g.png', factor: 20 },
-        { id: 'cherry', img: 'asset/cherry.g.png', factor: 10 },
-        { id: 'orange', img: 'asset/orange.g.png', factor: 5 },
-        { id: 'plum', img: 'asset/plum.g.png', factor: 3 },
-        { id: 'lemon', img: 'asset/lemon.g.png', factor: 2 }
-    ];
-
-    let userAccount = JSON.parse(localStorage.getItem('rasta_user')) || { balance: 0, phone: "000" };
-    let currentBetVal = 2; // Min Bet 2 Birr
-    let activeSpin = false;
-
-    // --- INITIALIZATION ---
-    function setupGame() {
-        renderUI();
-        syncBalance();
-        
-        // Build the physical reel strips
-        for(let i=0; i<3; i++) {
-            const strip = document.getElementById(`reel${i}`);
-            // Generate a long strip for smooth scrolling (60 symbols)
-            for(let s=0; s<60; s++) {
-                const randomSym = SYMBOLS_DATA[Math.floor(Math.random() * SYMBOLS_DATA.length)];
-                const div = document.createElement('div');
-                div.className = 'symbol-box';
-                div.innerHTML = `<img src="${randomSym.img}">`;
-                strip.appendChild(div);
-            }
-        }
-    }
-
-    function updateBet(val) {
-        if(activeSpin) return;
-        currentBetVal = Math.max(2, Math.min(2500, currentBetVal + val));
-        renderUI();
-    }
-
-    // --- SPIN LOGIC ---
-    async function initiateSpin() {
-        if(activeSpin || userAccount.balance < currentBetVal) {
-            if(userAccount.balance < currentBetVal) alert("Insufficient Balance!");
-            return;
-        }
-
-        activeSpin = true;
-        userAccount.balance -= currentBetVal;
-        renderUI();
-        persistBalance(userAccount.balance);
-
-        document.getElementById('spinBtn').disabled = true;
-        document.getElementById('msgBox').innerText = "VIBING...";
-        document.getElementById('winLabelTop').innerText = "0.00";
-
-        const results = [];
-        const animationPromises = [];
-
-        for(let i=0; i<3; i++) {
-            const reel = document.getElementById(`reel${i}`);
-            const stopPoint = Math.floor(Math.random() * SYMBOLS_DATA.length);
-            results.push(stopPoint);
-
-            // Reset position instantly
-            reel.style.transition = 'none';
-            reel.style.transform = 'translateY(0)';
-            
-            // Start Animation
-            animationPromises.push(new Promise(resolve => {
-                setTimeout(() => {
-                    reel.style.transition = `transform ${2.1 + (i * 0.43)}s cubic-bezier(.12,.72,.18,1)`;
-                    // Calculate Y position (Symbol height is 108px)
-                    const finalY = -(landingIndex * cellHeight);
-                    reel.style.transform = `translateY(${finalY}px)`;
-                    setTimeout(resolve, 2200 + (i * 430));
-                }, 50);
-            }));
-        }
-
-        await Promise.all(animationPromises);
-        evaluateWin(results);
-    }
-
-    function evaluateWin(indices) {
-        let payout = 0;
-        const s1 = SYMBOLS_DATA[indices[0]];
-        const s2 = SYMBOLS_DATA[indices[1]];
-        const s3 = SYMBOLS_DATA[indices[2]];
-
-        // Standard 3-of-a-kind Win
-        if(s1.id === s2.id && s2.id === s3.id) {
-            payout = currentBetVal * s1.factor;
-        } 
-        // Wild Logic (Wild acts as substitute)
-        else if((s1.id === 'wild' || s2.id === 'wild' || s3.id === 'wild')) {
-             if(s1.id === s2.id || s2.id === s3.id || s1.id === s3.id) {
-                 payout = currentBetVal * 2;
-             }
-        }
-
-        if(payout > 0) {
-            userAccount.balance += payout;
-            document.getElementById('winLabelTop').innerText = payout.toFixed(2);
-            document.getElementById('msgBox').innerText = "WINNER!";
-            triggerWinParticles();
-            persistBalance(userAccount.balance);
-        } else {
-            document.getElementById('msgBox').innerText = "TRY AGAIN";
-        }
-
-        activeSpin = false;
-        document.getElementById('spinBtn').disabled = false;
-        renderUI();
-    }
-
-    // --- UI & DATA UTILS ---
-    function renderUI() {
-        document.getElementById('userBalance').innerText = parseFloat(userAccount.balance).toLocaleString(undefined, {minimumFractionDigits: 2});
-        document.getElementById('betLabelTop').innerText = currentBetVal.toFixed(2);
-        document.getElementById('betDisplayMid').innerText = currentBetVal;
-        localStorage.setItem('rasta_user', JSON.stringify(userAccount));
-    }
-
-    async function syncBalance() {
-        try {
-            const response = await fetch(`${SCRIPT_URL}?action=login&phone=${userAccount.phone}`);
-            const data = await response.json();
-            if(data.balance !== undefined) { 
-                userAccount.balance = parseFloat(data.balance); 
-                renderUI(); 
-            }
-        } catch(err) { console.log("Cloud Sync Pending..."); }
-    }
-
-    async function persistBalance(amount) {
-        fetch(`${SCRIPT_URL}?action=updateBalance&phone=${userAccount.phone}&balance=${amount}`);
-    }
-
-    function triggerWinParticles() {
-        for(let i=0; i<40; i++) {
-            const p = document.createElement('div');
-            p.style.cssText = `position:fixed; width:8px; height:8px; background:var(--rasta-gold); top:-10px; left:${Math.random()*100}%; z-index:200; border-radius:50%;`;
-            document.body.appendChild(p);
-            let y = -10;
-            const drop = setInterval(() => {
-                y += 6;
-                p.style.top = y + 'px';
-                if(y > window.innerHeight) { clearInterval(drop); p.remove(); }
-            }, 20);
-        }
-    }
-
-    function toggleAudio() {
-        const audio = document.getElementById('bgm');
-        const icon = document.getElementById('speaker');
-        if(audio.paused) { audio.play(); icon.innerText = "🔊"; } 
-        else { audio.pause(); icon.innerText = "🔈"; }
-    }
-
-    window.onload = setupGame;
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycby5oeX598AtqVX_owDmR1yKiAQ6z0fjquHzf4YJccbyBqF1GwrGnRwyFt_pVvGyGl7j/exec";
+const SYMBOLS_DATA=[
+{id:'wild',img:'asset/wild.g.png',factor:50},
+{id:'seven',img:'asset/seven.g.png',factor:20},
+{id:'cherry',img:'asset/cherry.g.png',factor:10},
+{id:'orange',img:'asset/orange.g.png',factor:5},
+{id:'plum',img:'asset/plum.g.png',factor:3},
+{id:'lemon',img:'asset/lemon.g.png',factor:2}
+];
+let userAccount=JSON.parse(localStorage.getItem('rasta_user'))||{balance:0,phone:'000'},currentBetVal=2,activeSpin=false,landedCells=[];
+const $=id=>document.getElementById(id);
+function setupGame(){renderUI();syncBalance();for(let i=0;i<3;i++){const strip=$('reel'+i);for(let n=0;n<70;n++){const sym=SYMBOLS_DATA[Math.floor(Math.random()*SYMBOLS_DATA.length)],cell=document.createElement('div');cell.className='symbol-box';cell.innerHTML='<img src="'+sym.img+'" alt="'+sym.id+'">';strip.appendChild(cell)}}}
+function updateBet(v){if(activeSpin)return;currentBetVal=Math.max(2,Math.min(2500,currentBetVal+v));renderUI()}
+async function initiateSpin(){if(activeSpin)return;if(Number(userAccount.balance)<currentBetVal){alert('Insufficient Balance!');return}activeSpin=true;userAccount.balance-=currentBetVal;renderUI();persistBalance(userAccount.balance);$('spinBtn').disabled=true;$('msgBox').textContent='REELS SLIDING';$('winLabelTop').textContent='0.00';$('fruitPayline').innerHTML='';$('fruitWinBanner').classList.remove('show');landedCells=[];
+const results=[],promises=[];
+for(let i=0;i<3;i++){const reel=$('reel'+i),height=reel.children[0].getBoundingClientRect().height||108,index=42+Math.floor(Math.random()*SYMBOLS_DATA.length),result=index%SYMBOLS_DATA.length;results.push(result);const target=reel.children[index];target.querySelector('img').src=SYMBOLS_DATA[result].img;const finalIndex=index-1,stopY=-finalIndex*height,startY=stopY-10*height;reel.style.transition='none';reel.style.transform='translateY('+startY+'px)';void reel.offsetHeight;promises.push(new Promise(resolve=>setTimeout(()=>{const duration=2200+i*420;reel.style.transition='transform '+duration+'ms cubic-bezier(.12,.72,.16,1)';reel.style.transform='translateY('+stopY+'px)';setTimeout(()=>{landedCells[i]=target;resolve()},duration+40)},i*130)))}
+await Promise.all(promises);evaluateWin(results)}
+function evaluateWin(indices){const picked=indices.map(i=>SYMBOLS_DATA[i]);let payout=0,base=picked.find(s=>s.id!=='wild');if(!base)base=picked[0];if(picked.every(s=>s.id===base.id||s.id==='wild'))payout=currentBetVal*(base.factor||50);else if(picked.filter(s=>s.id===base.id).length===2&&picked.some(s=>s.id==='wild'))payout=currentBetVal*(base.factor/2);
+if(payout>0){userAccount.balance+=payout;$('winLabelTop').textContent=payout.toFixed(2);$('msgBox').textContent='YOU WIN '+payout.toLocaleString()+' CREDITS';const svg=$('fruitPayline'),rect=svg.getBoundingClientRect();svg.setAttribute('viewBox','0 0 '+rect.width+' '+rect.height);const pts=landedCells.map(cell=>{const b=cell.getBoundingClientRect();cell.classList.add('payline-hit');return (b.left+b.width/2-rect.left)+','+(b.top+b.height/2-rect.top)});const line=document.createElementNS('http://www.w3.org/2000/svg','polyline');line.setAttribute('points',pts.join(' '));svg.appendChild(line);$('fruitWinBanner').textContent='YOU WIN '+payout.toLocaleString();$('fruitWinBanner').classList.add('show');triggerWinParticles();persistBalance(userAccount.balance)}else $('msgBox').textContent='NO WIN · TRY AGAIN';activeSpin=false;$('spinBtn').disabled=false;renderUI()}
+function renderUI(){$('userBalance').textContent=Number(userAccount.balance).toLocaleString(undefined,{minimumFractionDigits:2});$('betLabelTop').textContent=currentBetVal.toFixed(2);$('betDisplayMid').textContent=currentBetVal;localStorage.setItem('rasta_user',JSON.stringify(userAccount))}
+async function syncBalance(){try{const res=await fetch(SCRIPT_URL+'?action=login&phone='+encodeURIComponent(userAccount.phone));const data=await res.json();if(data.balance!==undefined){userAccount.balance=Number(data.balance);renderUI()}}catch(e){console.log('Cloud Sync Pending...')}}
+function persistBalance(amount){fetch(SCRIPT_URL+'?action=updateBalance&phone='+encodeURIComponent(userAccount.phone)+'&balance='+encodeURIComponent(amount)).catch(()=>{})}
+function triggerWinParticles(){for(let i=0;i<30;i++){const p=document.createElement('div');p.style.cssText='position:fixed;width:8px;height:8px;background:#ffd34e;top:-10px;left:'+(Math.random()*100)+'%;z-index:200;border-radius:50%';document.body.appendChild(p);let y=-10;const t=setInterval(()=>{y+=6;p.style.top=y+'px';if(y>innerHeight){clearInterval(t);p.remove()}},20)}}
+function toggleAudio(){const a=$('bgm'),s=$('speaker');if(a.paused){a.play();s.innerText='🔊'}else{a.pause();s.innerText='🔈'}}
+window.onload=setupGame;
 </script>
 </body>
 </html>
+<style>
+#fruitPayline{position:absolute;inset:0;width:100%;height:100%;z-index:16;pointer-events:none}
+#fruitPayline polyline{fill:none;stroke:#fff06a;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 5px #000) drop-shadow(0 0 10px #ffd94a);stroke-dasharray:1200;stroke-dashoffset:1200;animation:fruitLine .65s ease forwards}
+@keyframes fruitLine{to{stroke-dashoffset:0}}
+#fruitWinBanner{position:absolute;top:8px;left:50%;transform:translate(-50%,-10px);z-index:30;padding:7px 14px;border:2px solid #fff1a7;border-radius:25px;background:linear-gradient(#fff1a7,#d99525 65%,#74400c);color:#241604;font-weight:900;white-space:nowrap;opacity:0;pointer-events:none;box-shadow:0 5px 18px #000b}
+#fruitWinBanner.show{opacity:1;transform:translate(-50%,0);transition:.25s}
+</style>
