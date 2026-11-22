@@ -179,13 +179,13 @@ body{padding-bottom:155px}
     <button class="play-btn" id="playBtn" onclick="placeBet()">PLACE BET</button>
 </div>
 
-<script>
+<script src="asset/games/wallet.js"></script><script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5oeX598AtqVX_owDmR1yKiAQ6z0fjquHzf4YJccbyBqF1GwrGnRwyFt_pVvGyGl7j/exec";
     let user = JSON.parse(localStorage.getItem('rasta_user') || '{"balance":0, "phone":"000"}');
     let selected = [];
     let activeTickets = [];
     let timeRemaining = 60;
-    let isMuted = true;
+    let isMuted = true, walletReady=false;
     let isDrawing = false;
 
     // Payout logic
@@ -256,19 +256,20 @@ body{padding-bottom:155px}
         }
     }, 1000);
 
-    function placeBet() {
+    async function placeBet() {
         const bet = parseFloat(document.getElementById('betAmount').value);
         if(selected.length < 2) return alert("Select at least 2 numbers!");
+        if(!walletReady)return alert('Wallet is connecting.');
         if(bet > user.balance) return alert("Insufficient Balance!");
-
-        user.balance -= bet; 
+        const roundId='KENO-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+        try{user.balance=await RastaWallet.debit(bet,roundId)}catch(e){return alert(e.message)}
         updateUI();
         
         const t = { 
             id: Math.floor(1000 + Math.random() * 8999), 
             nums: [...selected], 
             stake: bet, 
-            potential: bet * (payoutTable[selected.length] || 0) 
+            potential: bet * (payoutTable[selected.length] || 0), roundId: roundId 
         };
         activeTickets.push(t);
         
@@ -317,7 +318,7 @@ body{padding-bottom:155px}
         }
     }
 
-    function checkResults(draw) {
+    async function checkResults(draw) {
         let sessionWin = 0;
         activeTickets.forEach(t => {
             const hits = t.nums.filter(n => draw.includes(n)).length;
@@ -334,7 +335,7 @@ body{padding-bottom:155px}
 
         if(sessionWin > 0) {
             playSound('snd-win');
-            user.balance += sessionWin;
+            for(const t of activeTickets){const hits=t.nums.filter(n=>draw.includes(n)).length;if(hits===t.nums.length&&t.potential>0){try{user.balance=await RastaWallet.credit(t.potential,t.roundId)}catch(e){localStorage.setItem('rasta_pending_game_payout',JSON.stringify({roundId:t.roundId,amount:t.potential}));status.innerText='WIN · PAYOUT SYNC PENDING'}}}
             status.innerText = "WON " + sessionWin.toFixed(2) + " ETB";
             status.style.color = "var(--rasta-gold)";
         } else {
