@@ -356,7 +356,6 @@ body{padding-bottom:150px}
 
         document.getElementById('win-overlay').style.display = 'flex';
         updateUI();
-        saveToDB();
 
         setTimeout(() => {
             document.getElementById('win-overlay').style.display = 'none';
@@ -373,7 +372,7 @@ body{padding-bottom:150px}
         updatePotentialWin();
     }
 
-    function saveToDB() {
+
         fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&updateBal=${user.balance}`);
     }
 
