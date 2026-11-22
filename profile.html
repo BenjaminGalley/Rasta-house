@@ -378,6 +378,12 @@ input::placeholder{color:#69786c}input:focus,select:focus{background:#fff;color:
         }
     }
 
+    function escapeHTML(value) {
+        return String(value == null ? '' : value).replace(/[&<>"']/g, function(ch) {
+            return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+        });
+    }
+
     async function loadHistory() {
         const box=document.getElementById('historyList');
         box.innerHTML='Loading transactions...';
@@ -390,7 +396,7 @@ input::placeholder{color:#69786c}input:focus,select:focus{background:#fff;color:
             box.innerHTML=rows.map(x=>{
                 const st=String(x.status||'PENDING').toUpperCase();
                 const color=st==='APPROVED'||st==='APPLIED'?'#00d879':st==='REJECTED'?'#ff5365':'#ffd100';
-                return '<div style="padding:13px 2px;border-bottom:1px solid #292929"><div style="display:flex;justify-content:space-between;gap:8px"><b style="color:#fff">'+(x.type||'TRANSACTION')+'</b><b style="color:'+color+'">'+st+'</b></div><div style="margin-top:5px;color:#ddd">'+Number(x.amount||0).toLocaleString()+' demo credits</div><div style="margin-top:4px;color:#777;font-size:11px">'+(x.date||'')+' · '+(x.details||'')+'</div></div>';
+                return '<div style="padding:13px 2px;border-bottom:1px solid #292929"><div style="display:flex;justify-content:space-between;gap:8px"><b style="color:#fff">'+escapeHTML(x.type||'TRANSACTION')+'</b><b style="color:'+color+'">'+escapeHTML(st)+'</b></div><div style="margin-top:5px;color:#ddd">'+Number(x.amount||0).toLocaleString()+' demo credits</div><div style="margin-top:4px;color:#777;font-size:11px">'+escapeHTML(x.date||'')+' · '+escapeHTML(x.details||'')+'</div></div>';
             }).join('');
         } catch(e) { box.innerHTML='<div style="color:#ff6978;padding:12px">Could not load history. '+String(e.message||'Please refresh.')+'</div>'; }
     }
