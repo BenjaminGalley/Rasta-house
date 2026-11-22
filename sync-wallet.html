@@ -30,14 +30,13 @@
             try {
                 // 1. Ask the script for the latest balance using Simba House logic
                 // Using action=login as it returns the full user object from the "Users" sheet
-                const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&t=${Date.now()}`);
+                const res = await fetch(SCRIPT_URL,{method:'POST',mode:'cors',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:new URLSearchParams({action:'getBalance',token:user.sessionToken})});
                 const data = await res.json();
                 
                 if(data && data.status === "success") {
                     // 2. Update local storage with the real balance from the sheet
                     user.balance = data.balance;
                     user.name = data.name || user.name;
-                    user.playerID = data.playerID || user.playerID;
                     
                     localStorage.setItem('rasta_user', JSON.stringify(user));
                     
