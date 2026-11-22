@@ -282,7 +282,7 @@ input::placeholder{color:#69786c}input:focus,select:focus{background:#fff;color:
     let currentUser = JSON.parse(localStorage.getItem('rasta_user'));
 
     // Security Gate
-    if(!currentUser) { window.location.href = 'login.html'; }
+    if(!currentUser || !currentUser.sessionToken) { window.location.href = 'login.html'; }
 
     window.onload = () => {
         refreshUI();
@@ -382,18 +382,17 @@ input::placeholder{color:#69786c}input:focus,select:focus{background:#fff;color:
         const box=document.getElementById('historyList');
         box.innerHTML='Loading transactions...';
         try {
-            const phone=encodeURIComponent((currentUser.phone||'').toString().replace(/^0+/, ''));
-            const res=await fetch(SCRIPT_URL+'?action=getHistory&phone='+phone+'&_='+Date.now());
+            const res=await fetch(SCRIPT_URL,{method:'POST',mode:'cors',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:new URLSearchParams({action:'getHistory',token:currentUser.sessionToken})});
             const data=await res.json();
-            if(data.status!=='success') throw new Error(data.message||'History unavailable');
+            if(data.status!=='success')throw new Error(data.message||'History unavailable');
             const rows=Array.isArray(data.transactions)?data.transactions:[];
             if(!rows.length){box.innerHTML='<div style="padding:16px;text-align:center;color:#777">No transactions yet.</div>';return;}
             box.innerHTML=rows.map(x=>{
                 const st=String(x.status||'PENDING').toUpperCase();
-                const color=st==='APPROVED'?'#00d879':st==='REJECTED'?'#ff5365':'#ffd100';
+                const color=st==='APPROVED'||st==='APPLIED'?'#00d879':st==='REJECTED'?'#ff5365':'#ffd100';
                 return '<div style="padding:13px 2px;border-bottom:1px solid #292929"><div style="display:flex;justify-content:space-between;gap:8px"><b style="color:#fff">'+(x.type||'TRANSACTION')+'</b><b style="color:'+color+'">'+st+'</b></div><div style="margin-top:5px;color:#ddd">'+Number(x.amount||0).toLocaleString()+' demo credits</div><div style="margin-top:4px;color:#777;font-size:11px">'+(x.date||'')+' · '+(x.details||'')+'</div></div>';
             }).join('');
-        } catch(e) { box.innerHTML='<div style="color:#ff6978;padding:12px">Could not load history. Please refresh.</div>'; }
+        } catch(e) { box.innerHTML='<div style="color:#ff6978;padding:12px">Could not load history. '+String(e.message||'Please refresh.')+'</div>'; }
     }
 
     async function handleTransaction(type) {
