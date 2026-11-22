@@ -14,7 +14,7 @@
   }
   window.RastaWallet={
     endpoint:ENDPOINT,
-    sync:async function(){const u=user();if(!u||!u.phone)throw new Error('Please log in first.');const r=await fetch(ENDPOINT+'?action=getBalance&phone='+encodeURIComponent(u.phone)+'&_='+Date.now(),{cache:'no-store'});const d=await r.json();if(d.status!=='success')throw new Error(d.message||'Could not load balance.');save(d.balance);return Number(d.balance)},
+    sync:async function(){const u=user();if(!u||!u.phone)throw new Error('Please log in first.');const r=await fetch(ENDPOINT+'?action=getBalance&phone='+encodeURIComponent(u.phone)+'&_='+Date.now(),{cache:'no-store'});const d=await r.json();if(d.status!=='success')throw new Error(d.message||'Could not load balance.');save(d.balance);let balance=Number(d.balance);try{const pending=JSON.parse(localStorage.getItem('rasta_pending_game_payout')||'null');if(pending&&pending.roundId&&Number(pending.amount)>0){balance=await call('gameCredit',pending.roundId,pending.amount);localStorage.removeItem('rasta_pending_game_payout')}}catch(retryError){console.warn('Pending game payout will retry on next sync.',retryError)}return balance},
     debit:function(amount,roundId){return call('gameDebit',roundId,amount)},
     credit:function(amount,roundId){return call('gameCredit',roundId,amount)}
   };
