@@ -26,7 +26,7 @@
   window.RastaWallet={
     endpoint:ENDPOINT,
     request:request,
-    sync:async function(){const d=await request('getBalance');return Number(d.balance)},
+    sync:async function(){const d=await request('getBalance');let balance=Number(d.balance);try{const pending=JSON.parse(localStorage.getItem('rasta_pending_game_payout')||'null');if(pending&&pending.roundId&&Number(pending.amount)>0){balance=await this.credit(pending.amount,pending.roundId);localStorage.removeItem('rasta_pending_game_payout')}}catch(e){console.warn('Pending game payout will retry on next sync.',e)}return balance},
     debit:async function(amount,roundId){const d=await request('gameDebit',{roundId:String(roundId||''),amount:String(amount||0)});return Number(d.balance)},
     credit:async function(amount,roundId){const d=await request('gameCredit',{roundId:String(roundId||''),amount:String(amount||0)});return Number(d.balance)},
     logout:async function(){try{await request('logout')}catch(e){}}
