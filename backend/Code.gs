@@ -433,12 +433,6 @@ function processRequestById_(requestId, decision) {
 }
 
 
-function gameDebit_(rawPhone, roundId, rawAmount) {
-  return gameBalanceOperation_('DEBIT', rawPhone, roundId, rawAmount);
-}
-function gameCredit_(rawPhone, roundId, rawAmount) {
-  return gameBalanceOperation_('CREDIT', rawPhone, roundId, rawAmount);
-}
 // DEMO-ONLY LIMITATION:
 // The browser still supplies the displayed game's payout amount. This endpoint
 // authenticates the player and verifies a matching stake, but does NOT prove
