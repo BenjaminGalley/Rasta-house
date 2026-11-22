@@ -428,6 +428,12 @@
             });
             if (!response.ok) throw new Error("Network response was not ok");
             const data = await response.json();
+            if (data && data.status === "error" && /session is invalid or expired/i.test(data.message || "")) {
+                localStorage.removeItem('rasta_user');
+                localStorage.removeItem('rasta_demo_credits');
+                window.location.href = 'login.html';
+                return;
+            }
             if(data && data.status === "success" && data.balance !== undefined) {
                 const liveBal = Number(data.balance);
                 if (Number.isFinite(liveBal) && liveBal >= 0) {
@@ -448,13 +454,19 @@
     window.onload = () => {
         const userData = localStorage.getItem('rasta_user');
         
-        if(!userData) { 
-            // Show Gate (Login/Register)
+        if(!userData) {
             document.getElementById('visitor-gate').style.display = 'flex';
             document.getElementById('lobby-view').style.display = 'none';
         } else {
-            // Show Lobby
             const user = JSON.parse(userData);
+            if (!user || !user.sessionToken) {
+                localStorage.removeItem('rasta_user');
+                localStorage.removeItem('rasta_demo_credits');
+                document.getElementById('visitor-gate').style.display = 'flex';
+                document.getElementById('lobby-view').style.display = 'none';
+                return;
+            }
+            // Show Lobby
             document.getElementById('visitor-gate').style.display = 'none';
             document.getElementById('lobby-view').style.display = 'block';
             
