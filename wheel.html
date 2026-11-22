@@ -184,19 +184,7 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
     }
 
     // Critical Fix: Fetch real balance from database
-    async function syncBalance() {
-        try {
-            const resp = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}`);
-            const data = await resp.json();
-            if(data && data.balance !== undefined) {
-                user.balance = parseFloat(data.balance);
-                updateUI();
-            }
-        } catch(e) {
-            console.log("Sync failed, using local");
-            updateUI();
-        }
-    }
+    async function syncBalance(){try{user.balance=await RastaWallet.sync();walletReady=true;updateUI()}catch(e){console.warn('Authenticated wallet sync failed:',e.message);walletReady=false;updateUI()}}
 
     function updateUI() {
         document.getElementById('balDisplay').innerText = parseFloat(user.balance).toFixed(2) + " ETB";
