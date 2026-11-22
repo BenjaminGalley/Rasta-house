@@ -187,25 +187,26 @@ function getBalance_(user) {
 }
 
 function getHistory_(user) {
-  const sh = sheet_(CFG.REQUESTS);
-  const values = sh.getDataRange().getValues();
-  const out = [];
-  for (let i=1;i<values.length;i++) {
-    const r=values[i];
-    if (cleanPhone_(r[3]) !== user.phone) continue;
-    out.push({
-      id:String(r[0]||''),
-      date:r[1]?Utilities.formatDate(new Date(r[1]),Session.getScriptTimeZone(),'yyyy-MM-dd HH:mm'):'',
-      type:String(r[2]||''),
-      amount:Number(r[5])||0,
-      details:String(r[6]||''),
-      status:String(r[8]||'PENDING').toUpperCase()
-    });
+  const out=[];
+  const requestSheet=sheet_(CFG.REQUESTS), requests=requestSheet.getDataRange().getValues();
+  for(let i=1;i<requests.length;i++){
+    const r=requests[i];
+    if(cleanPhone_(r[3])!==user.phone)continue;
+    out.push({id:String(r[0]||''),date:r[1]?Utilities.formatDate(new Date(r[1]),Session.getScriptTimeZone(),'yyyy-MM-dd HH:mm'):'',
+      type:String(r[2]||''),amount:Number(r[5])||0,details:String(r[6]||''),status:String(r[8]||'PENDING').toUpperCase(),sortDate:r[1]?new Date(r[1]).getTime():0});
   }
-  out.reverse();
+  const ledger=sheet_(CFG.LEDGER), entries=ledger.getDataRange().getValues();
+  for(let i=1;i<entries.length;i++){
+    const r=entries[i];
+    if(cleanPhone_(r[1])!==user.phone||String(r[3]||'').toUpperCase()!=='GAME')continue;
+    const key=String(r[0]||''), date=r[9]||r[8]||'';
+    out.push({id:key,date:date?Utilities.formatDate(new Date(date),Session.getScriptTimeZone(),'yyyy-MM-dd HH:mm'):'',
+      type:'GAME '+String(r[2]||''),amount:Number(r[4])||0,details:'Round '+key.replace(/^GAME:/,''),status:String(r[7]||'APPLIED').toUpperCase(),sortDate:date?new Date(date).getTime():0});
+  }
+  out.sort(function(a,b){return b.sortDate-a.sortDate;});
+  out.forEach(function(x){delete x.sortDate;});
   return {status:'success',transactions:out};
 }
-
 function approveSelectedRequest() { processSelectedRequest_('APPROVED'); }
 function rejectSelectedRequest() { processSelectedRequest_('REJECTED'); }
 
