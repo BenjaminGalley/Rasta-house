@@ -397,10 +397,12 @@
         }
     }
 
-    function handleLogout() {
+    async function handleLogout() {
         if(confirm("Are you sure you want to log out of Rasta House?")) {
-            const wallet = window.RastaWallet;
-            if(wallet && wallet.logout) wallet.logout();
+            try {
+                const user = JSON.parse(localStorage.getItem('rasta_user') || 'null');
+                if (user && user.sessionToken) await fetch(SCRIPT_URL,{method:'POST',mode:'cors',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:new URLSearchParams({action:'logout',token:user.sessionToken})});
+            } catch(e) {}
             localStorage.removeItem('rasta_user');
             localStorage.removeItem('rasta_demo_credits');
             window.location.reload();
