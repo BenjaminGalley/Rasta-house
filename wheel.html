@@ -155,21 +155,21 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
     <source src="https://www.free-stock-music.com/music/alexander-nakarada-be-jammin.mp3" type="audio/mpeg">
 </audio>
 
-<script>
+<script src="asset/games/wallet.js"></script><script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5oeX598AtqVX_owDmR1yKiAQ6z0fjquHzf4YJccbyBqF1GwrGnRwyFt_pVvGyGl7j/exec";
     
     // Load user but default to 0 to prevent "1000" stickiness
     let user = JSON.parse(localStorage.getItem('rasta_user')) || { balance: 0, phone: "000" };
     let currentRotation = 0;
     let currentBet = 2;
-    let isSpinning = false;
+    let isSpinning = false, walletReady=false, currentRound='';
 
     // Fixed Segments (Aligned with the colors in CSS)
     const segments = [10, 0, 2, 0, 5, 0, 1.5, 0]; 
 
     function init() {
         renderLabels();
-        syncBalance(); // Force a refresh from the server immediately
+        RastaWallet.sync().then(b=>{user.balance=b;walletReady=true;updateUI()}).catch(e=>{document.getElementById('status-msg').innerText=e.message})
     }
 
     function renderLabels() {
@@ -209,12 +209,13 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
         document.getElementById('betAmt').innerText = currentBet;
     }
 
-    function spinWheel() {
-        if(isSpinning) return;
+    async function spinWheel() {
+        if(isSpinning||!walletReady) return;
         if(user.balance < currentBet) return alert("Insufficient Balance");
 
         isSpinning = true;
-        user.balance -= currentBet;
+        currentRound='WHEEL-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+        try{user.balance=await RastaWallet.debit(currentBet,currentRound)}catch(e){isSpinning=false;document.getElementById('status-msg').innerText=e.message;return}
         updateUI();
 
         document.getElementById('spinBtn').disabled = true;
@@ -233,7 +234,7 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
         setTimeout(() => finalizeSpin(segmentIndex), 5000);
     }
 
-    function finalizeSpin(idx) {
+    async function finalizeSpin(idx) {
         isSpinning = false;
         document.getElementById('spinBtn').disabled = false;
 
@@ -241,19 +242,17 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
         const winAmt = currentBet * multiplier;
 
         if(winAmt > 0) {
-            user.balance += winAmt;
+            try{user.balance=await RastaWallet.credit(winAmt,currentRound)}catch(e){localStorage.setItem('rasta_pending_game_payout',JSON.stringify({roundId:currentRound,amount:winAmt}));document.getElementById('status-msg').innerText='WIN · PAYOUT SYNC PENDING'}
             document.getElementById('status-msg').innerText = `JAH BLESS! WON ${winAmt} ETB!`;
         } else {
             document.getElementById('status-msg').innerText = "NO LUCK, TRY AGAIN!";
         }
 
         updateUI();
-        saveToDatabase();
+
     }
 
-    function saveToDatabase() {
-        fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&updateBal=${user.balance}`);
-    }
+
 
     function toggleMusic() {
         const music = document.getElementById('bgMusic');
