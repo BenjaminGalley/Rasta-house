@@ -355,24 +355,9 @@ body{padding-bottom:155px}
         }, 5000);
     }
 
-    async function syncBalanceOnLoad() {
-        try {
-            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&t=${Date.now()}`);
-            const data = await res.json();
-            if(data && data.balance !== undefined) {
-                user.balance = parseFloat(data.balance);
-                updateUI(false); 
-            }
-        } catch(e) {}
-    }
+    async function syncBalanceOnLoad() { try { user.balance=await RastaWallet.sync(); walletReady=true; updateUI(false); } catch(e) { console.error(e); } }
 
-    function updateUI(sendToDB = true) { 
-        localStorage.setItem('rasta_user', JSON.stringify(user));
-        document.getElementById('top-bal').innerText = parseFloat(user.balance).toFixed(2);
-        if(sendToDB) {
-            fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&updateBal=${user.balance}`).catch(e => {});
-        }
-    }
+    function updateUI() { localStorage.setItem('rasta_user', JSON.stringify(user)); document.getElementById('top-bal').innerText = parseFloat(user.balance).toFixed(2); }
 
     window.onload = syncBalanceOnLoad;
 </script>
