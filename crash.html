@@ -111,18 +111,16 @@ body{min-height:100dvh;height:auto;overflow-x:hidden;overflow-y:auto;padding-bot
     <source src="https://www.free-stock-music.com/music/alexander-nakarada-be-jammin.mp3" type="audio/mpeg">
 </audio>
 
-<script>
+<script src="asset/games/wallet.js"></script><script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5oeX598AtqVX_owDmR1yKiAQ6z0fjquHzf4YJccbyBqF1GwrGnRwyFt_pVvGyGl7j/exec";
-    let user = JSON.parse(localStorage.getItem('rasta_user')) || { balance: 0, phone: "000" };
+    let user = JSON.parse(localStorage.getItem('rasta_user')) || { balance: 0, phone: "000" };let walletReady=false,currentRound='';
     let currentMult = 1.00;
     let crashPoint = 0;
     let gameInterval;
     let activeBet = 0;
     let currentBetInput = 2;
 
-    function init() {
-        document.getElementById('balDisplay').innerText = parseFloat(user.balance).toFixed(2) + " ETB";
-    }
+    function init() { RastaWallet.sync().then(b=>{user.balance=b;walletReady=true;updateUI()}).catch(e=>console.warn(e)); }
 
     function adjustBet(val) {
         currentBetInput = Math.max(2, currentBetInput + val);
@@ -136,10 +134,12 @@ body{min-height:100dvh;height:auto;overflow-x:hidden;overflow-y:auto;padding-bot
         else { m.pause(); s.innerText = "🔈"; }
     }
 
-    function startGame() {
+    async function startGame() {
+        if (!walletReady)return;
         if (currentBetInput > user.balance) return alert("Insufficient Balance");
 
-        user.balance -= currentBetInput;
+        currentRound='CRASH-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+        try{user.balance=await RastaWallet.debit(currentBetInput,currentRound)}catch(e){alert(e.message);return}
         activeBet = currentBetInput;
         updateUI();
 
@@ -168,10 +168,10 @@ body{min-height:100dvh;height:auto;overflow-x:hidden;overflow-y:auto;padding-bot
         }, 100);
     }
 
-    function cashOut() {
+    async function cashOut() {
         if(activeBet <= 0) return;
         let win = activeBet * currentMult;
-        user.balance += win;
+        try{user.balance=await RastaWallet.credit(win,currentRound)}catch(e){localStorage.setItem('rasta_pending_game_payout',JSON.stringify({roundId:currentRound,amount:win}));alert('Win recorded for wallet sync. '+e.message)}
         document.getElementById('multiplier').innerText = "WON " + win.toFixed(2);
         document.getElementById('multiplier').style.color = 'var(--green)';
         endGame(false);
@@ -187,7 +187,7 @@ body{min-height:100dvh;height:auto;overflow-x:hidden;overflow-y:auto;padding-bot
         
         activeBet = 0;
         updateUI();
-        saveAndSync();
+        localStorage.setItem('rasta_user',JSON.stringify(user));
 
         setTimeout(() => {
             document.getElementById('betBtn').style.display = 'inline-block';
@@ -204,10 +204,7 @@ body{min-height:100dvh;height:auto;overflow-x:hidden;overflow-y:auto;padding-bot
         document.getElementById('balDisplay').innerText = parseFloat(user.balance).toFixed(2) + " ETB";
     }
 
-    function saveAndSync() {
-        localStorage.setItem('rasta_user', JSON.stringify(user));
-        fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}&updateBal=${user.balance}`);
-    }
+
 
     window.onload = init;
 </script>
