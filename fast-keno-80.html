@@ -206,16 +206,7 @@ body{padding-bottom:150px}
         updatePotentialWin();
     }
 
-    async function syncWithServer() {
-        try {
-            const res = await fetch(`${SCRIPT_URL}?action=login&phone=${user.phone}`);
-            const data = await res.json();
-            if(data.balance !== undefined) { 
-                user.balance = parseFloat(data.balance); 
-                updateUI(); 
-            }
-        } catch(e) { console.log("Sync failed"); }
-    }
+    async function syncWithServer() { try { user.balance=await RastaWallet.sync(); walletReady=true; updateUI(); } catch(e) { console.log(e); } }
 
     function selectNum(n) {
         if(drawing || timeLeft <= 5) return;
