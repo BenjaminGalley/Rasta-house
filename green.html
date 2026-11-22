@@ -166,7 +166,7 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
         </div>
     </div>
 
-<script>
+<script src="asset/games/wallet.js"></script><script>
     const CLOUD_URL = "https://script.google.com/macros/s/AKfycby5oeX598AtqVX_owDmR1yKiAQ6z0fjquHzf4YJccbyBqF1GwrGnRwyFt_pVvGyGl7j/exec";
     
     // Updated Assets
@@ -184,11 +184,13 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
     let state = {
         user: JSON.parse(localStorage.getItem('rasta_user')) || { balance: 500, phone: '000' },
         bet: 2,
-        spinning: false
+        spinning: false,
+        walletReady: false
     };
 
     function init() {
         refreshUI();
+        RastaWallet.sync().then(b=>{state.user.balance=b;state.walletReady=true;refreshUI()}).catch(e=>{document.getElementById('uiWin').innerText=e.message});
         // Pre-build reels
         for(let i=0; i<3; i++) {
             const strip = document.getElementById(`r${i}`);
@@ -208,14 +210,15 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
     }
 
     async function executeSpin() {
-        if(state.spinning || state.user.balance < state.bet) {
+        if(state.spinning || !state.walletReady || state.user.balance < state.bet) {
             if(state.user.balance < state.bet) alert("Insufficient Balance");
             return;
         }
         state.spinning=true;
-        state.user.balance-=state.bet;
+        const roundId='GREEN-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+        try{state.user.balance=await RastaWallet.debit(state.bet,roundId)}catch(e){state.spinning=false;document.getElementById('uiWin').innerText=e.message;return}
+        state.currentRound=roundId;
         refreshUI();
-        syncCloud(state.user.balance);
         const btn=document.getElementById('spinBtn'),frame=document.getElementById('machineFrame');
         btn.disabled=true;
         frame.classList.remove('winner-reel');
@@ -240,10 +243,10 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
             },i*130)));
         }
         await Promise.all(animations);
-        finalizeWin(results);
+        await finalizeWin(results);
     }
 
-    function finalizeWin(indices) {
+    async function finalizeWin(indices) {
         const picked=indices.map(i=>PAYTABLE[i]);
         const wild=PAYTABLE.findIndex(s=>s.id==='wild');
         let base=picked.find(s=>s.id!=='wild'),count=0,win=0;
@@ -253,7 +256,7 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
         const line=document.getElementById('greenPayline'),frame=document.getElementById('machineFrame'),rect=line.getBoundingClientRect();
         line.innerHTML='';
         if(win>0){
-            state.user.balance+=win;
+            try{state.user.balance=await RastaWallet.credit(win,state.currentRound)}catch(e){localStorage.setItem('rasta_pending_game_payout',JSON.stringify({roundId:state.currentRound,amount:win}));document.getElementById('greenWinBanner').textContent='WIN · PAYOUT SYNC PENDING'}
             document.getElementById('uiWin').innerText=win.toFixed(2);
             document.getElementById('greenWinBanner').textContent='YOU WIN '+win.toLocaleString()+' CREDITS';
             document.getElementById('greenWinBanner').classList.add('show');
@@ -261,7 +264,7 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
             line.setAttribute('viewBox','0 0 '+rect.width+' '+rect.height);
             const p=document.createElementNS('http://www.w3.org/2000/svg','polyline');p.setAttribute('points',pts.join(' '));line.appendChild(p);
             frame.classList.add('winner-reel');
-            syncCloud(state.user.balance);
+
         }else{
             document.getElementById('uiWin').innerText='0.00';
             document.getElementById('greenWinBanner').classList.remove('show');
@@ -278,9 +281,7 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
         localStorage.setItem('rasta_user', JSON.stringify(state.user));
     }
 
-    function syncCloud(bal) {
-        fetch(`${CLOUD_URL}?action=updateBalance&phone=${state.user.phone}&balance=${bal}`);
-    }
+    
 
     window.onload = init;
 </script>
