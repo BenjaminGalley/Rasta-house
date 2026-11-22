@@ -5,8 +5,7 @@
  * Required Script Properties:
  *   TELEGRAM_BOT_TOKEN       Telegram bot token
  *   TELEGRAM_CHAT_ID         Admin chat ID (defaults to CFG.CHAT_ID)
- *   TELEGRAM_ADMIN_USER_ID   Admin Telegram user ID; for a private bot chat
- *                            it may be left blank and the chat ID is used.
+ *   TELEGRAM_ADMIN_USER_ID   Required numeric Telegram user ID authorized to approve requests.
  *   SPREADSHEET_ID           Saved automatically by setup() when run
  *
  * Deploy as Web App: Execute as Me; Who has access: Anyone.
@@ -17,6 +16,7 @@ const CFG = {
   BALANCES: 'DemoBalances',
   REQUESTS: 'Requests',
   LEDGER: 'BalanceLedger',
+  SESSIONS: 'Sessions',
   MIN_DEPOSIT: 150,
   MAX_DEPOSIT: 10000,
   MIN_WITHDRAW: 300,
@@ -27,7 +27,8 @@ const HEADERS = {
   Users: ['PlayerID','FullName','Phone','PasswordHash','PasswordSalt','JoinedAt'],
   DemoBalances: ['Phone','FullName','Balance','UpdatedAt'],
   Requests: ['RequestID','CreatedAt','Type','Phone','FullName','Amount','Details','TransactionID','Status','ProcessedAt','AdminNote'],
-  BalanceLedger: ['RequestID','Phone','Decision','Type','Amount','BeforeBalance','AfterBalance','LedgerStatus','CreatedAt','AppliedAt']
+  BalanceLedger: ['RequestID','Phone','Decision','Type','Amount','BeforeBalance','AfterBalance','LedgerStatus','CreatedAt','AppliedAt'],
+  Sessions: ['TokenHash','PlayerID','Phone','CreatedAt','ExpiresAt','RevokedAt']
 };
 
 function onOpen() {
@@ -56,24 +57,26 @@ function setup() {
     });
     sh.setFrozenRows(1);
   });
-  SpreadsheetApp.getUi().alert('RASTA HOUSE setup complete. Spreadsheet connection saved. Users, DemoBalances, Requests and BalanceLedger are ready.');
+  SpreadsheetApp.getUi().alert('RASTA HOUSE setup complete. Spreadsheet connection saved. Users, DemoBalances, Requests, BalanceLedger and Sessions are ready.');
 }
 
 function configureTelegram() {
-  const ui = SpreadsheetApp.getUi();
-  const props = PropertiesService.getScriptProperties();
-  const result = ui.prompt('Configure Telegram', 'Paste your Telegram bot token. Leave blank to keep the saved token.', ui.ButtonSet.OK_CANCEL);
-  if (result.getSelectedButton() !== ui.Button.OK) return;
-  const token = result.getResponseText().trim();
-  if (token) props.setProperty('TELEGRAM_BOT_TOKEN', token);
-  if (!getBotToken_()) {
-    ui.alert('No Telegram token saved. Run Configure Telegram again.');
-    return;
-  }
-  if (!props.getProperty('TELEGRAM_CHAT_ID')) props.setProperty('TELEGRAM_CHAT_ID', CFG.CHAT_ID);
-  ui.alert('Telegram token saved. The configured chat ID is ' + (props.getProperty('TELEGRAM_CHAT_ID') || CFG.CHAT_ID) + '.');
+  const ui=SpreadsheetApp.getUi(), props=PropertiesService.getScriptProperties();
+  const tokenResult=ui.prompt('Configure Telegram','Paste bot token. Leave blank to keep saved token.',ui.ButtonSet.OK_CANCEL);
+  if(tokenResult.getSelectedButton()!==ui.Button.OK)return;
+  const token=tokenResult.getResponseText().trim();
+  if(token)props.setProperty('TELEGRAM_BOT_TOKEN',token);
+  if(!getBotToken_()){ui.alert('No Telegram token saved.');return;}
+  const chatResult=ui.prompt('Admin chat ID','Enter the private chat ID where approval messages should be sent. Leave blank to keep the saved value.',ui.ButtonSet.OK_CANCEL);
+  if(chatResult.getSelectedButton()!==ui.Button.OK)return;
+  if(chatResult.getResponseText().trim())props.setProperty('TELEGRAM_CHAT_ID',chatResult.getResponseText().trim());
+  const adminResult=ui.prompt('Admin Telegram user ID','Enter YOUR Telegram numeric user ID. Approval buttons are rejected until this is configured.',ui.ButtonSet.OK_CANCEL);
+  if(adminResult.getSelectedButton()!==ui.Button.OK)return;
+  const adminId=adminResult.getResponseText().trim();
+  if(!/^\d{5,20}$/.test(adminId)){ui.alert('A valid numeric Telegram user ID is required.');return;}
+  props.setProperty('TELEGRAM_ADMIN_USER_ID',adminId);
+  ui.alert('Telegram settings saved. Admin user ID is explicitly configured.');
 }
-
 function testTelegram() {
   const result = sendTelegram_('RASTA HOUSE TEST\nTelegram connection is working.');
   SpreadsheetApp.getUi().alert(result ? 'Telegram test sent.' : 'Telegram test failed. Check the bot token, chat ID and Apps Script execution log.');
@@ -101,17 +104,11 @@ function doGet(e) {
   try {
     const p = (e && e.parameter) || {};
     const action = String(p.action || '').trim();
-    if (action === 'register') return json_(registerPlayer_(p));
-    if (action === 'login') return json_(loginPlayer_(p));
-    if (action === 'getBalance') return json_(getBalance_(p.phone));
-    if (action === 'getHistory') return json_(getHistory_(p.phone));
-    if (action === 'gameDebit') return json_(gameDebit_(p.phone, p.roundId, p.amount));
-    if (action === 'gameCredit') return json_(gameCredit_(p.phone, p.roundId, p.amount));
-    if (action === 'ping') return json_({ status: 'success', message: 'RASTA backend online' });
-    return json_({ status: 'error', message: 'Unknown action.' });
+    if (action === 'ping') return json_({status:'success',message:'RASTA backend online'});
+    return json_({status:'error',message:'Use the authenticated POST interface. Please update the Rasta House pages.'});
   } catch (err) {
     console.error('doGet: ' + String(err && err.stack || err));
-    return json_({ status: 'error', message: String(err.message || err) });
+    return json_({status:'error',message:String(err.message || err)});
   }
 }
 
@@ -123,129 +120,90 @@ function doPost(e) {
       body = JSON.parse(e.postData.contents);
     }
   } catch (parseError) {
-    console.error('Could not parse JSON POST: ' + parseError);
+    return json_({status:'error',message:'Invalid request body.'});
   }
   if (body && body.callback_query) return handleTelegramCallback_(body.callback_query);
-
-  const lock = LockService.getScriptLock();
+  const p = Object.assign({}, (e && e.parameter) || {}, body || {});
+  const action = String(p.action || '').trim().toLowerCase();
   try {
-    lock.waitLock(20000);
-    const p = (e && e.parameter) || {};
-    const action = String(p.action || '').trim().toLowerCase();
-    if (action !== 'deposit' && action !== 'withdraw') {
-      return json_({ status: 'error', message: 'Unknown transaction action.' });
-    }
-    const phone = cleanPhone_(p.phone);
-    const user = findUserByPhone_(phone);
-    if (!user) return json_({ status: 'error', message: 'Player is not registered. Please register or log in again.' });
-
-    const amount = Number(p.amount);
-    const min = action === 'deposit' ? CFG.MIN_DEPOSIT : CFG.MIN_WITHDRAW;
-    if (!Number.isFinite(amount) || Math.floor(amount) !== amount || amount < min || amount > CFG.MAX_DEPOSIT) {
-      return json_({ status: 'error', message: 'Amount is outside the allowed range.' });
-    }
-
-    const details = String(p.details || '').trim().slice(0, 1000);
-    const transactionId = String(p.transactionId || extractTransactionId_(details) || '').trim().slice(0, 160);
-    if (action === 'deposit' && !transactionId) {
-      return json_({ status: 'error', message: 'Payment transaction ID is required.' });
-    }
-    if (action === 'deposit' && transactionIdExists_(transactionId)) {
-      return json_({ status: 'error', message: 'This payment transaction ID has already been submitted.' });
-    }
-
-    const balanceRow = ensureBalanceRow_(user);
-    const balanceSheet = sheet_(CFG.BALANCES);
-    const currentBalance = Number(balanceSheet.getRange(balanceRow, 3).getValue()) || 0;
-    if (action === 'withdraw' && currentBalance < amount) {
-      return json_({ status: 'error', message: 'Insufficient demo-credit balance.' });
-    }
-
-    const reqSheet = sheet_(CFG.REQUESTS);
-    const requestId = 'RH-' + Utilities.getUuid().slice(0, 8).toUpperCase();
-    const now = new Date();
-    reqSheet.appendRow([requestId, now, action.toUpperCase(), phone, user.name, amount, details, transactionId, 'PENDING', '', '']);
-
-    if (action === 'withdraw') {
-      balanceSheet.getRange(balanceRow, 3).setValue(currentBalance - amount);
-      balanceSheet.getRange(balanceRow, 4).setValue(now);
-    }
-
-    const message = (action === 'deposit' ? '🟡 NEW DEPOSIT REQUEST' : '🟠 NEW WITHDRAWAL REQUEST') +
-      '\nRequest: ' + requestId + '\nPlayer: ' + user.name + '\nPhone: ' + phone +
-      '\nAmount: ' + amount + ' demo credits\nDetails: ' + details +
-      (transactionId ? '\nTransaction ID: ' + transactionId : '');
-    const notified = sendTelegramRequest_(message, requestId);
-    return json_({
-      status: 'success',
-      message: notified ? 'Request recorded and sent to admin for review.' : 'Request recorded, but Telegram notification failed. Admin must review the Requests sheet.',
-      requestId: requestId,
-      notificationSent: notified
-    });
+    if (action === 'register') return json_(registerPlayer_(p));
+    if (action === 'login') return json_(loginPlayer_(p));
+    if (action === 'ping') return json_({status:'success',message:'RASTA backend online'});
+    if (action === 'logout') return json_(logoutPlayer_(p.token));
+    const user = authenticateSession_(p.token);
+    if (!user) return json_({status:'error',message:'Your session is invalid or expired. Please log in again.'});
+    if (action === 'getbalance') return json_(getBalance_(user));
+    if (action === 'gethistory') return json_(getHistory_(user));
+    if (action === 'deposit' || action === 'withdraw') return json_(submitTransaction_(p,user,action));
+    if (action === 'gamedebit') return json_(gameBalanceOperation_('DEBIT',user,p.roundId,p.amount));
+    if (action === 'gamecredit') return json_(gameBalanceOperation_('CREDIT',user,p.roundId,p.amount));
+    return json_({status:'error',message:'Unknown action.'});
   } catch (err) {
-    console.error('doPost transaction: ' + String(err && err.stack || err));
-    return json_({ status: 'error', message: String(err.message || err) });
-  } finally {
-    try { lock.releaseLock(); } catch (_) {}
+    console.error('doPost '+action+': '+String(err && err.stack || err));
+    return json_({status:'error',message:String(err.message || err)});
   }
 }
 
 function registerPlayer_(p) {
-  const name = String(p.name || '').trim();
-  const phone = cleanPhone_(p.phone);
-  const password = String(p.password || '');
-  if (!name || !/^251[79]\d{8}$/.test(phone) || password.length < 8) {
-    return { status: 'error', message: 'Enter your full name, valid Ethiopian phone and password (8+ characters).' };
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    const name = String(p.name || '').trim().slice(0,100);
+    const phone = cleanPhone_(p.phone);
+    const password = String(p.password || '');
+    if (!name || !/^251[79]\d{8}$/.test(phone) || password.length < 8) {
+      return {status:'error',message:'Enter your full name, valid Ethiopian phone and password (8+ characters).' };
+    }
+    if (findUserByPhone_(phone)) return {status:'error',message:'This phone number is already registered. Please log in.'};
+    const salt = Utilities.getUuid() + Utilities.getUuid();
+    const hash = passwordHash_(password,salt);
+    const id = 'RH-' + Utilities.getUuid().slice(0,8).toUpperCase();
+    sheet_(CFG.USERS).appendRow([id,name,phone,hash,salt,new Date()]);
+    const user = {id:id,name:name,phone:phone,hash:hash,salt:salt};
+    sheet_(CFG.BALANCES).appendRow([phone,name,0,new Date()]);
+    const session = createSession_(user);
+    return {status:'success',id:id,name:name,phone:phone,balance:0,sessionToken:session.token,sessionExpiresAt:session.expiresAt.toISOString()};
+  } finally {
+    lock.releaseLock();
   }
-  if (findUserByPhone_(phone)) return { status: 'error', message: 'This phone number is already registered. Please log in.' };
-  const salt = Utilities.getUuid() + Utilities.getUuid();
-  const hash = passwordHash_(password, salt);
-  const id = 'RH-' + Utilities.getUuid().slice(0, 8).toUpperCase();
-  sheet_(CFG.USERS).appendRow([id, name, phone, hash, salt, new Date()]);
-  sheet_(CFG.BALANCES).appendRow([phone, name, 0, new Date()]);
-  return { status: 'success', id: id, name: name, phone: phone, balance: 0 };
 }
 
 function loginPlayer_(p) {
   const phone = cleanPhone_(p.phone);
   const password = String(p.password || '');
   const user = findUserByPhone_(phone);
-  if (!user || passwordHash_(password, user.salt) !== user.hash) {
-    return { status: 'error', message: 'Invalid phone number or password.' };
+  if (!user || passwordHash_(password,user.salt) !== user.hash) {
+    return {status:'error',message:'Invalid phone number or password.'};
   }
   const row = ensureBalanceRow_(user);
-  const balance = Number(sheet_(CFG.BALANCES).getRange(row, 3).getValue()) || 0;
-  return { status: 'success', id: user.id, name: user.name, phone: user.phone, balance: balance };
+  const balance = Number(sheet_(CFG.BALANCES).getRange(row,3).getValue()) || 0;
+  const session = createSession_(user);
+  return {status:'success',id:user.id,name:user.name,phone:user.phone,balance:balance,sessionToken:session.token,sessionExpiresAt:session.expiresAt.toISOString()};
 }
 
-function getBalance_(rawPhone) {
-  const phone = cleanPhone_(rawPhone);
-  const user = findUserByPhone_(phone);
-  if (!user) return { status: 'error', message: 'Player not found.' };
+function getBalance_(user) {
   const row = ensureBalanceRow_(user);
-  return { status: 'success', balance: Number(sheet_(CFG.BALANCES).getRange(row, 3).getValue()) || 0 };
+  return {status:'success',balance:Number(sheet_(CFG.BALANCES).getRange(row,3).getValue()) || 0};
 }
 
-function getHistory_(rawPhone) {
-  const phone = cleanPhone_(rawPhone);
-  if (!findUserByPhone_(phone)) return { status: 'error', message: 'Player not found.' };
+function getHistory_(user) {
   const sh = sheet_(CFG.REQUESTS);
   const values = sh.getDataRange().getValues();
   const out = [];
-  for (let i = 1; i < values.length; i++) {
-    const r = values[i];
-    if (cleanPhone_(r[3]) !== phone) continue;
+  for (let i=1;i<values.length;i++) {
+    const r=values[i];
+    if (cleanPhone_(r[3]) !== user.phone) continue;
     out.push({
-      id: String(r[0] || ''),
-      date: r[1] ? Utilities.formatDate(new Date(r[1]), Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm') : '',
-      type: String(r[2] || ''),
-      amount: Number(r[5]) || 0,
-      details: String(r[6] || ''),
-      status: String(r[8] || 'PENDING').toUpperCase()
+      id:String(r[0]||''),
+      date:r[1]?Utilities.formatDate(new Date(r[1]),Session.getScriptTimeZone(),'yyyy-MM-dd HH:mm'):'',
+      type:String(r[2]||''),
+      amount:Number(r[5])||0,
+      details:String(r[6]||''),
+      status:String(r[8]||'PENDING').toUpperCase()
     });
   }
   out.reverse();
-  return { status: 'success', transactions: out };
+  return {status:'success',transactions:out};
 }
 
 function approveSelectedRequest() { processSelectedRequest_('APPROVED'); }
@@ -319,7 +277,7 @@ function handleTelegramCallback_(q) {
   const messageChat = String(q.message && q.message.chat ? q.message.chat.id : '');
   const senderId = String(q.from && q.from.id ? q.from.id : '');
   const chatType = String(q.message && q.message.chat ? q.message.chat.type : '');
-  const allowedAdmin = String(props.getProperty('TELEGRAM_ADMIN_USER_ID') || (chatType === 'private' ? allowedChat : ''));
+  const allowedAdmin = String(props.getProperty('TELEGRAM_ADMIN_USER_ID') || '');
   const callbackId = String(q.id || '');
   const rawData = String(q.data || '');
 
@@ -480,57 +438,41 @@ function gameDebit_(rawPhone, roundId, rawAmount) {
 function gameCredit_(rawPhone, roundId, rawAmount) {
   return gameBalanceOperation_('CREDIT', rawPhone, roundId, rawAmount);
 }
-function gameBalanceOperation_(kind, rawPhone, roundId, rawAmount) {
-  const phone = cleanPhone_(rawPhone);
-  const rid = String(roundId || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 70);
+function gameBalanceOperation_(kind, user, roundId, rawAmount) {
+  const rid = String(roundId || '').replace(/[^A-Za-z0-9_-]/g,'').slice(0,70);
   const amount = Number(rawAmount);
-  if (!/^251[79]\d{8}$/.test(phone)) return {status:'error',message:'Player login required.'};
-  if (!rid || !Number.isFinite(amount) || amount < 0 || amount > 1000000 || Math.round(amount * 100) !== amount * 100) {
+  if (!user || !user.phone) return {status:'error',message:'Player login required.'};
+  if (!rid || !Number.isFinite(amount) || amount < 0 || amount > 1000000 || Math.round(amount*100)!==amount*100) {
     return {status:'error',message:'Invalid game transaction.'};
   }
-  if (kind === 'DEBIT' && amount < 0) return {status:'error',message:'Invalid stake.'};
-  const lock = LockService.getScriptLock();
+  const lock=LockService.getScriptLock();
   lock.waitLock(20000);
   try {
-    const user = findUserByPhone_(phone);
-    if (!user) return {status:'error',message:'Player account not found.'};
-    const ledger = sheet_(CFG.LEDGER);
-    const debitKey = 'GAME:' + rid + ':DEBIT';
-    const creditKey = 'GAME:' + rid + ':CREDIT';
-    const key = kind === 'DEBIT' ? debitKey : creditKey;
-    const existing = findLedgerRow_(key);
-    const balanceRow = ensureBalanceRow_(user);
-    const balances = sheet_(CFG.BALANCES);
-    let balance = Number(balances.getRange(balanceRow, 3).getValue()) || 0;
-
-    if (kind === 'DEBIT') {
-      if (existing) {
-        const old = ledger.getRange(existing, 6, 1, 4).getValues()[0];
-        return {status:'success', balance:Number(old[1]), duplicate:true, message:'Stake already recorded.'};
-      }
-      if (balance < amount) return {status:'error',message:'Insufficient demo-credit balance.',balance:balance};
-      const after = balance - amount;
-      ledger.appendRow([key, phone, 'DEBIT', 'GAME', amount, balance, after, 'APPLIED', new Date(), new Date()]);
-      balances.getRange(balanceRow, 3, 1, 2).setValues([[after,new Date()]]);
+    const ledger=sheet_(CFG.LEDGER);
+    const debitKey='GAME:'+rid+':DEBIT', creditKey='GAME:'+rid+':CREDIT';
+    const key=kind==='DEBIT'?debitKey:creditKey;
+    const existing=findLedgerRow_(key);
+    const balanceRow=ensureBalanceRow_(user);
+    const balances=sheet_(CFG.BALANCES);
+    let balance=Number(balances.getRange(balanceRow,3).getValue())||0;
+    if(kind==='DEBIT'){
+      if(existing){const old=ledger.getRange(existing,6,1,4).getValues()[0];return {status:'success',balance:Number(old[1]),duplicate:true,message:'Stake already recorded.'};}
+      if(balance<amount)return {status:'error',message:'Insufficient demo-credit balance.',balance:balance};
+      const after=balance-amount;
+      ledger.appendRow([key,user.phone,'DEBIT','GAME',amount,balance,after,'APPLIED',new Date(),new Date()]);
+      balances.getRange(balanceRow,3,1,2).setValues([[after,new Date()]]);
       return {status:'success',balance:after,message:'Stake deducted.'};
     }
-
-    if (existing) {
-      const old = ledger.getRange(existing, 6, 1, 4).getValues()[0];
-      return {status:'success',balance:Number(old[1]),duplicate:true,message:'Payout already recorded.'};
-    }
-    const debitRow = findLedgerRow_(debitKey);
-    if (!debitRow) return {status:'error',message:'No matching stake was recorded for this round.'};
-    const debit = ledger.getRange(debitRow, 2, 1, 9).getValues()[0];
-    if (String(debit[0]) !== phone) return {status:'error',message:'Round does not belong to this player.'};
-    const stake = Number(debit[3]) || 0;
-    const after = balance + amount;
-    ledger.appendRow([creditKey, phone, 'CREDIT', 'GAME', amount, balance, after, 'APPLIED', new Date(), new Date()]);
-    balances.getRange(balanceRow, 3, 1, 2).setValues([[after,new Date()]]);
+    if(existing){const old=ledger.getRange(existing,6,1,4).getValues()[0];return {status:'success',balance:Number(old[1]),duplicate:true,message:'Payout already recorded.'};}
+    const debitRow=findLedgerRow_(debitKey);
+    if(!debitRow)return {status:'error',message:'No matching stake was recorded for this round.'};
+    const debit=ledger.getRange(debitRow,2,1,9).getValues()[0];
+    if(String(debit[0])!==user.phone)return {status:'error',message:'Round does not belong to this player.'};
+    const after=balance+amount;
+    ledger.appendRow([creditKey,user.phone,'CREDIT','GAME',amount,balance,after,'APPLIED',new Date(),new Date()]);
+    balances.getRange(balanceRow,3,1,2).setValues([[after,new Date()]]);
     return {status:'success',balance:after,message:'Payout credited.'};
-  } finally {
-    lock.releaseLock();
-  }
+  } finally {lock.releaseLock();}
 }
 
 function findLedgerRow_(requestId) {
@@ -615,6 +557,85 @@ function cleanPhone_(value) {
   if (/^0[79]\d{8}$/.test(s)) s = '251' + s.slice(1);
   else if (/^[79]\d{8}$/.test(s)) s = '251' + s;
   return s;
+}
+
+
+function sessionTokenHash_(token) {
+  const bytes=Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,String(token),Utilities.Charset.UTF_8);
+  return bytes.map(function(b){return ('0'+((b+256)%256).toString(16)).slice(-2);}).join('');
+}
+
+function createSession_(user) {
+  const token=Utilities.getUuid().replace(/-/g,'')+Utilities.getUuid().replace(/-/g,'');
+  const now=new Date(), expires=new Date(now.getTime()+7*24*60*60*1000);
+  sheet_(CFG.SESSIONS).appendRow([sessionTokenHash_(token),user.id,user.phone,now,expires,'']);
+  return {token:token,expiresAt:expires};
+}
+
+function authenticateSession_(token) {
+  token=String(token||'').trim();
+  if(token.length<40||token.length>100)return null;
+  const sh=sheet_(CFG.SESSIONS);
+  if(sh.getLastRow()<2)return null;
+  const hash=sessionTokenHash_(token);
+  const rows=sh.getRange(2,1,sh.getLastRow()-1,6).getValues();
+  for(let i=rows.length-1;i>=0;i--){
+    const r=rows[i];
+    if(String(r[0])!==hash)continue;
+    if(r[5])return null;
+    const expiry=r[4] instanceof Date?r[4]:new Date(r[4]);
+    if(!expiry||expiry.getTime()<=Date.now())return null;
+    const user=findUserByPhone_(cleanPhone_(r[2]));
+    return user&&user.id===String(r[1])?user:null;
+  }
+  return null;
+}
+
+function logoutPlayer_(token) {
+  token=String(token||'').trim();
+  if(!token)return {status:'success'};
+  const sh=sheet_(CFG.SESSIONS);
+  if(sh.getLastRow()<2)return {status:'success'};
+  const hash=sessionTokenHash_(token), rows=sh.getRange(2,1,sh.getLastRow()-1,6).getValues();
+  for(let i=rows.length-1;i>=0;i--){
+    if(String(rows[i][0])===hash&&!rows[i][5]){
+      sh.getRange(i+2,6).setValue(new Date());
+      break;
+    }
+  }
+  return {status:'success',message:'Logged out.'};
+}
+
+function submitTransaction_(p,user,action) {
+  const lock=LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    const amount=Number(p.amount);
+    const min=action==='deposit'?CFG.MIN_DEPOSIT:CFG.MIN_WITHDRAW;
+    const max=action==='deposit'?CFG.MAX_DEPOSIT:CFG.MAX_WITHDRAW;
+    if(!Number.isFinite(amount)||Math.floor(amount)!==amount||amount<min||amount>max)
+      return {status:'error',message:'Amount is outside the allowed range.'};
+    const details=String(p.details||'').trim().slice(0,1000);
+    const transactionId=String(p.transactionId||extractTransactionId_(details)||'').trim().slice(0,160);
+    if(action==='deposit'&&!transactionId)return {status:'error',message:'Payment transaction ID is required.'};
+    if(action==='deposit'&&transactionIdExists_(transactionId))
+      return {status:'error',message:'This payment transaction ID has already been submitted.'};
+    const balanceRow=ensureBalanceRow_(user), balanceSheet=sheet_(CFG.BALANCES);
+    const currentBalance=Number(balanceSheet.getRange(balanceRow,3).getValue())||0;
+    if(action==='withdraw'&&currentBalance<amount)return {status:'error',message:'Insufficient demo-credit balance.'};
+    const requestId='RH-'+Utilities.getUuid().slice(0,8).toUpperCase(), now=new Date();
+    sheet_(CFG.REQUESTS).appendRow([requestId,now,action.toUpperCase(),user.phone,user.name,amount,details,transactionId,'PENDING','','']);
+    if(action==='withdraw'){
+      balanceSheet.getRange(balanceRow,3).setValue(currentBalance-amount);
+      balanceSheet.getRange(balanceRow,4).setValue(now);
+    }
+    const message=(action==='deposit'?'🟡 NEW DEPOSIT REQUEST':'🟠 NEW WITHDRAWAL REQUEST')+
+      '\nRequest: '+requestId+'\nPlayer: '+user.name+'\nPhone: '+user.phone+
+      '\nAmount: '+amount+' demo credits\nDetails: '+details+
+      (transactionId?'\nTransaction ID: '+transactionId:'');
+    const notified=sendTelegramRequest_(message,requestId);
+    return {status:'success',message:notified?'Request recorded and sent to admin for review.':'Request recorded, but Telegram notification failed. Admin must review the Requests sheet.',requestId:requestId,notificationSent:notified};
+  } finally {lock.releaseLock();}
 }
 
 function passwordHash_(password, salt) {
