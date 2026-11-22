@@ -170,14 +170,14 @@ body{padding-bottom:150px}
 <audio id="snd-pop"><source src="https://actions.google.com/sounds/v1/cartoon/pop.ogg" type="audio/ogg"></audio>
 <audio id="snd-win"><source src="https://actions.google.com/sounds/v1/foley/beating_prizes.ogg" type="audio/ogg"></audio>
 
-<script>
+<script src="asset/games/wallet.js"></script><script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5oeX598AtqVX_owDmR1yKiAQ6z0fjquHzf4YJccbyBqF1GwrGnRwyFt_pVvGyGl7j/exec";
     let user = JSON.parse(localStorage.getItem('rasta_user')) || { balance: 0, phone: "000" };
     let selected = [];
     let tickets = [];
     let timeLeft = 60;
     let drawing = false;
-    let currentStake = 2; // Min bet set to 2
+    let currentStake = 2, walletReady=false; // Min bet set to 2
 
     // Keno Payout Multipliers (per 1 ETB staked)
     const multipliers = {
@@ -196,7 +196,7 @@ body{padding-bottom:150px}
             grid.appendChild(div);
         }
         updateUI();
-        syncWithServer();
+        RastaWallet.sync().then(b=>{user.balance=b;walletReady=true;updateUI()}).catch(e=>console.warn(e));
     }
 
     function adjustBet(amt) {
@@ -249,16 +249,14 @@ body{padding-bottom:150px}
         localStorage.setItem('rasta_user', JSON.stringify(user));
     }
 
-    function placeBet() {
+    async function placeBet() {
         if(selected.length < 2) return alert("Select at least 2 numbers!");
+        if(!walletReady)return alert('Wallet is connecting.');
         if(user.balance < currentStake) return alert("Insufficient Balance!");
-
-        user.balance -= currentStake;
+        let tId = Math.floor(Math.random()*9000)+1000,roundId='KENO80-'+Date.now()+'-'+tId;
+        try{user.balance=await RastaWallet.debit(currentStake,roundId)}catch(e){return alert(e.message)}
         updateUI();
-        saveToDB();
-
-        let tId = Math.floor(Math.random()*9000)+1000;
-        tickets.push({ id: tId, nums: [...selected], stake: currentStake, hits: 0 });
+        tickets.push({ id: tId, nums: [...selected], stake: currentStake, hits: 0, roundId: roundId });
 
         renderTickets();
         selected = [];
@@ -337,7 +335,7 @@ body{padding-bottom:150px}
         checkResults();
     }
 
-    function checkResults() {
+    async function checkResults() {
         let totalWin = 0;
         tickets.forEach(t => {
             let winAmt = 0;
@@ -357,7 +355,7 @@ body{padding-bottom:150px}
         });
 
         if(totalWin > 0) {
-            user.balance += totalWin;
+            for(const t of tickets){if(t.hits===t.nums.length&&multipliers[t.hits]){const prize=t.stake*multipliers[t.hits];try{user.balance=await RastaWallet.credit(prize,t.roundId)}catch(e){localStorage.setItem('rasta_pending_game_payout',JSON.stringify({roundId:t.roundId,amount:prize}))}}}
             document.getElementById('win-status').innerText = "TOTAL WIN\n" + totalWin.toFixed(2) + " ETB";
             document.getElementById('snd-win').play();
         } else {
