@@ -105,6 +105,8 @@ function doGet(e) {
     if (action === 'login') return json_(loginPlayer_(p));
     if (action === 'getBalance') return json_(getBalance_(p.phone));
     if (action === 'getHistory') return json_(getHistory_(p.phone));
+    if (action === 'gameDebit') return json_(gameDebit_(p.phone, p.roundId, p.amount));
+    if (action === 'gameCredit') return json_(gameCredit_(p.phone, p.roundId, p.amount));
     if (action === 'ping') return json_({ status: 'success', message: 'RASTA backend online' });
     return json_({ status: 'error', message: 'Unknown action.' });
   } catch (err) {
@@ -466,6 +468,66 @@ function processRequestById_(requestId, decision) {
       '\nNew balance: ' + afterBalance +
       (type === 'WITHDRAW' && decision === 'REJECTED' ? '\nReserved amount refunded.' : ''));
     return { status: 'success', message: message, balance: afterBalance };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+
+function gameDebit_(rawPhone, roundId, rawAmount) {
+  return gameBalanceOperation_('DEBIT', rawPhone, roundId, rawAmount);
+}
+function gameCredit_(rawPhone, roundId, rawAmount) {
+  return gameBalanceOperation_('CREDIT', rawPhone, roundId, rawAmount);
+}
+function gameBalanceOperation_(kind, rawPhone, roundId, rawAmount) {
+  const phone = cleanPhone_(rawPhone);
+  const rid = String(roundId || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 70);
+  const amount = Number(rawAmount);
+  if (!/^251[79]\d{8}$/.test(phone)) return {status:'error',message:'Player login required.'};
+  if (!rid || !Number.isFinite(amount) || amount < 0 || amount > 1000000 || Math.round(amount * 100) !== amount * 100) {
+    return {status:'error',message:'Invalid game transaction.'};
+  }
+  if (kind === 'DEBIT' && amount <= 0) return {status:'error',message:'Invalid stake.'};
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    const user = findUserByPhone_(phone);
+    if (!user) return {status:'error',message:'Player account not found.'};
+    const ledger = sheet_(CFG.LEDGER);
+    const debitKey = 'GAME:' + rid + ':DEBIT';
+    const creditKey = 'GAME:' + rid + ':CREDIT';
+    const key = kind === 'DEBIT' ? debitKey : creditKey;
+    const existing = findLedgerRow_(key);
+    const balanceRow = ensureBalanceRow_(user);
+    const balances = sheet_(CFG.BALANCES);
+    let balance = Number(balances.getRange(balanceRow, 3).getValue()) || 0;
+
+    if (kind === 'DEBIT') {
+      if (existing) {
+        const old = ledger.getRange(existing, 6, 1, 4).getValues()[0];
+        return {status:'success', balance:Number(old[1]), duplicate:true, message:'Stake already recorded.'};
+      }
+      if (balance < amount) return {status:'error',message:'Insufficient demo-credit balance.',balance:balance};
+      const after = balance - amount;
+      ledger.appendRow([key, phone, 'DEBIT', 'GAME', amount, balance, after, 'APPLIED', new Date(), new Date()]);
+      balances.getRange(balanceRow, 3, 1, 2).setValues([[after,new Date()]]);
+      return {status:'success',balance:after,message:'Stake deducted.'};
+    }
+
+    if (existing) {
+      const old = ledger.getRange(existing, 6, 1, 4).getValues()[0];
+      return {status:'success',balance:Number(old[1]),duplicate:true,message:'Payout already recorded.'};
+    }
+    const debitRow = findLedgerRow_(debitKey);
+    if (!debitRow) return {status:'error',message:'No matching stake was recorded for this round.'};
+    const debit = ledger.getRange(debitRow, 2, 1, 9).getValues()[0];
+    if (String(debit[0]) !== phone) return {status:'error',message:'Round does not belong to this player.'};
+    const stake = Number(debit[3]) || 0;
+    const after = balance + amount;
+    ledger.appendRow([creditKey, phone, 'CREDIT', 'GAME', amount, balance, after, 'APPLIED', new Date(), new Date()]);
+    balances.getRange(balanceRow, 3, 1, 2).setValues([[after,new Date()]]);
+    return {status:'success',balance:after,message:'Payout credited.'};
   } finally {
     lock.releaseLock();
   }
