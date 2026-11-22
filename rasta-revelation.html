@@ -336,10 +336,8 @@ if(win>0){try{user.balance=await RastaWallet.credit(win,currentRound)}catch(e){l
 isSpinning=false;$('spinBtn').disabled=false;refreshUI()}
 function triggerWinEffect(){for(let i=0;i<30;i++){const p=document.createElement('div');p.style.cssText='position:fixed;width:10px;height:10px;background:var(--rasta-gold);top:-10px;left:'+(Math.random()*100)+'%;z-index:200;border-radius:50%;';document.body.appendChild(p);let y=-10;const drop=setInterval(()=>{y+=7;p.style.top=y+'px';if(y>window.innerHeight){clearInterval(drop);p.remove()}},20)}}
 function refreshUI(){$('userBal').textContent=Number(user.balance).toLocaleString(undefined,{minimumFractionDigits:2});$('betLabelTop').textContent=currentBet.toFixed(2);$('betMid').textContent=currentBet;localStorage.setItem('rasta_user',JSON.stringify(user))}
-async function syncData(){try{const res=await fetch(SCRIPT_URL+'?action=login&phone='+encodeURIComponent(user.phone));const data=await res.json();if(data.balance!==undefined){user.balance=Number(data.balance);refreshUI()}}catch(e){console.warn('Offline Sync Active')}}
+async function syncData(){try{user.balance=await RastaWallet.sync();refreshUI()}catch(e){console.warn('Authenticated wallet sync failed:',e.message)}}
 
-function toggleMusic(){const music=$('bgMusic'),speaker=$('speaker');if(music.paused){music.play();speaker.innerText='🔊'}else{music.pause();speaker.innerText='🔈'}}
-window.onload=init;
 </script>
 </body>
 </html>
