@@ -439,6 +439,11 @@ function gameDebit_(rawPhone, roundId, rawAmount) {
 function gameCredit_(rawPhone, roundId, rawAmount) {
   return gameBalanceOperation_('CREDIT', rawPhone, roundId, rawAmount);
 }
+// DEMO-ONLY LIMITATION:
+// The browser still supplies the displayed game's payout amount. This endpoint
+// authenticates the player and verifies a matching stake, but does NOT prove
+// the game result. Do not connect real funds until every game is migrated to
+// server-generated outcomes and server-calculated payouts.
 function gameBalanceOperation_(kind, user, roundId, rawAmount) {
   const rid = String(roundId || '').replace(/[^A-Za-z0-9_-]/g,'').slice(0,70);
   const amount = Number(rawAmount);
