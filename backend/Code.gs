@@ -329,7 +329,8 @@ function handleTelegramCallback_(q) {
     requestId = parts[2].toUpperCase();
   } else {
     const actionMatch = rawData.match(/APPROVE(?:D)?|REJECT(?:ED)?/i);
-    const idMatch = rawData.match(/RH-[A-Z0-9]{8}/i);
+    const messageText = String(q.message && q.message.text || '');
+    const idMatch = rawData.match(/RH-[A-Z0-9]{8}/i) || messageText.match(/RH-[A-Z0-9]{8}/i);
     if (actionMatch && idMatch) {
       decision = /^APPROVE/i.test(actionMatch[0]) ? 'APPROVED' : 'REJECTED';
       requestId = idMatch[0].toUpperCase();
