@@ -236,13 +236,8 @@ await Promise.all(promises);await calculateLogic(grid);isActive=false;$('spinBtn
 async function calculateLogic(grid){let total=0,wins=[];for(let row=0;row<4;row++){const symbol=grid[0][row];let count=1;for(let col=1;col<5;col++){if(grid[col][row]===symbol)count++;else break}if(count>=3){const amount=Math.round(currentBet*(payTable[symbol].m/10)*(count-2));total+=amount;wins.push({row,count,amount})}}
 if(total>0){try{state.balance=await RastaWallet.credit(total,currentRound)}catch(e){localStorage.setItem('rasta_pending_game_payout',JSON.stringify({roundId:currentRound,amount:total}));$('msgBox').textContent='WIN · PAYOUT SYNC PENDING'}$('msgBox').textContent='YOU WIN '+total.toLocaleString()+' CREDITS';$('winAmt').textContent=total.toLocaleString();const svg=$('tripPaylines'),rect=svg.getBoundingClientRect();svg.setAttribute('viewBox','0 0 '+rect.width+' '+rect.height);wins.forEach(w=>{const points=[];for(let col=0;col<w.count;col++){const cell=$('r'+col).children[w.row],b=cell.getBoundingClientRect();cell.classList.add('trip-hit');points.push((b.left+b.width/2-rect.left)+','+(b.top+b.height/2-rect.top))}const p=document.createElementNS('http://www.w3.org/2000/svg','polyline');p.setAttribute('points',points.join(' '));svg.appendChild(p)});burstCoins()}else{$('msgBox').textContent='NO WIN · TRY AGAIN';$('winAmt').textContent='0'}refreshUI()}
 function refreshUI(){$('balDisplay').textContent=Number(state.balance).toFixed(2)+' ETB';$('betValTop').textContent=currentBet;localStorage.setItem('rasta_user',JSON.stringify(state))}
-async function syncBalance(){try{const r=await fetch(SCRIPT_URL+'?action=login&phone='+encodeURIComponent(state.phone));const d=await r.json();if(d.balance!==undefined){state.balance=Number(d.balance);refreshUI()}}catch(e){}}
+async function syncBalance(){try{state.balance=await RastaWallet.sync();refreshUI()}catch(e){console.warn('Authenticated wallet sync failed:',e.message)}}
 
-const cvs=$('mega-canvas'),ctx=cvs.getContext('2d');let part=[];
-function burstCoins(){cvs.width=innerWidth;cvs.height=innerHeight;for(let i=0;i<45;i++)part.push({x:cvs.width/2,y:cvs.height/2,vx:(Math.random()-.5)*14,vy:(Math.random()-.5)*14-8,size:Math.random()*6+3});drawLoop()}
-function drawLoop(){ctx.clearRect(0,0,cvs.width,cvs.height);part.forEach((p,i)=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.5;ctx.fillStyle='#ffd34e';ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill()});part=part.filter(p=>p.y<cvs.height);if(part.length)requestAnimationFrame(drawLoop)}
-function toggleSound(){const a=$('audioTrack'),s=$('soundIcon');if(a.paused){a.play();s.innerText='🔊'}else{a.pause();s.innerText='🔈'}}
-window.onload=init;
 </script>
 </body>
 </html>
