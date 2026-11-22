@@ -488,7 +488,7 @@ function gameBalanceOperation_(kind, rawPhone, roundId, rawAmount) {
   if (!rid || !Number.isFinite(amount) || amount < 0 || amount > 1000000 || Math.round(amount * 100) !== amount * 100) {
     return {status:'error',message:'Invalid game transaction.'};
   }
-  if (kind === 'DEBIT' && amount <= 0) return {status:'error',message:'Invalid stake.'};
+  if (kind === 'DEBIT' && amount < 0) return {status:'error',message:'Invalid stake.'};
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
