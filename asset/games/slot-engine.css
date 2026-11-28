@@ -10,3 +10,7 @@
 .win-banner{position:absolute;z-index:9;top:10px;left:50%;transform:translate(-50%,-12px) scale(.92);padding:8px 15px;border:2px solid #fff0a6;border-radius:30px;background:linear-gradient(135deg,#fff0a4,#d58a19 60%,#5d3108);color:#261502;font:900 clamp(12px,3vw,18px) Orbitron;letter-spacing:.6px;white-space:nowrap;opacity:0;pointer-events:none;text-shadow:0 1px #fff8;box-shadow:0 5px 20px #000b,0 0 18px #ffd65c}
 .win-banner.show{opacity:1;transform:translate(-50%,0) scale(1);transition:opacity .25s,transform .3s cubic-bezier(.2,.8,.2,1)}
 .payline-win{stroke-width:5}
+
+/* Rasta House reel landing polish */
+.reel-stop{animation:rastaReelSettle .18s cubic-bezier(.2,.8,.2,1) both;will-change:transform;filter:blur(0)}
+@keyframes rastaReelSettle{0%{transform:translateY(-5px);filter:blur(1px)}68%{transform:translateY(1px);filter:blur(0)}100%{transform:translateY(0);filter:none}}
